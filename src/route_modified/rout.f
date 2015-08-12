@@ -22,7 +22,7 @@ c     nrow and ncol should be larger than the grid
 c     nyr should equal run length yrs+1
       INTEGER NROW, NCOL, DAYS, NYR, Nflow, Nheat
       PARAMETER (NROW = 195, NCOL = 245)
-      PARAMETER (NYR = 100)
+      PARAMETER (NYR = 200)
 
 c     no changes after here
       REAL    DT
