@@ -87,6 +87,9 @@ c     Solve for
 
       ELSE				         ! make UH_S grid, and save it
         print*, 'making UH_S grid...it takes a while...'
+c       ========= hacked by Yixin ========= 
+        UH_FILE=TRIM(UH_DRCTRY)//TRIM(GRID_CELL)//'.uh_s'
+c       ========= hacked by Yixin (end) ========= 
         print*, 'NOTE:  your new UH_S grid file will be written in the'
         print*, '       directory you run from, and will be called:'
         write(*,'(A)')  UH_FILE
