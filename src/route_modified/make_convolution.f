@@ -24,7 +24,7 @@ c
 
       PARAMETER   (RERD  = 6371229.0)    !radius of earth in meters
 c 
-      CHARACTER*80 GRID_CELL,FLOWPATH
+      CHARACTER*200 GRID_CELL,FLOWPATH
 
       INTEGER DPREC, CLEN
 
