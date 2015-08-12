@@ -12,7 +12,7 @@ c
 
       INTEGER NCOL,NROW,IROW,ICOL,I,J
       REAL DIFF(NCOL,NROW)
-      CHARACTER*72 FILENAME
+      CHARACTER*200 FILENAME
 
       OPEN(10, FILE = FILENAME,FORM = 'FORMATTED',
      $     STATUS='OLD',ERR=9001)
@@ -39,7 +39,7 @@ c
 
       INTEGER NCOL,NROW,ICOL,IROW,I,J
       REAL FRACTION(NCOL,NROW)
-      CHARACTER*72 FILENAME
+      CHARACTER*200 FILENAME
 
 c      PRINT*, 'HARDCODED FRACTION FILE'
       OPEN(22, FILE = FILENAME,
@@ -73,7 +73,7 @@ c      PRINT*, 'HARDCODED FRACTION FILE'
       REAL    UH_DATA(KE),UH_BOX(PMAX,KE)
       INTEGER N, K
       REAL    JUNK
-      CHARACTER*80 UH_IMPLSE
+      CHARACTER*200 UH_IMPLSE
 c
 c  Open the file with the grid cell impulse response function.
 c  One set of unit responses is used for all grid cells
@@ -98,7 +98,7 @@ c
 
       INTEGER NCOL,NROW,IROW,ICOL,I,J
       REAL VELO(NCOL,NROW)
-      CHARACTER*72 FILENAME
+      CHARACTER*200 FILENAME
 
       OPEN(10, FILE = FILENAME,FORM = 'FORMATTED',
      $     STATUS='OLD', ERR=9001)
@@ -126,7 +126,7 @@ c
 
       INTEGER NCOL,NROW,ICOL,IROW,I,J
       REAL XMASK(NCOL,NROW)
-      CHARACTER*72, FILENAME
+      CHARACTER*200, FILENAME
 
       OPEN(10, FILE = FILENAME,FORM = 'FORMATTED',
      $     STATUS='OLD',ERR=9001)
@@ -159,7 +159,7 @@ c  reads the flow direction file.
       INTEGER DIREC(NCOL,NROW,2) 
       INTEGER H(NCOL,NROW)
       REAL XC, YC, SIZE
-      CHARACTER*72 FILENAME
+      CHARACTER*200 FILENAME
       CHARACTER*14 CDUM 
 
       OPEN(10, FILE = FILENAME, FORM = 'FORMATTED',
@@ -227,7 +227,7 @@ c     Subroutine added by UW_JRY_2010/12/14
 c
       INTEGER NCOL,NROW,ICOL,IROW,I,J
       REAL a_d(ncol,nrow),b_d(ncol,nrow),a_w(ncol,nrow),b_w(ncol,nrow)
-      CHARACTER*72 FILENAME
+      CHARACTER*200 FILENAME
 
       OPEN(22, FILE = FILENAME,
      &     FORM = 'FORMATTED',STATUS='OLD',ERR=9001)
