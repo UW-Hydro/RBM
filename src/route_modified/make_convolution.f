@@ -100,7 +100,6 @@ c
 c 
          if(torf)then
 c
-           print *, "hhhhhhhhhhhhhhh", LOC(1:CLEN)
    !        OPEN(20,FILE=TRIM(FLOWPATH)//TRIM(GRID_CELL)
    !  $         ,STATUS='OLD',ERR=9001)
            OPEN(20,FILE=TRIM(FLOWPATH)//LOC(1:CLEN)
