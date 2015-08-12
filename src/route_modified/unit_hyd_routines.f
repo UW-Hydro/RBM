@@ -73,8 +73,8 @@ c     Solve for
       REAL    UH_S(PMAX,KE+UH_DAY-1)
       INTEGER N, I, J, K, L, T, II, JJ, TT, U, clen
       REAL    SUM
-      character*80 GRID_CELL,UH_DRCTRY
-      CHARACTER*80 UH_FILE,UH_STRING       !new, AW
+      character*200 GRID_CELL,UH_DRCTRY
+      CHARACTER*200 UH_FILE,UH_STRING       !new, AW
       IF (UH_STRING(1:4) .ne. 'NONE') THEN       ! read UH_S grid, not make it
         print*, 'reading UH_S grid from file'
         UH_FILE=TRIM(UH_DRCTRY)//TRIM(GRID_CELL)//'.uh_s'

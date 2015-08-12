@@ -38,6 +38,7 @@ c
   
       INTEGER     ii1,IDAY(DAYS), IMONTH(DAYS), IYEAR(DAYS)
       INTEGER MO(12*NYR),YR(12*NYR)
+      CHARACTER*20 LOC   ! Yixin hacked
 
 C     *** 0 <= K_CONST = 1.0 
 C *** K_CONST smaller 1.0 makes it a simple linear storage
@@ -69,28 +70,42 @@ c     find the revised cooordinates
 
 C        CONVERSIONFACTOR for mm/day to ft**3/sec         <--?????
 
-
          AREA =  RERD**2*ABS(SIZE)*PI/180*             !give area of box in 
      &        ABS(SIN((JLOC-SIZE/2.0)*PI/180)-         !square meters
      $        SIN((JLOC+SIZE/2.0)*PI/180))
          
-         AREA_SUM = AREA_SUM + AREA
+         AREA_SUM = AREA_SUM + AREA ! AREA_SUM: not used - Yixin
          iwrite=icol-ii+1
-c 
-         FACTOR = FRACTION(II,JJ)*35.315*AREA/(86400.0*1000.0)  !convert to sq.mi.
+c
+         FACTOR = FRACTION(II,JJ)*35.315*AREA/(86400.0*1000.0)  !convert to sq.mi. - NOT CORRECT! - Yixin
                                                                 !&mult. by cell fract
+                                                                !Convert flow
+                                                                !from [mm/day] to
+                                                                ! [cfs] - Yixin
 c 
-         FACTOR_SUM = FACTOR_SUM + FACTOR
+         FACTOR_SUM = FACTOR_SUM + FACTOR  ! FACTOR_SUM: not used - Yixin
 c 
-         INQUIRE(FILE=TRIM(FLOWPATH)//TRIM(GRID_CELL),
+! ============= Yixin hacked ===================
+         call create_vic_names(jloc,iloc,loc,clen,dprec)
+
+
+   !      INQUIRE(FILE=TRIM(FLOWPATH)//TRIM(GRID_CELL),
+   !  $                     EXIST=TORF)
+         INQUIRE(FILE=TRIM(FLOWPATH)//LOC(1:CLEN),
      $                     EXIST=TORF)
+   !    if (.not.TORF) write(91,*) 'No file '
+   !  &  ,TRIM(FLOWPATH)//TRIM(GRID_CELL)
        if (.not.TORF) write(91,*) 'No file '
-     &  ,TRIM(FLOWPATH)//TRIM(GRID_CELL)
+     &  ,TRIM(FLOWPATH)//LOC(1:CLEN)
 c 
          if(torf)then
-c 
-           OPEN(20,FILE=TRIM(FLOWPATH)//TRIM(GRID_CELL)
+c
+           print *, "hhhhhhhhhhhhhhh", LOC(1:CLEN)
+   !        OPEN(20,FILE=TRIM(FLOWPATH)//TRIM(GRID_CELL)
+   !  $         ,STATUS='OLD',ERR=9001)
+           OPEN(20,FILE=TRIM(FLOWPATH)//LOC(1:CLEN)
      $         ,STATUS='OLD',ERR=9001)
+! ============= Yixin hacked (end) ===================
 c
 c       Read the header on the VIC fluxes files
 c 
@@ -146,7 +161,7 @@ c                 Qin(i) = Qin(i)+UH_S(N,J)*(BASE(I-J+1)+RUNO(I-J+1))
             END DO
 c            
 c  Added by JRY 9/30/2009             
-c                
+c            
 c            FLOW(I) = FLOW(I)+Qin(i)
          END DO
          CLOSE(20)

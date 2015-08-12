@@ -26,15 +26,15 @@ c
      &       ,skip_MET,nyy,nmm,ndd,nhh
      &       ,Ntest
       logical rbm10,write_flow,write_header
-      CHARACTER*80 GRID_CELL 
+      CHARACTER*200 GRID_CELL 
       REAL    FACTOR_SUM
      &    ,flowavg,flowin,depth,width,vel,heat_pd
      &    ,yy,mm,dd,hh
       real    aa_d,bb_d,aa_w,bb_w
 c 
-      character*50 header
-      CHARACTER*80 OUTPATH
-      character*80 flowout,flowpath,heatout,heatpath
+      character*200 header
+      CHARACTER*200 OUTPATH
+      character*200 flowout,flowpath,heatout,heatpath
       if (rbm10) then
          heat_pd=Nheat_pd
 c
