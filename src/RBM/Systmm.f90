@@ -29,7 +29,7 @@ real, parameter:: pi=3.14159,rfac=304.8
 !
 contains
 !
-SUBROUTINE SYSTMM(temp_file,param_file)
+SUBROUTINE SYSTMM(temp_file)
 !
 use Block_Energy
 use Block_Hydro
@@ -38,7 +38,6 @@ use Block_Network
 Implicit None
 !
 character (len=200):: temp_file
-character (len=200):: param_file
 !
 integer::njb
 !
