@@ -157,7 +157,7 @@ do nr=1,nreach
 !     is entered manually into the network file (UW_JRY_2011/03/15)
 !
     read(90,'(5x,i5,5x,i5,8x,i5,6x,a8,6x,a10,7x,f10.0,i5)')  &
-              node,nrow,ncol,lat,long,rmile1,ndelta(ncell)
+              node,nrow,ncol,lat,long,rmile1,ndelta(ncell)
 !
 !    Set the number of segments of the default, if not specified
 !
