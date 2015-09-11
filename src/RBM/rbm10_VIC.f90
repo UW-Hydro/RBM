@@ -78,37 +78,37 @@ net_file      = TRIM(inPrefix)//'_Network'
 spatial_file  = TRIM(outPrefix)//'.Spat'
 temp_file     = TRIM(outPrefix)//'.Temp'
 !
-write(*,*) 'Spatial file: ',spatial_file         
-write(*,*) 'Network file    : ',net_file
-write(*,*) 'Temperature file: ',temp_file
-!
-OPEN(UNIT=90,FILE=TRIM(net_file),STATUS='OLD')
-!
-!     Read header information from control file
-!
-read(90,*)
-read(90,'(A)') flow_file
-!
-!     Open file with hydrologic data
-!
-open(unit=35,FILE=TRIM(flow_file) ,FORM='FORMATTED',ACCESS='DIRECT' ,RECL=60,STATUS='old')
-!
-!
-read(90,'(A)') heat_file
-!
-!     Open file with meteorologic data
-!     
-open(unit=36,FILE=TRIM(heat_file) ,FORM='FORMATTED',ACCESS='DIRECT' ,RECL=50,STATUS='old')
-!
-!     Call systems programs to get started
-!
-!     SUBROUTINE BEGIN reads control file, sets up topology and
-!     important properties of reaches
-!
-write(*,*) 'Calling BEGIN'
-!
-!     SUBROUTINE BEGIN reads in river system information from the NETWORK file
-!
+        write(*,*) 'Spatial file: ',spatial_file         
+        write(*,*) 'Network file    : ',net_file
+        write(*,*) 'Temperature file: ',temp_file
+        !
+        OPEN(UNIT=90,FILE=TRIM(net_file),STATUS='OLD')
+        !
+        !     Read header information from control file
+        !
+        read(90,*)
+        read(90,'(A)') flow_file
+        !
+        !     Open file with hydrologic data
+        !
+        open(unit=35,FILE=TRIM(flow_file), ACCESS='SEQUENTIAL',FORM='FORMATTED', STATUS='old')
+        !
+        !
+        read(90,'(A)') heat_file
+        !
+        !     Open file with meteorologic data
+        !     
+        open(unit=36,FILE=TRIM(heat_file), ACCESS='SEQUENTIAL', FORM='FORMATTED', STATUS='old')
+        !
+        !     Call systems programs to get started
+        !
+        !     SUBROUTINE BEGIN reads control file, sets up topology and
+        !     important properties of reaches
+        !
+        write(*,*) 'Calling BEGIN'
+        !
+        !     SUBROUTINE BEGIN reads in river system information from the NETWORK file
+        !
 CALL BEGIN(spatial_file)
 !
 !     SUBROUTINE SYSTMM performs the simulations

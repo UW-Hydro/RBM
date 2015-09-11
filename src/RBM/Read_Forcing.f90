@@ -20,8 +20,8 @@ do nr=1,nreach
     nrec_flow=flow_cells*(ndays-1)+no_flow
     nrec_heat=heat_cells*(ndays-1)+no_heat
 !
-    read(35,'(2i5,2f10.1,2f6.1,f7.1,f6.2)' &
-           ,rec=nrec_flow) nnd,ncell &
+
+    read(35,*) nnd,ncell &
            ,Q_in(no_heat),Q_out(no_heat),Q_diff(no_heat) &  
            ,depth(no_heat),width(no_heat),u(no_heat)
 
@@ -29,8 +29,7 @@ do nr=1,nreach
     if(u(no_heat).lt.0.01) u(no_heat)=0.01
     if(ncell.ne.no_heat) write(*,*) 'Flow file error',ncell,no_heat 
 !
-    read(36,'(i5,2f6.1,2f7.4,f6.3,f7.1,f5.1)' &
-           ,rec=nrec_heat) ncell &
+    read(36,*) ncell &
            ,dbt(no_heat),ea(no_heat) &
            ,Q_ns(no_heat),Q_na(no_heat),rho &
            ,press(no_heat),wind(no_heat)
@@ -68,11 +67,10 @@ do nr=1,nreach
   Q_out(no_heat)=Q_in(no_heat)
   Q_trib(nr)=Q_out(no_heat)    
   nrec_heat=heat_cells*(ndays-1)+no_heat
-  read(36,'(i5,2f6.1,2f7.4,f6.3,f7.1,f5.1)' &
-         ,rec=nrec_heat) ncell &
-         ,dbt(no_heat),ea(no_heat) &   
-         ,Q_ns(no_heat),Q_na(no_heat),rho &
-         ,press(no_heat),wind(no_heat)
+  read(36,*) ncell &
+           ,dbt(no_heat),ea(no_heat) &
+           ,Q_ns(no_heat),Q_na(no_heat),rho &
+           ,press(no_heat),wind(no_heat)
 !
 !  The flow and hydraulics for the last cell has to be 
 !  modified so they do not
