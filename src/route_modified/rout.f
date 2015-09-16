@@ -225,7 +225,7 @@ c     Direct access file opened for writing results used by RBM10 - JRY 10/30/20
 c
 
         open (15,FILE=TRIM(FLOWOUT),FORM='FORMATTED'
-     &          ,ACCESS='DIRECT',RECL=60)
+     &          ,ACCESS='SEQUENTIAL')
 c
 c    Output pathname for heat flux
 c
@@ -234,7 +234,7 @@ c
      &             ,HEATOUT                  
 c        
       open(16,FILE=TRIM(HEATOUT),FORM='FORMATTED'
-     &          ,ACCESS='DIRECT',RECL=50)
+     &          ,ACCESS='SEQUENTIAL')
       end if      
         
 c
