@@ -67,8 +67,9 @@ c     Skip records if necessary
 c      
 c     Write the flow for this grid cell to the RBM direct access file
 c 
-             write(15,'(2i5,2f10.1,2f6.1,f7.1,f6.2)')
+             write(15,'(2i5,2f10.1,2f6.1,f7.1,f6.2)',rec=nrec)
      &              i,Nheat,flowin,flow(i),Qin(i),depth,width,vel
+             write(*,*) i
            end if
              do navg=1,7
                 Heat_data(navg)=0.0
@@ -93,7 +94,7 @@ c
 c         Write the heat budget data for this grid cell
 c         to the RB direct access file
 c         
-            write(16,'(i5,2f6.1,2f7.4,f6.3,f7.1,f5.1)')
+            write(16,'(i5,2f6.1,2f7.4,f6.3,f7.1,f5.1)',rec=nrec)
      &           Nheat,Heat_data
          end do
          close(25)
