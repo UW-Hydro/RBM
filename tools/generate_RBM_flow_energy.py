@@ -21,9 +21,6 @@ route_station_file = cfg['INPUT']['route_station_file']
 RVIC_output_nc = cfg['INPUT']['RVIC_output_nc']
 # VIC output nc file - energy
 vic_output_energy_nc = cfg['INPUT']['vic_output_energy_nc']
-# VIC output time step - flow (units: hour)
-vic_flow_dt = cfg['INPUT']['vic_flow_dt']
-vic_energy_dt = cfg['INPUT']['vic_energy_dt']
 
 # [RBM_OPTIONS]
 # RBM start and end date (dt.date)
