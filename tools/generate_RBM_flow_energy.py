@@ -30,11 +30,11 @@ start_date = dt.date(cfg['RBM_OPTIONS']['start_date'][0], \
 end_date = dt.date(cfg['RBM_OPTIONS']['end_date'][0], \
                          cfg['RBM_OPTIONS']['end_date'][1], \
                          cfg['RBM_OPTIONS']['end_date'][2])
-# Same, but dt.datetime
-start_datetime = dt.datetime(cfg['RBM_OPTIONS']['start_date'][0], \
+# Same, but string 'YYYY-MM-DD'
+start_date_str = '{:4d}-{:02d}-{:02d}'.format(cfg['RBM_OPTIONS']['start_date'][0], \
                          cfg['RBM_OPTIONS']['start_date'][1], \
                          cfg['RBM_OPTIONS']['start_date'][2])
-end_datetime = dt.datetime(cfg['RBM_OPTIONS']['end_date'][0], \
+end_date_str = '{:4d}-{:02d}-{:02d}'.format(cfg['RBM_OPTIONS']['end_date'][0], \
                          cfg['RBM_OPTIONS']['end_date'][1], \
                          cfg['RBM_OPTIONS']['end_date'][2])
 
@@ -90,38 +90,46 @@ print 'Loading and processing VIC output flow data...'
 ds_flow = xray.open_dataset(RVIC_output_nc)
 da_flow = ds_flow['streamflow'][:-1,:,:]  # Remove the last junk time step
 
+#=== Select time range ===#
+da_flow = da_flow.sel(time=slice(start_date_str, end_date_str))
+
+#=== Convert units ===#
+da_flow = da_flow * pow(1000.0/25.4/12, 3)  # convert m3/s to cfs
+
+#=== Set zero flow to 5.0 cfs ====#
+da_flow.values[da_flow.values<5.0] = 5.0
+
+#=== Calculate flow depth, width and velocity ===#
+da_depth = a_d * pow(da_flow, b_d)  # flow depth [ft]
+da_width = a_w * pow(da_flow, b_w)  # flow width [ft]
+da_velocity = da_flow / da_depth / da_width  # flow velocoty [ft/s]
+
+#====================================================#
+# Rearrange data - flow
+#====================================================#
 #=== Put data for each grid cell into a df ===#
 list_df = []
 for i, lat_lon in enumerate(list_flow_lat_lon):
+    print i+1
     lat = float(lat_lon.split('_')[0])
     lon = float(lat_lon.split('_')[1])
-    df_flow = pd.DataFrame(da_flow.loc[:,lat,lon].values, index=da_flow.coords['time'].values, columns=['flow'])
-    # Select time range
-    df_flow = my_functions.select_time_range(df_flow, start_datetime, end_datetime)
-    # Convert units
-    df_flow = df_flow * pow(1000.0/25.4/12, 3)  # convert m3/s to cfs
-    # Create df and fill in variables
-    df = pd.DataFrame(index=df_flow.index)
+    df = pd.DataFrame(index=da_flow.coords['time'].values) # create df
     df['day'] = range(1, len(df)+1)  # day number (1,2,3,...)
     df['cell'] = list_flow_cell_number[i]  # cell number
-    df['Q_in'] = df_flow['flow'].values  # inflow discharge [cfs]
-    df['Q_out'] = df_flow['flow'].values  # outflow discharge [cfs]
+    df['Q_in'] = da_flow.loc[:,lat,lon].values  # inflow discharge [cfs]
+    df['Q_out'] = df['Q_in']  # outflow discharge [cfs]
     df['Q_diff'] = 0.0  # lateral flow [cfs]
-    df['depth'] = a_d * pow(df_flow['flow'].values, b_d)  # flow depth [ft]
-    df['width'] = a_w * pow(df_flow['flow'].values, b_w)  # flow width [ft]
-    df['u'] = df_flow['flow'].values / df['depth'].values / df['width']  # flow velocoty [ft/s]
+    df['depth'] = da_depth.loc[:,lat,lon].values  # flow depth [ft]
+    df['width'] = da_width.loc[:,lat,lon].values  # flow width [ft]
+    df['velocity'] = da_velocity.loc[:,lat,lon].values  # flow velocity [ft/s]
     list_df.append(df)
-
-#=== Rearrange data ===#
-# Combine df of all grid cells together, in a single multiindex df (indice: cell; date)
+    
+#=== Combine df of all grid cells together, in a single multiindex df (indice: cell; date) ===#
 df_flow = pd.concat(list_df, keys=list_flow_cell_number)
 
 #=== Switch order of indice (to: date; cell), then sort ===#
 df_flow = df_flow.reorder_levels([1,0], axis=0)
 df_flow = df_flow.sortlevel(0)
-
-#=== Close dataset ===#
-ds_flow.close()
 
 #====================================================#
 # Load and process VIC output data - energy
@@ -162,6 +170,7 @@ ds_vic_energy.close()
 #=== Put data for each grid cell into a df ===#
 list_df = []
 for i, lat_lon in enumerate(list_energy_lat_lon):
+    print i+1
     lat = float(lat_lon.split('_')[0])
     lon = float(lat_lon.split('_')[1])
     df = pd.DataFrame(index=vic_energy_daily['Tair'].coords['date'].values) # create df
@@ -188,5 +197,6 @@ df_energy = df_energy.sortlevel(0)
 #====================================================#
 # Write data to file
 #====================================================#
+print 'Writing data to files...'
 np.savetxt(cfg['OUTPUT']['rbm_flow_file'], df_flow.values, fmt='%d %d %.1f %.1f %.1f %.1f %.1f %.2f')
 np.savetxt(cfg['OUTPUT']['rbm_energy_file'], df_energy.values, fmt='%d %.1f %.1f %.4f %.4f %.3f %.1f %.1f')
