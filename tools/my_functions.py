@@ -74,31 +74,4 @@ def config_type(value):
             return val_list
 # -------------------------------------------------------------------- #
 
-#========================================================================
-#========================================================================
-
-def select_time_range(data, start_datetime, end_datetime):
-    ''' This function selects out the part of data within a time range
-
-    Input:
-        data: [dataframe/Series] data with index of datetime
-        start_datetime: [dt.datetime] start time
-        end_datetime: [dt.datetime] end time
-
-    Return:
-        Selected data (same object type as input)
-    '''
-
-    import datetime as dt
-
-    start = data.index.searchsorted(start_datetime)
-    end = data.index.searchsorted(end_datetime)
-
-    data_selected = data.ix[start:end+1]
-
-    return data_selected
-
-#========================================================================
-#========================================================================
-
 
