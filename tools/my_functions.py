@@ -74,4 +74,59 @@ def config_type(value):
             return val_list
 # -------------------------------------------------------------------- #
 
+#============================================================#
+#============================================================#
+
+def modify_hydraulics_at_reservoir(lat, lon, depth, width, year_operated, da_depth, da_width, da_velocity, da_flow, min_velocity):
+    ''' This function modifies flow hydraulics at a reservoir grid cell
+    Input:
+        lat, lon: lat and lon of the grid cell of the reservoir [float]
+        depth, width: depth and width for this reservoir [ft]
+        year_operated: the calendar year the beginning of which reservoir operation started [int]
+        da_depth, da_width, da_flow: xray.DataArray of flow depth, width, velocity and flow discharge [ft and s] (must have the same time indices)
+
+    Return:
+        da_depth, da_width, da_velocity: modified xray.DataArray
+    '''
+
+    import pandas as pd
+    import datetime as dt
+   
+    #=== Extract time index of data ===#
+    dates = da_depth['time'].to_series().index
+    start_date = dates[0]  # start datetime of data
+    end_date = dates[-1]  # end datetime of data
+
+    #=== Calculate new depth, width and velocity ===#
+    if year_operated<=start_date.year:  # if reservoir operation started before simulation period,
+                                        # modify hydraulics for the whole period
+        s_depth = pd.Series(depth, index=dates)
+        s_width = pd.Series(width, index=dates)
+        s_velocity = da_flow.loc[:,lat,lon] / s_depth / s_width
+        s_velocity[s_velocity<min_velocity] = min_velocity
+    else:  # if reservoir operation started after simulation period,
+           # modify hydraulics only from the year starting operation
+        #=== Modify depth ===#
+        s_depth = da_depth.loc[:,lat,lon].to_series()  # original depth
+        dates_to_modify = s_depth.truncate(before=dt.datetime(year_operated,1,1)).index
+                            # dates after reservoir operation began
+        s_depth.loc[dates_to_modify] = depth  # modify depth
+        #=== Modify width ===#
+        s_width = da_width.loc[:,lat,lon].to_series()  # originalwidth 
+        s_width.loc[dates_to_modify] = width  # modify width 
+        #=== Modify velocity ===#
+        s_velocity = da_flow.loc[:,lat,lon] / s_depth / s_width
+        s_velocity[s_velocity<min_velocity] = min_velocity
+
+    #=== Modify DataArray ===#
+    da_depth.loc[:,lat,lon] = s_depth
+    da_width.loc[:,lat,lon] = s_width
+    da_velocity.loc[:,lat,lon] = s_velocity
+    
+    return da_depth, da_width, da_velocity 
+
+
+
+
+
 

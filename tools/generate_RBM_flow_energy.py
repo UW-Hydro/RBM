@@ -82,7 +82,7 @@ if len(list_flow_lat_lon)!=n_flow or len(list_energy_lat_lon)!=n_energy:
     exit()
 
 #====================================================#
-# Load and process VIC output data - flow
+# Load and process RVIC output data - flow
 #====================================================#
 print 'Loading and processing VIC output flow data...'
 
@@ -103,6 +103,32 @@ da_flow.values[da_flow.values<5.0] = 5.0
 da_depth = a_d * pow(da_flow, b_d)  # flow depth [ft]
 da_width = a_w * pow(da_flow, b_w)  # flow width [ft]
 da_velocity = da_flow / da_depth / da_width  # flow velocoty [ft/s]
+
+#=== Set minimum velocity ===#
+da_velocity.values[da_velocity.values<cfg['RBM_OPTIONS']['min_velocity']] = \
+                                                cfg['RBM_OPTIONS']['min_velocity']
+
+#====================================================#
+# Consider reservoir
+#====================================================#
+print 'Processing reservoirs...'
+if cfg['RESERVOIR']['if_reservoir']:  # If consider reservoir in RBM model
+    #=== Load reservoir info ===#
+    df_reservoir_info = pd.read_csv(cfg['RESERVOIR']['reservoir_info_csv'])
+    #=== Loop over each reservoir ==#
+    for i in range(len(df_reservoir_info)):
+        # Extract reservoir info
+        lat = df_reservoir_info.ix[i]['grid_lat']
+        lon = df_reservoir_info.ix[i]['grid_lon']
+        year_operated = int(df_reservoir_info.ix[i]['year_operated_start_of_Calendar_year'])
+        depth = df_reservoir_info.ix[i]['depth_feet']  # [feet]
+        width = df_reservoir_info.ix[i]['width_feet']  # [feet]
+        
+        da_depth, da_width, da_velocity = my_functions.modify_hydraulics_at_reservoir(\
+                                                    lat, lon, depth, width, \
+                                                    year_operated, da_depth, \
+                                                    da_width, da_velocity, da_flow, \
+                                                    cfg['RBM_OPTIONS']['min_velocity'])
 
 #====================================================#
 # Rearrange data - flow
