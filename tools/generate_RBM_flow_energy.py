@@ -17,8 +17,6 @@ cfg = my_functions.read_config(sys.argv[1])  # Read config file
 # [INPUT]
 # Routing station file - output from 'prepare_RBM_param.py'
 route_station_file = cfg['INPUT']['route_station_file']
-# RVIC output nc file (must be "grid" format)
-RVIC_output_nc = cfg['INPUT']['RVIC_output_nc']
 # VIC output nc file - energy
 vic_output_energy_nc = cfg['INPUT']['vic_output_energy_nc']
 
@@ -87,14 +85,19 @@ if len(list_flow_lat_lon)!=n_flow or len(list_energy_lat_lon)!=n_energy:
 print 'Loading and processing VIC output flow data...'
 
 #=== Load data ===#
-ds_flow = xray.open_dataset(RVIC_output_nc)
-da_flow = ds_flow['streamflow'][:-1,:,:]  # Remove the last junk time step
+ds_flow = xray.open_dataset(cfg['INPUT']['flow_output_nc'])
+if cfg['INPUT']['flow_data_type']=='RVIC': # if RVIC output, remove the last junk time step
+    da_flow = ds_flow['streamflow'][:-1,:,:]
+elif cfg['INPUT']['flow_data_type']=='reservoir': # if simple reservoir model output, 
+                                                  # directly extract stramflow
+    da_flow = ds_flow['streamflow']
 
 #=== Select time range ===#
 da_flow = da_flow.sel(time=slice(start_date_str, end_date_str))
 
 #=== Convert units ===#
-da_flow = da_flow * pow(1000.0/25.4/12, 3)  # convert m3/s to cfs
+if cfg['INPUT']['flow_data_type']=='RVIC': # if RVIC output, convert m3/s to cfs
+    da_flow = da_flow * pow(1000.0/25.4/12, 3)
 
 #=== Set zero flow to 5.0 cfs ====#
 da_flow.values[da_flow.values<5.0] = 5.0
