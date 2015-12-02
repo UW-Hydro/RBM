@@ -7,6 +7,7 @@ import sys
 import datetime as dt
 import pandas as pd
 import xray
+import gc
 import my_functions
 
 cfg = my_functions.read_config(sys.argv[1])  # Read config file
@@ -111,6 +112,11 @@ da_velocity = da_flow / da_depth / da_width  # flow velocoty [ft/s]
 da_velocity.values[da_velocity.values<cfg['RBM_OPTIONS']['min_velocity']] = \
                                                 cfg['RBM_OPTIONS']['min_velocity']
 
+#=== Close dataset ===#
+ds_flow.close()
+del ds_flow
+gc.collect()
+
 #====================================================#
 # Consider reservoir
 #====================================================#
@@ -155,10 +161,20 @@ for i, lat_lon in enumerate(list_flow_lat_lon):
     
 #=== Combine df of all grid cells together, in a single multiindex df (indice: cell; date) ===#
 df_flow = pd.concat(list_df, keys=list_flow_cell_number)
+del list_df
+gc.collect()
 
 #=== Switch order of indice (to: date; cell), then sort ===#
 df_flow = df_flow.reorder_levels([1,0], axis=0)
 df_flow = df_flow.sortlevel(0)
+
+#=== Writing data to file ===#
+print 'Writing flow data to file...'
+np.savetxt(cfg['OUTPUT']['rbm_flow_file'], df_flow.values, fmt='%d %d %.1f %.1f %.1f %.1f %.1f %.2f')
+
+#=== Delete dataframes ===#
+del da_depth, da_width, da_velocity
+gc.collect()
 
 #====================================================#
 # Load and process VIC output data - energy
@@ -223,9 +239,13 @@ df_energy = pd.concat(list_df, keys=list_cell_index)
 df_energy = df_energy.reorder_levels([1,0], axis=0)
 df_energy = df_energy.sortlevel(0)
 
-#====================================================#
-# Write data to file
-#====================================================#
-print 'Writing data to files...'
-np.savetxt(cfg['OUTPUT']['rbm_flow_file'], df_flow.values, fmt='%d %d %.1f %.1f %.1f %.1f %.1f %.2f')
+#=== Writing data to file ===#
+print 'Writing energy data to file...'
 np.savetxt(cfg['OUTPUT']['rbm_energy_file'], df_energy.values, fmt='%d %.1f %.1f %.4f %.4f %.3f %.1f %.1f')
+
+#=== Clean up memory ===#
+del df_energy
+del list_df
+
+
+
