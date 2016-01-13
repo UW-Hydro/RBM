@@ -1,2 +1,2 @@
 # RBM
-River Basin Mode - Stream temperature modeling
+River Basin Model - Stream temperature modeling
