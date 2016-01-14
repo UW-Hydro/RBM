@@ -144,6 +144,22 @@ do nyear=start_year,end_year
 !     
 !     Variable Mohseni parameters (UW_JRY_2011/06/16)
 ! 
+!******************************************************************************
+!                            TWO-LAYER MODEL NOTE
+!******************************************************************************
+!
+! It it at this point that the upstream (headwaters in the original, but either
+! headwaters or reservoirs no) are initialized
+
+! There should be a fork here, based on location of either headwaters or reservoir
+! outlets, to use either the Mohseni relations for headwaters or the simulated
+! temperature from the reservoir. Remember also that the outflow from the reservoir
+! must also be accounted for, although it need not be done here.
+! It might be a good idea, though it could also be done elsewhere to consider
+! inserting the two-layer model at this point JRY 1/14/2016
+! 
+!******************************************************************************
+!
         T_head(nr)=mu(nr)+(alphaMu(nr) &
                   /(1.+exp(gmma(nr)*(beta(nr)-T_smth(nr)))))  
 !
@@ -155,6 +171,17 @@ do nyear=start_year,end_year
       x_bndry=x_head-50.0
 !
 !     Establish particle tracks
+!
+!******************************************************************************
+!                            TWO-LAYER MODEL NOTE
+!******************************************************************************
+!
+! It it at this point that the particle tracking is performed and the argument
+! in the subroutine call must now reflect what the next upstream endpoint is, 
+! be it a headwaters or a reservoir outlet. It may also be necessary to create
+! an argument that specifies the starting point. JRY 1/14/2016
+!******************************************************************************
+! 
 !
       call Particle_Track(nr,x_head,x_bndry)
 !
@@ -176,13 +203,31 @@ do nyear=start_year,end_year
 !
           npndx=2
 !
+!******************************************************************************
+!                            TWO-LAYER MODEL NOTE
+!******************************************************************************
+!
+!   Something should probably happen here to accommodate both kinds of boundaries,
+!   riverine and reservoir.  JRY 1/14/2016
+!
+!
 !     Interpolation at the upstream boundary
+!
 !
           if(nseg.eq.1) then
             T_0 = T_head(nr)
           else 
 !
+!
 !     Interpolation at the downstream boundary
+!
+!******************************************************************************
+!                            TWO-LAYER MODEL NOTE
+!******************************************************************************
+!
+!       no_celm(nr) might now contain information about the type of cell, depending
+!       on how the logic is managed. JRY 1/14/2016
+!
 !
           if(nseg.eq.no_celm(nr)) npndx=3
 !
@@ -232,6 +277,7 @@ do nyear=start_year,end_year
               DONE=.TRUE.
             end if
             if(ntribs.eq.0.and.Q_diff(nncell).gt.0) then
+! 
               Q2=Q1+Q_diff(nncell)
               T_dist=T_head(nr)
               T_0=(Q1*T_0+Q_diff(nncell)*T_dist)/Q2

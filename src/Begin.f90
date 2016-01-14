@@ -111,6 +111,18 @@ do nr=1,nreach
 !
   nseg=0
   write(*,*) ' Starting to read reach ',nr
+!**************************************************************************
+!
+!                 NOTES FOR TWO-LAYER MODEL
+!
+!**************************************************************************
+!
+! It is in the following section, where the NETWORK file is read that the
+! logic for identifying riverine and reservoir cells should happen.It will
+! probably also be necessary to update BLOCK_NETWORK.f90 to manage this.
+! Other possibilities exist, of course.  
+! JRY 1/14/2016
+!
 !
 !     Read the number of cells in this reach, the headwater #,
 !     the number of the cell where it enters the next higher order stream,
