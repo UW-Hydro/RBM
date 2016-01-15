@@ -79,7 +79,7 @@ do nr=1,nreach
 !  take the values of the segment to which it is tributary
 !
   Q_in(ncell)=Q_out(ncell-1)
-!  Q_out(ncell)=Q_in(ncell-1)
+!  Q_out(ncell)=Q_in(ncell-1)
   Q_diff(no_heat)=0.0
   u(no_heat)=u(no_heat-1)
   depth(no_heat)=depth(no_heat-1)

@@ -191,7 +191,7 @@ do nyear=start_year,end_year
             xa(ntrp)=x_dist(nr,npart)
             ta(ntrp)=temp(nr,npart,n1)
           end do
-          x=x_part(ns)
+          x=x_part(ns)
 !
 !     Call the interpolation function
 !
@@ -200,7 +200,7 @@ do nyear=start_year,end_year
 !
 300 continue
 350 continue
-!          dt_calc=dt_part(ns)
+!          dt_calc=dt_part(ns)
           nncell=segment_cell(nr,nstrt_elm(ns))
 !
 !    Set NCELL0 for purposes of tributary input
