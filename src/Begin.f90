@@ -33,7 +33,7 @@ logical:: first_cell,source
 contains
 !
 !
-Subroutine BEGIN(param_file,spatial_file)
+Subroutine BEGIN(spatial_file)
 !
 use Block_Energy
 use Block_Hydro
@@ -41,7 +41,7 @@ use Block_Network
 !
 implicit none
 !
-    character (len=200):: param_file,source_file,spatial_file
+    character (len=200):: source_file,spatial_file
     integer:: Julian
 !
 !

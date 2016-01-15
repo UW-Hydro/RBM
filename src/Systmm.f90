@@ -29,7 +29,7 @@ real, parameter:: pi=3.14159,rfac=304.8
 !
 contains
 !
-SUBROUTINE SYSTMM(temp_file,param_file)
+SUBROUTINE SYSTMM(temp_file)
 !
 use Block_Energy
 use Block_Hydro
@@ -38,7 +38,6 @@ use Block_Network
 Implicit None
 !
 character (len=200):: temp_file
-character (len=200):: param_file
 !
 integer::njb
 !
@@ -260,7 +259,7 @@ do nyear=start_year,end_year
 !   other points by some additional code that keys on the
 !   value of ndelta (now a vector)(UW_JRY_11/08/2013)
 !
-            call WRITE(time,nd,nr,ncell,ns,T_0,T_head(nr),dbt(ncell))
+            call WRITE(time,nd,nr,ncell,ns,T_0,T_head(nr),dbt(ncell),Q_out(ncell))
 !
 !     End of computational element loop
 !

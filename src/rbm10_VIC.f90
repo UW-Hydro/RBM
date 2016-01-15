@@ -48,7 +48,6 @@ character (len=200 ):: outPrefix
 character (len=200 ):: flow_file
 character (len=200 ):: heat_file
 character (len=200 ):: net_file
-character (len=200 ):: param_file
 character (len=200 ):: temp_file
 character (len=200 ):: spatial_file
 character (len=8)   :: start_data,end_data     
@@ -76,13 +75,11 @@ call getarg ( 2, outPrefix )
 ! Identify input/output files
 !
 net_file      = TRIM(inPrefix)//'_Network'
-param_file    = TRIM(inPrefix)//'_Parameters'
 spatial_file  = TRIM(outPrefix)//'.Spat'
 temp_file     = TRIM(outPrefix)//'.Temp'
 !
 write(*,*) 'Spatial file: ',spatial_file         
 write(*,*) 'Network file    : ',net_file
-write(*,*) 'Parameter file  : ',param_file!
 write(*,*) 'Temperature file: ',temp_file
 !
 OPEN(UNIT=90,FILE=TRIM(net_file),STATUS='OLD')
@@ -94,14 +91,14 @@ read(90,'(A)') flow_file
 !
 !     Open file with hydrologic data
 !
-open(unit=35,FILE=TRIM(flow_file) ,FORM='FORMATTED',ACCESS='DIRECT' ,RECL=60,STATUS='old')
+open(unit=35,FILE=TRIM(flow_file), ACCESS='SEQUENTIAL',FORM='FORMATTED', STATUS='old')
 !
 !
 read(90,'(A)') heat_file
 !
 !     Open file with meteorologic data
 !     
-open(unit=36,FILE=TRIM(heat_file) ,FORM='FORMATTED',ACCESS='DIRECT' ,RECL=50,STATUS='old')
+open(unit=36,FILE=TRIM(heat_file), ACCESS='SEQUENTIAL', FORM='FORMATTED', STATUS='old')
 !
 !     Call systems programs to get started
 !
@@ -112,11 +109,11 @@ write(*,*) 'Calling BEGIN'
 !
 !     SUBROUTINE BEGIN reads in river system information from the NETWORK file
 !
-CALL BEGIN(param_file, spatial_file)
+CALL BEGIN(spatial_file)
 !
 !     SUBROUTINE SYSTMM performs the simulations
 !
-CALL SYSTMM(temp_file,param_file) ! (WUR_WF_MvV_2011/01/05)
+CALL SYSTMM(temp_file) ! (WUR_WF_MvV_2011/01/05)
 !
 !     Close files after simulation is complete
 !

@@ -1,0 +1,27 @@
+RBM parameter preparation control file template
+#
+#Temperature Simulation
+Starting Date:            <START_DATE>
+Ending Data:              <END_DATE>
+Time Steps per Day:       1
+Output directory:         <OUTPUT_DIR>
+Basin code:         <BASIN_CODE>
+Topology File:            <TOPOLOGY_FILE>
+#
+#
+Network File:             <NETWORK_FILE>
+#
+#
+Flow File:                <OUTPUT_FLOW_FILE>
+#
+#
+Heat  File:               <OUTPUT_ENERGY_FILE>
+#
+#
+Mohseni Parameters:       <MOHSENI_FILE>
+#
+#
+Heat Dump:                FALSE
+#
+#
+Ndelta:                   2
