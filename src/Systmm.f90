@@ -3,7 +3,6 @@ Module SYSTM
 integer:: ncell,nncell,ncell0,nc_head,no_flow,no_heat
 integer:: nc,nd,ndd,nm,nr,ns
 integer:: nr_trib,ntrb,ntribs
-integer:: nrec_flow,nrec_heat
 integer:: n1,n2,nnd,nobs,ndays,nyear,nd_year,ntmp
 integer:: npart,nseg,nwpd 
 real::    dt_comp,dt_calc,dt_total,hpd,Q1,Q2,q_dot,q_surf,z
@@ -254,10 +253,9 @@ do nyear=start_year,end_year
 	    T_trib(nr)=T_0
 !
 !   Write all temperature output UW_JRY_11/08/2013
-!   The temperature is output at the beginning of the 
-!   reach.  It is, of course, possible to get output at
-!   other points by some additional code that keys on the
-!   value of ndelta (now a vector)(UW_JRY_11/08/2013)
+!   Write temperature for the current cell, as well as its
+!   corresponding headwater temperature (of the current reach),
+!   air temperature and flow discharge (commented by YM 1/20/2016))
 !
             call WRITE(time,nd,nr,ncell,ns,T_0,T_head(nr),dbt(ncell),Q_out(ncell))
 !

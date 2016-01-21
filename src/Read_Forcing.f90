@@ -6,7 +6,7 @@ USE Block_Network
 ! 
 IMPLICIT NONE
 !
-integer:: nc,ncell,nnd,no_flow,no_heat,nr,nrec_flow,nrec_heat
+integer:: nc,ncell,nnd,no_flow,no_heat,nr
 real:: Q_avg
 
 
@@ -17,10 +17,6 @@ do nr=1,nreach
     no_flow=no_flow+1
     no_heat=no_heat+1
 !
-    nrec_flow=flow_cells*(ndays-1)+no_flow
-    nrec_heat=heat_cells*(ndays-1)+no_heat
-!
-
     read(35,*) nnd,ncell &
            ,Q_in(no_heat),Q_out(no_heat),Q_diff(no_heat) &  
            ,depth(no_heat),width(no_heat),u(no_heat)
@@ -66,7 +62,6 @@ do nr=1,nreach
   Q_in(no_heat)=Q_out(no_heat-1)
   Q_out(no_heat)=Q_in(no_heat)
   Q_trib(nr)=Q_out(no_heat)    
-  nrec_heat=heat_cells*(ndays-1)+no_heat
   read(36,*) ncell &
            ,dbt(no_heat),ea(no_heat) &
            ,Q_ns(no_heat),Q_na(no_heat),rho &
