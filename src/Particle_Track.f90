@@ -28,7 +28,7 @@ DO ns=no_celm(nr),1,-1
 !     computational interval
 !
    IF(dt_total.lt.dt_comp) THEN
-      x_part(ns)=x_part(ns)+dx(segment_cell(nr,nx_part))
+      x_part(ns)=x_part(ns)+dx(segment_cell(nr,nx_part))
 !
 !     If the particle has started upstream from the boundary point, give it
 !     the value of the boundary
