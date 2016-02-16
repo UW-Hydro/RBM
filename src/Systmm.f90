@@ -14,9 +14,6 @@ real   :: x,x_bndry,xd,xdd,xd_year,x_head,xwpd,year
 real,dimension(:),allocatable:: T_head,T_smth,T_trib
 real,dimension(:,:,:),allocatable:: temp
 !
-!
-logical:: DONE
-!
 ! Indices for lagrangian interpolation
 !
 integer:: npndx,ntrp
@@ -41,6 +38,8 @@ character (len=200):: temp_file
 character (len=200):: param_file
 !
 integer::njb
+!
+logical:: DONE,LEAP_YEAR
 !
 real             :: tntrp
 real,dimension(4):: ta,xa
@@ -103,7 +102,10 @@ hpd=1./xwpd
 do nyear=start_year,end_year
   write(*,*) ' Simulation Year - ',nyear,start_year,end_year
   nd_year=365
-  if (mod(nyear,4).eq.0) nd_year=366
+!
+! Check to see if it is a leap year
+!
+  if (LEAP_YEAR(nyear)) nd_year=366
 !
 !     Day loop starts
 !
