@@ -1,0 +1,6 @@
+# Object code
+*.o
+# Tilde files
+*~
+# Compiled modules
+*.mod

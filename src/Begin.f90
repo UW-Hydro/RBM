@@ -80,7 +80,7 @@ read(90,*) nreach,flow_cells,heat_cells,source
  no_cells=0
  allocate(no_tribs(heat_cells))
  no_tribs=0
- allocate(trib(heat_cells,10))
+ allocate(trib(heat_cells,ns_max))
  trib=0
  allocate(head_cell(nreach))
  allocate(segment_cell(nreach,ns_max))
@@ -157,7 +157,7 @@ do nr=1,nreach
 !     is entered manually into the network file (UW_JRY_2011/03/15)
 !
     read(90,'(5x,i5,5x,i5,8x,i5,6x,a8,6x,a10,7x,f10.0,i5)')  &
-              node,nrow,ncol,lat,long,rmile1,ndelta(ncell)
+              node,nrow,ncol,lat,long,rmile1,ndelta(ncell)
 !
 !    Set the number of segments of the default, if not specified
 !
