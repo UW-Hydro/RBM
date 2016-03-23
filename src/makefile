@@ -49,10 +49,8 @@ Julian.o: Julian.f90
 	$(f90comp) -c Julian.f90
 tntrp.o: tntrp.f90
 	$(f90comp) -c tntrp.f90
-
 rbm10_VIC.o: bgin.mod systm.mod rbm10_VIC.f90
 	$(f90comp) -c rbm10_VIC.f90
-
 # Cleaning everything
 clean:
 	rm bgin.mod block_energy.mod block_hydro.mod block_network.mod\
