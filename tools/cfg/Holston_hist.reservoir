@@ -1,0 +1,6 @@
+[INPUT]
+run_code: Holston
+rbm_output_dir: /raid/yifan/RBM/preprocess/RBM_output/
+precision: 4
+nseg_nday_filename: Holston.nseg_nday
+
