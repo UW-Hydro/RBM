@@ -4,14 +4,18 @@ Link RVIC output and RBM
 Step 1. Generate routing station file and RBM control file
 #============================================================#
 Run './prepare_RBM_param.py' with a config file (see example: ./cfg/prepare_RBM_param.Salmon.cfg)
-    - Generate a routing station file (for the next step to generate flow and energy file)
-    - Generate RBM control file (with running period and flow and energy file missing and to be subsitute)
+    Usage: $./prepare_RBM_param.py <config_file>
+    Purposes:
+        - Generate a routing station file (for the next step to generate flow and energy file)
+        - Generate RBM control file (with running period and flow and energy file missing and to be subsituted)
 
 #============================================================#
 Step 2. Generate flow and energy file as input to RBM
 #============================================================#
 Run './generate_RBM_flow_energy.py' with a config file (see example: ./cfg/generate_RBM_flow_energy.Salmon.cfg)
-    - Generate a flow and an energy file (in the format of RBM input)
+    Usage: $./generate_RBM_flow_energy.py <config_file>
+    Purposes:
+        - Generate a flow and an energy file (in the format that RBM reads)
 
 #============================================================#
 Step 3. Complete RBM control file
