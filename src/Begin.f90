@@ -171,6 +171,7 @@ do nr=1,nreach !loop through all the reaches from first to last reach
         ! Added variable ndelta (UW_JRY_2011/03/15)
         !
             dx(ncell)=5280.*(rmile0-rmile1)/ndelta(ncell)
+         !   print *,dx(ncell), rmile0 - rmile1, ndelta(ncell)
             rmile0=rmile1
             nndlta=0
         200 continue
@@ -192,6 +193,7 @@ do nr=1,nreach !loop through all the reaches from first to last reach
          no_celm(nr)=nseg
          segment_cell(nr,nseg)=ncell
          x_dist(nr,nseg)=5280.*rmile1
+      print *,'nseg, ncell' , nseg, ncell
         !
         ! End of segment loop
         !
