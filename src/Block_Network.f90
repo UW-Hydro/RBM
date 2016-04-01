@@ -10,7 +10,7 @@ Module Block_Network
 !
 ! Integer variables 
 !
-    integer:: flow_cells,heat_cells,nreservoir !add number of reservoir (nreservoir)
+    integer:: flow_cells,heat_cells,nres !add number of reservoir (nreservoir)
     integer:: ndays,nreach,ntrb,nwpd
     integer,parameter::ns_max=200
     integer:: start_year,end_year
