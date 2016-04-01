@@ -10,11 +10,12 @@ real:: dt_total
 !
 !     First do the reverse particle tracking
 !
-DO ns=no_celm(nr),1,-1
+DO ns=no_celm(nr),1,-1  ! loops from no_celm(nr) to 1, backwards by 1
 !
 !     Segment is in cell SEGMENT_CELL(NC)
 !
    ncell=segment_cell(nr,ns)
+   print *, nr, ns, ncell  
    nx_s=1
    nx_part=ns
    dt_part(ns)=dt(ncell)
