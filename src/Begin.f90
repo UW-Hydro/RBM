@@ -11,6 +11,7 @@ implicit none
     character (len=8) :: end_date,start_date     
     character (len=8) :: lat
     character (len=10):: long
+    character :: dam_name
 !
 ! Integer variables
 !
@@ -18,7 +19,7 @@ integer:: start_year,start_month,start_day
 integer:: end_year,end_month,end_day
 integer:: head_name,trib_cell
 integer:: jul_start,main_stem,nyear1,nyear2,nc,ncell,nseg
-integer:: ns_max_test,nndlta,node,ncol,nrow,nr,cum_sgmnt
+integer:: ns_max_test,nndlta,node,ncol,nrow,nr,cum_sgmnt,nreservoir
 !
 ! Logical variables
 !
@@ -38,6 +39,7 @@ Subroutine BEGIN(spatial_file)
 use Block_Energy
 use Block_Hydro
 use Block_Network
+use Block_Reservoir
 !
 implicit none
 !
@@ -63,7 +65,7 @@ write(*,'(2(2x,i4,2i2))')  &
 !
 jul_start = Julian(start_year,start_month,start_day)
 !
-read(90,*) nreach,flow_cells,heat_cells,source
+read(90,*) nreach,flow_cells,heat_cells,nres,source !read in number of reservoir(nres)
 !
 ! Allocate dynamic arrays
 !
@@ -85,6 +87,23 @@ read(90,*) nreach,flow_cells,heat_cells,source
  allocate(head_cell(nreach))
  allocate(segment_cell(nreach,ns_max))
  allocate(x_dist(nreach,0:ns_max))
+
+! Allocate reservoir info
+ allocate(dam_lat(nres))
+ allocate(dam_lon(nres))
+ allocate(res_grid_lat(nres))
+ allocate(res_grid_lon(nres))
+ allocate(res_depth_feet(nres))
+ allocate(res_width_feet(nres))
+ allocate(res_length_feet(nres))
+ allocate(dam_number(nres))
+ allocate(start_operating_year(nres))
+ allocate(res_top_vol(nres))
+ allocate(res_bot_vol(nres))
+ allocate(res_max_flow(nres))
+ allocate(res_min_flow(nres))
+ allocate(res_start_node(nres))
+ allocate(res_end_node(nres))
 !
 ! Check to see if there are point source inputs
 ! 
@@ -212,6 +231,16 @@ nwpd=1
 xwpd=nwpd
 dt_comp=86400./xwpd
 !
+!--------------------------read in reservoir info-----------------------------
+read(37,*)
+do nreservoir = 1,nres
+   read(37,*) dam_number(nreservoir), dam_name ,dam_lat(nreservoir) ,dam_lon(nreservoir), res_grid_lat(nreservoir), res_grid_lon(nreservoir) &
+              ,start_operating_year(nreservoir) , res_top_vol(nreservoir), res_bot_vol(nreservoir),res_max_flow(nreservoir) &
+              ,res_min_flow(nreservoir), res_depth_feet(nreservoir), res_width_feet(nreservoir), res_length_feet(nreservoir) &
+              ,res_start_node(nreservoir), res_end_node(nreservoir)
+end do
+!
+stop
 !     ******************************************************
 !                         Return to RMAIN
 !     ******************************************************
