@@ -104,6 +104,7 @@ read(90,*) nreach,flow_cells,heat_cells,nres,source !read in number of reservoir
  allocate(res_min_flow(nres))
  allocate(res_start_node(nres))
  allocate(res_end_node(nres))
+ allocate(nodes_x(nreach,0:ns_max))
 !
 ! Check to see if there are point source inputs
 ! 
@@ -136,7 +137,7 @@ do nr=1,nreach !loop through all the reaches from first to last reach
     !     the headwater number of the next higher order stream it enters, and
     !     the river mile of the headwaters.
     !
-    read(90,'(i5,11x,i4,10x,i5,15x,i5,15x,f10.0,i5)') no_cells(nr) &
+    read(90,'(i5,11x,i4,10x,i5,15x,i5,15x,f10.0,i5)') no_cells(nr) & ! first header for each reach
        ,head_name,trib_cell,main_stem,rmile0
     !
     !     If this is reach that is tributary to cell TRIB_CELL, give it the
@@ -150,7 +151,7 @@ do nr=1,nreach !loop through all the reaches from first to last reach
     !
     !     Reading Mohseni parameters for each headwaters (UW_JRY_2011/06/18)
     !
-    read(90,*) alphaMu(nr),beta(nr) &
+    read(90,*) alphaMu(nr),beta(nr) & ! second header for each reach
             ,gmma(nr),mu(nr),smooth_param(nr)
     !
     !     Reading Reach Element information
@@ -175,8 +176,12 @@ do nr=1,nreach !loop through all the reaches from first to last reach
         !     Variable ndelta read in here.  At present, number of elements
         !     is entered manually into the network file (UW_JRY_2011/03/15)
         !
-          read(90,'(5x,i5,5x,i5,8x,i5,6x,a8,6x,a10,7x,f10.0,i5)')  &
+          read(90,'(5x,i5,5x,i5,8x,i5,6x,a8,6x,a10,7x,f10.0,i5)')  &  ! nodes for each reach
               node,nrow,ncol,lat,long,rmile1,ndelta(ncell)
+
+        !      X,Y matrix with nodes in each reach
+            nodes_x(nr,ncell) = node
+            
         !
         !    Set the number of segments of the default, if not specified
         !

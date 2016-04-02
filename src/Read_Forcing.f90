@@ -13,6 +13,7 @@ real:: Q_avg
 no_flow=0
 no_heat=0
 do nr=1,nreach
+
     do nc=1,no_cells(nr)-1 
         no_flow=no_flow+1
         no_heat=no_heat+1
@@ -21,7 +22,7 @@ do nr=1,nreach
         nrec_heat=heat_cells*(ndays-1)+no_heat
         !
 
-        read(35,*) nnd,ncell &
+        read(35,*) nnd,ncell &   !  flow file
            ,Q_in(no_heat),Q_out(no_heat),Q_diff(no_heat) &  
            ,depth(no_heat),width(no_heat),u(no_heat)
 
@@ -29,7 +30,7 @@ do nr=1,nreach
         if(u(no_heat).lt.0.01) u(no_heat)=0.01
         if(ncell.ne.no_heat) write(*,*) 'Flow file error',ncell,no_heat 
         !
-        read(36,*) ncell &
+        read(36,*) ncell &  !  heat file
             ,dbt(no_heat),ea(no_heat) &
             ,Q_ns(no_heat),Q_na(no_heat),rho &
             ,press(no_heat),wind(no_heat)
@@ -54,7 +55,26 @@ do nr=1,nreach
         if(dt(no_heat).gt.dt_comp) write(45,*) &
              'Travel time=',dt(no_heat) &
               , '> dt_comp at node -',no_heat
+
+
+        !
+        !        Calculate the next upstream dam and time for water to get there 
+        !
+        if(res_pres = 'TRUE') THEN
+
+            x_res_array =  x_res(nr, 1:nseg) ! array of the reservoir #'s in Network file           
+            res_index = which(x_res_array.gt.0) ! which of those nodes have a reservoir
+            nodes_x  ! X,Y matrix of nodes of each reach
+
+
+            dt_res =dx_res(no_heat)/u(no_heat)
+
+
+        END IF
+
+
     end do
+
     !
     !      Tributary flow is Q_out from the next to the last cell
     !
