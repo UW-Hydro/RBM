@@ -60,17 +60,17 @@ do nr=1,nreach
         !
         !        Calculate the next upstream dam and time for water to get there 
         !
-        if(res_pres = 'TRUE') THEN
+      !  if(res_pres = 'TRUE') THEN
 
-            x_res_array =  x_res(nr, 1:nseg) ! array of the reservoir #'s in Network file           
-            res_index = which(x_res_array.gt.0) ! which of those nodes have a reservoir
-            nodes_x  ! X,Y matrix of nodes of each reach
-
-
-            dt_res =dx_res(no_heat)/u(no_heat)
+      !      x_res_array =  x_res(nr, 1:nseg) ! array of the reservoir #'s in Network file           
+      !      res_index = which(x_res_array.gt.0) ! which of those nodes have a reservoir
+      !      nodes_x  ! X,Y matrix of nodes of each reach
 
 
-        END IF
+       !     dt_res =dx_res(no_heat)/u(no_heat)
+
+
+      !  END IF
 
 
     end do
