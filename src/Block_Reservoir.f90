@@ -10,4 +10,6 @@ module Block_Reservoir
         integer, dimension (:), allocatable:: res_start_node, res_end_node
        !  integer, dimension (:,:), allocatable:: nodes_x   !for each reach, what are all the nodes
         real, dimension(:,:), allocatable  :: nodes_x
+        logical, dimension(:,:), allocatable  :: res_pres
+        logical :: reservoir ! the TRUE or FALSE in fifth line of _Network file whether reserovirs are present 
 end module Block_Reservoir

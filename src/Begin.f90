@@ -20,14 +20,16 @@ integer:: end_year,end_month,end_day
 integer:: head_name,trib_cell
 integer:: jul_start,main_stem,nyear1,nyear2,nc,ncell,nseg
 integer:: ns_max_test,nndlta,node,ncol,nrow,nr,cum_sgmnt,nreservoir
+integer:: node_res
 !
 ! Logical variables
 !
-logical:: first_cell,source
+logical:: first_cell,source, res_presx
 !
 ! Real variables
 !
   real :: rmile0,rmile1,xwpd
+   
 !
 
 !
@@ -65,7 +67,7 @@ write(*,'(2(2x,i4,2i2))')  &
 !
 jul_start = Julian(start_year,start_month,start_day)
 !
-read(90,*) nreach,flow_cells,heat_cells,nres,source !read in number of reservoir(nres)
+read(90,*) nreach,flow_cells,heat_cells,nres,source, reservoir  !read in number of reservoir(nres)
 !
 ! Allocate dynamic arrays
 !
@@ -105,6 +107,7 @@ read(90,*) nreach,flow_cells,heat_cells,nres,source !read in number of reservoir
  allocate(res_start_node(nres))
  allocate(res_end_node(nres))
  allocate(nodes_x(nreach,0:ns_max))
+ allocate(res_pres(nreach,0:ns_max))
 !
 ! Check to see if there are point source inputs
 ! 
@@ -176,12 +179,19 @@ do nr=1,nreach !loop through all the reaches from first to last reach
         !     Variable ndelta read in here.  At present, number of elements
         !     is entered manually into the network file (UW_JRY_2011/03/15)
         !
-          read(90,'(5x,i5,5x,i5,8x,i5,6x,a8,6x,a10,7x,f10.0,i5)')  &  ! nodes for each reach
+        
+        if(reservoir) then
+           read(90,'(5x,i5,5x,i5,8x,i5,6x,a8,6x,a10,7x,f10.0,i5,i6,2x,l5)')  &  ! nodes for each reach
+              node,nrow,ncol,lat,long,rmile1,ndelta(ncell),node_res,res_presx
+        else
+           read(90,'(5x,i5,5x,i5,8x,i5,6x,a8,6x,a10,7x,f10.0,i5)')  &
               node,nrow,ncol,lat,long,rmile1,ndelta(ncell)
+        end if
 
         !      X,Y matrix with nodes in each reach
-            nodes_x(nr,ncell) = node
-            
+            nodes_x(nr,ncell) = node_res
+            res_pres(nr,ncell) = res_presx
+           print *, node_res,res_presx 
         !
         !    Set the number of segments of the default, if not specified
         !
@@ -247,7 +257,11 @@ do nreservoir = 1,nres
               , res_bot_vol(nreservoir),res_depth_feet(nreservoir) &
               , res_width_feet(nreservoir), res_length_feet(nreservoir) &
               ,res_start_node(nreservoir), res_end_node(nreservoir)
- 
+
+!   print *, dam_number(nreservoir), res_depth_feet(nreservoir) &
+!              , res_width_feet(nreservoir), res_length_feet(nreservoir) &
+!              ,res_start_node(nreservoir), res_end_node(nreservoir)
+   print *, 'reservoirs present?  ', reservoir 
  !  read(37,*) dam_number(nreservoir), dam_name ,dam_lat(nreservoir) ,dam_lon(nreservoir) &
  !             , res_grid_lat(nreservoir), res_grid_lon(nreservoir) &
  !             ,start_operating_year(nreservoir) , res_top_vol(nreservoir) &

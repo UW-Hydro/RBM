@@ -44,7 +44,7 @@ do nr=1,nreach
         ! 
         Q_avg=0.5*(Q_in(no_heat)+Q_out(no_heat))
         Q_diff(no_heat)=Q_diff(no_heat)/delta_n
-        dt(no_heat)=dx(no_heat)/u(no_heat)
+        dt(no_heat)=dx(no_heat)/u(no_heat)  ! time it takes for water to travel to headwater
 
         !
         !  Added check to see if travel time of parcel exceeds the
@@ -60,7 +60,7 @@ do nr=1,nreach
         !
         !        Calculate the next upstream dam and time for water to get there 
         !
-      !  if(res_pres = 'TRUE') THEN
+      !  if(reservoir) THEN
 
       !      x_res_array =  x_res(nr, 1:nseg) ! array of the reservoir #'s in Network file           
       !      res_index = which(x_res_array.gt.0) ! which of those nodes have a reservoir
