@@ -9,7 +9,11 @@ module Block_Reservoir
         integer, dimension (:), allocatable:: res_top_vol, res_bot_vol, res_max_flow, res_min_flow
         integer, dimension (:), allocatable:: res_start_node, res_end_node
        !  integer, dimension (:,:), allocatable:: nodes_x   !for each reach, what are all the nodes
-        real, dimension(:,:), allocatable  :: nodes_x
+        real , dimension(:), allocatable  :: rmile_node
+        integer, dimension(:,:), allocatable  :: res_num, nodes_x
         logical, dimension(:,:), allocatable  :: res_pres
         logical :: reservoir ! the TRUE or FALSE in fifth line of _Network file whether reserovirs are present 
+        integer, dimension (:), allocatable :: xres
+        integer :: xres2
+        real, dimension(:), allocatable :: dx_res
 end module Block_Reservoir

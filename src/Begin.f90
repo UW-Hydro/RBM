@@ -60,8 +60,8 @@ read(start_date,'(i4,2i2)') start_year,start_month,start_day
 read(end_date,  '(i4,2i2)') end_year,end_month,end_day
 nyear1=start_year
 nyear2=end_year
-write(*,'(2(2x,i4,2i2))')  &
- start_year,start_month,start_day,end_year,end_month,end_day
+!write(*,'(2(2x,i4,2i2))')  &
+! start_year,start_month,start_day,end_year,end_month,end_day
 !
 !     Establish the Julian day for which simulations begin
 !
@@ -107,17 +107,49 @@ read(90,*) nreach,flow_cells,heat_cells,nres,source, reservoir  !read in number 
  allocate(res_start_node(nres))
  allocate(res_end_node(nres))
  allocate(nodes_x(nreach,0:ns_max))
+ allocate(res_num(nreach,0:ns_max))
  allocate(res_pres(nreach,0:ns_max))
+ allocate(rmile_node(0:ns_max))
+ allocate(xres(0:ns_max))
+allocate(dx_res(0:heat_cells))
 !
 ! Check to see if there are point source inputs
 ! 
 if (source) then
 !
    read(90,'(A)') source_file ! (WUR_WF_MvV_2011/05/23)
-   print *,'source file: ', source_file ! (WUR_WF_MvV_2011/05/23)
+ !  print *,'source file: ', source_file ! (WUR_WF_MvV_2011/05/23)
    open(40,file=TRIM(source_file),status='old')
 !
 end if
+
+!
+!--------------------------read in reservoir info-----------------------------
+read(37,*)
+do nreservoir = 1,nres
+   read(37,*) dam_number(nreservoir)  &
+              , res_grid_lat(nreservoir), res_grid_lon(nreservoir) &
+              , res_top_vol(nreservoir) &
+              , res_bot_vol(nreservoir),res_depth_feet(nreservoir) &
+              , res_width_feet(nreservoir), res_length_feet(nreservoir) &
+              ,res_start_node(nreservoir), res_end_node(nreservoir)
+
+   print *, dam_number(nreservoir), res_depth_feet(nreservoir) &
+              , res_width_feet(nreservoir), res_length_feet(nreservoir) &
+              ,res_start_node(nreservoir), res_end_node(nreservoir)
+ !  read(37,*) dam_number(nreservoir), dam_name ,dam_lat(nreservoir)
+ !  ,dam_lon(nreservoir) &
+ !             , res_grid_lat(nreservoir), res_grid_lon(nreservoir) &
+ !             ,start_operating_year(nreservoir) , res_top_vol(nreservoir) &
+ !             , res_bot_vol(nreservoir),res_max_flow(nreservoir) &
+ !             ,res_min_flow(nreservoir), res_depth_feet(nreservoir) &
+ !             , res_width_feet(nreservoir), res_length_feet(nreservoir) &
+ !             ,res_start_node(nreservoir), res_end_node(nreservoir)
+
+
+end do
+
+
 !
 !     Start reading the reach date and initialize the reach index, NR
 !     and the cell index, NCELL
@@ -133,7 +165,8 @@ do nr=1,nreach !loop through all the reaches from first to last reach
     !     Initialize NSEG, the total number of segments in this reach
     !
     nseg=0
-    write(*,*) ' Starting to read reach ',nr
+   
+ !  write(*,*) ' Starting to read reach ',nr
     !
     !     Read the number of cells in this reach, the headwater #,
     !     the number of the cell where it enters the next higher order stream,
@@ -189,9 +222,10 @@ do nr=1,nreach !loop through all the reaches from first to last reach
         end if
 
         !      X,Y matrix with nodes in each reach
-            nodes_x(nr,ncell) = node_res
+            nodes_x(nr,ncell) = node
+            res_num(nr,ncell) = node_res
             res_pres(nr,ncell) = res_presx
-           print *, node_res,res_presx 
+            rmile_node(ncell) = rmile1
         !
         !    Set the number of segments of the default, if not specified
         !
@@ -205,6 +239,22 @@ do nr=1,nreach !loop through all the reaches from first to last reach
         ! Added variable ndelta (UW_JRY_2011/03/15)
         !
             dx(ncell)=5280.*(rmile0-rmile1)/ndelta(ncell)
+
+        !  calcualte distance to next upstream reservoir
+        ! print *,'reach #: ', nr, 'ncell: ', ncell,'# of cells: ',nodes_x(nr,:)
+       ! print *, nodes_x((ncell-3):ncell)
+
+        if(reservoir) then
+            if(res_presx) then  !if cell in reservoir
+                  dx_res(ncell) = 0 ! cell in reservoir
+            else  if(any(res_pres(nr,:)) ) then   ! any reservoirs upstream of this cell in this reach
+                xres(1:size(res_end_node)) = ncell - res_end_node
+               dx_res(ncell) = 5280.*(rmile_node(res_end_node(minloc(xres, dim=1 ,mask=(xres >0))-1)) - rmile1 ) !  /ndelta(ncell)
+           else
+                dx_res(ncell) = 0 ! no reservoir upstream of cell
+           end if
+        end if
+
          !   print *,dx(ncell), rmile0 - rmile1, ndelta(ncell)
             rmile0=rmile1
             nndlta=0
@@ -233,6 +283,9 @@ do nr=1,nreach !loop through all the reaches from first to last reach
         !
     end do
     if(ns_max_test.lt.nseg) ns_max_test=nseg
+
+!   print *, 'nodes_x for reach  ', nr, nodes_x(nr,1:15)
+
 !
 ! End of reach loop
 !
@@ -248,31 +301,6 @@ nwpd=1
 xwpd=nwpd
 dt_comp=86400./xwpd
 !
-!--------------------------read in reservoir info-----------------------------
-read(37,*)
-do nreservoir = 1,nres
-   read(37,*) dam_number(nreservoir)  &
-              , res_grid_lat(nreservoir), res_grid_lon(nreservoir) &
-              , res_top_vol(nreservoir) &
-              , res_bot_vol(nreservoir),res_depth_feet(nreservoir) &
-              , res_width_feet(nreservoir), res_length_feet(nreservoir) &
-              ,res_start_node(nreservoir), res_end_node(nreservoir)
-
-!   print *, dam_number(nreservoir), res_depth_feet(nreservoir) &
-!              , res_width_feet(nreservoir), res_length_feet(nreservoir) &
-!              ,res_start_node(nreservoir), res_end_node(nreservoir)
-   print *, 'reservoirs present?  ', reservoir 
- !  read(37,*) dam_number(nreservoir), dam_name ,dam_lat(nreservoir) ,dam_lon(nreservoir) &
- !             , res_grid_lat(nreservoir), res_grid_lon(nreservoir) &
- !             ,start_operating_year(nreservoir) , res_top_vol(nreservoir) &
- !             , res_bot_vol(nreservoir),res_max_flow(nreservoir) &
- !             ,res_min_flow(nreservoir), res_depth_feet(nreservoir) &
- !             , res_width_feet(nreservoir), res_length_feet(nreservoir) &
- !             ,res_start_node(nreservoir), res_end_node(nreservoir)
-
-end do
-!
-stop
 !     ******************************************************
 !                         Return to RMAIN
 !     ******************************************************

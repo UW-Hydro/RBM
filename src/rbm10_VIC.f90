@@ -119,6 +119,8 @@ temp_file     = TRIM(outPrefix)//'.Temp'
         !     SUBROUTINE BEGIN reads in river system information from the NETWORK file
         !
 CALL BEGIN(spatial_file)
+        write(*, *) 'test print'
+
 !
 !     SUBROUTINE SYSTMM performs the simulations
 !

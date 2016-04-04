@@ -19,4 +19,5 @@ Module Block_Network
 ! Real variables
 !
     real:: delta_n,dt_comp
+ !   real, dimension(:), allocatable :: rmile_node
 end module Block_Network

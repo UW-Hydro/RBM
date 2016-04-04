@@ -3,6 +3,7 @@ SUBROUTINE Read_Forcing
 USE Block_Energy
 USE Block_Hydro
 USE Block_Network
+USE Block_Reservoir
 ! 
 IMPLICIT NONE
 !
@@ -60,7 +61,11 @@ do nr=1,nreach
         !
         !        Calculate the next upstream dam and time for water to get there 
         !
-      !  if(reservoir) THEN
+
+        ! write(*,*)  'reach: ', nr,"cell #: ", no_cells(nr)
+       if(reservoir) THEN
+
+           
 
       !      x_res_array =  x_res(nr, 1:nseg) ! array of the reservoir #'s in Network file           
       !      res_index = which(x_res_array.gt.0) ! which of those nodes have a reservoir
@@ -70,7 +75,7 @@ do nr=1,nreach
        !     dt_res =dx_res(no_heat)/u(no_heat)
 
 
-      !  END IF
+        END IF
 
 
     end do
