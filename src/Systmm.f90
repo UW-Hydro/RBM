@@ -40,7 +40,8 @@ Implicit None
 !
 character (len=200):: temp_file
 !
-integer::njb
+integer::njb, resx2
+integer, dimension(:), allocatable :: resx
 !
 real             :: tntrp
 real,dimension(4):: ta,xa
@@ -66,7 +67,7 @@ allocate (Q_na(heat_cells))
 allocate (press(heat_cells))
 allocate (wind(heat_cells))
 allocate (dt_res(2*heat_cells))
-
+allocate (resx(2*heat_cells))
 print *,'temp_out size',temp_out
 
 !  allocate(temp_out(4))
@@ -203,22 +204,13 @@ do nyear=start_year,end_year
          ! if particle tracking calculates a cell goes above reservoir (so even though
          ! particle tracking calcuates water came from above the reservoir, in reality
          ! it originated from the reservoir)
-           else if (reservoir.and.res_upstream(nr,segment_cell(nr,ns)) ) then !just if a reservoir is upstream
+           else if (reservoir.and.any(res_pres(nr,segment_cell(nr,ns):segment_cell(nr,nseg)))  ) then
+                 !if a reservoir between ns and nseg
 
-
-                print *, 'nr', nr, 'seg1 and seg2',segment_cell(nr,nseg) &
-                        , segment_cell(nr,ns) , res_pres(nr, segment_cell(nr,nseg) : segment_cell(nr,ns))
-
-                 if(any(res_pres(nr,segment_cell(nr,ns): segment_cell(nr,nseg)) ) ) then
-                 !  any(res_pres(nr,:))
-                   print *, 'array to res'
-                        
-                   
-                   T_0 = temp_out(res_num(nr,nseg))  !  
-   
-                 else ! if reservoir upstream but water did not cross reservoir
-                    go to 650 
-                 end if
+                 ! these two lines gets reservoir number in reach
+                 resx(segment_cell(nr,nseg): segment_cell(nr,ns)) = res_num(nr,segment_cell(nr,nseg):segment_cell(nr,ns))
+                 resx2 = maxval(resx(segment_cell(nr,nseg):segment_cell(nr,ns)),1)
+                 T_0 = temp_out(resx2)  ! temperature of reservoir parcel crossed
           else 
             !
             !     Interpolation at the downstream boundary
@@ -239,7 +231,6 @@ do nyear=start_year,end_year
           !
        300 continue
        350 continue
-       650 continue
 
 ! insert IF statement with res_pres  
         ! IF stameent with res_calc   IF(res_calc(res_num(nr,ns)) 
