@@ -109,9 +109,12 @@ read(90,*) nreach,flow_cells,heat_cells,nres,source, reservoir  !read in number 
  allocate(nodes_x(nreach,0:ns_max))
  allocate(res_num(nreach,0:ns_max))
  allocate(res_pres(nreach,0:ns_max))
+ allocate(res_upstream(nreach,0:ns_max))
  allocate(rmile_node(0:ns_max))
  allocate(xres(0:ns_max))
-allocate(dx_res(0:heat_cells))
+ allocate(dx_res(0:heat_cells))
+ allocate(temp_out(nres))
+ temp_out(1:4) = (/ 7,8,9,10/) ! arbitrarily declaring temp_out for practice 
 !
 ! Check to see if there are point source inputs
 ! 
@@ -216,17 +219,18 @@ do nr=1,nreach !loop through all the reaches from first to last reach
         if(reservoir) then
            read(90,'(5x,i5,5x,i5,8x,i5,6x,a8,6x,a10,7x,f10.0,i5,i6,2x,l5)')  &  ! nodes for each reach
               node,nrow,ncol,lat,long,rmile1,ndelta(ncell),node_res,res_presx
-        else
+
+        !      X,Y matrix with nodes in each reach
+            nodes_x(nr,ncell) = node    ! matrix of nodes for each cell
+            res_num(nr,ncell) = node_res   ! matrix of reservoir index values
+            res_pres(nr,ncell) = res_presx  ! matrix for if reservoir is present for each cell
+            rmile_node(ncell) = rmile1
+
+        else    ! IF no reservoir information in _Network file:
            read(90,'(5x,i5,5x,i5,8x,i5,6x,a8,6x,a10,7x,f10.0,i5)')  &
               node,nrow,ncol,lat,long,rmile1,ndelta(ncell)
         end if
 
-        !      X,Y matrix with nodes in each reach
-            nodes_x(nr,ncell) = node
-            res_num(nr,ncell) = node_res
-            res_pres(nr,ncell) = res_presx
-            rmile_node(ncell) = rmile1
-        !
         !    Set the number of segments of the default, if not specified
         !
          if (ndelta(ncell).lt.1) ndelta(ncell)=n_default
@@ -239,30 +243,44 @@ do nr=1,nreach !loop through all the reaches from first to last reach
         ! Added variable ndelta (UW_JRY_2011/03/15)
         !
             dx(ncell)=5280.*(rmile0-rmile1)/ndelta(ncell)
-
-        !  calcualte distance to next upstream reservoir
+!  print *, 'nr',nr,'nseg',nseg,'ndelta',ndelta(ncell), 'dx', dx(ncell)/5280
         ! print *,'reach #: ', nr, 'ncell: ', ncell,'# of cells: ',nodes_x(nr,:)
-       ! print *, nodes_x((ncell-3):ncell)
-
-        if(reservoir) then
-            if(res_presx) then  !if cell in reservoir
-                  dx_res(ncell) = 0 ! cell in reservoir
-            else  if(any(res_pres(nr,:)) ) then   ! any reservoirs upstream of this cell in this reach
-                xres(1:size(res_end_node)) = ncell - res_end_node
-               dx_res(ncell) = 5280.*(rmile_node(res_end_node(minloc(xres, dim=1 ,mask=(xres >0))-1)) - rmile1 ) !  /ndelta(ncell)
-           else
-                dx_res(ncell) = 0 ! no reservoir upstream of cell
-           end if
-        end if
-
          !   print *,dx(ncell), rmile0 - rmile1, ndelta(ncell)
-            rmile0=rmile1
+            rmile0=rmile1    !for next calculation, so rmile0 - rmile1 is distance between two nodes
             nndlta=0
         200 continue
             nndlta=nndlta+1
             nseg=nseg+1
             segment_cell(nr,nseg)=ncell
+!     print *,'nndlta',  nndlta, 'nr',nr,'nseg',nseg,x_dist(nr,nseg)/5280, x_dist(nr,nseg-1)/5280, dx(ncell)/5280
             x_dist(nr,nseg)=x_dist(nr,nseg-1)-dx(ncell)
+
+        !
+        !  calcualte distance to next upstream reservoir
+        !
+        if(reservoir) then
+            if(res_presx) then  !if cell in reservoir
+       !         x_dist_res(ncell) = 0 ! cell in reservoir
+                res_upstream(nr,ncell) = .false.
+
+            else  if(any(res_pres(nr,:)) ) then   ! any reservoirs upstream of this cell in this reach
+                xres(1:size(res_end_node)) = ncell - res_end_node
+      !          x_dist_res(ncell) = 5280.*(rmile_node(res_end_node(minloc(xres,dim=1 ,mask=(xres >0))-1)) - rmile1 ) !  /ndelta(ncell)
+
+       !         if(nndlta > 1) x_dist_res(ncell) = x_dist_res(ncell) +  dx(ncell)
+
+               res_upstream(nr,ncell) = .true.
+
+           else
+     !           x_dist_res(ncell) = 0 ! no reservoir upstream of cell
+     !           res_upstream(nr,ncell) = .false.
+
+           end if
+
+        end if
+  !      print *,'nr',nr,'nseg',nseg, nseg,x_dist(nr,nseg)/5280
+     !       if(reservoir) x_dist_res(nr,nseg) = x_dist_res(nr,nseg-1)- dx_res(ncell)
+
         !
         !   Write Segment List for mapping to temperature output (UW_JRY_2008/11/19)
         !
@@ -277,12 +295,19 @@ do nr=1,nreach !loop through all the reaches from first to last reach
          no_celm(nr)=nseg
          segment_cell(nr,nseg)=ncell
          x_dist(nr,nseg)=5280.*rmile1
-     ! print *,'nseg, ncell' , nseg, ncell
+    !     if(reservoir) x_dist_res(nr,nseg) = 5280.*rmile1
+!    print *,'nndlta',  nndlta, 'nr',nr,'nseg',nseg, 'x_dist', x_dist(nr,(nseg-1):nseg)
         !
         ! End of segment loop
         !
     end do
     if(ns_max_test.lt.nseg) ns_max_test=nseg
+
+        if(any(res_pres(nr,:))) then
+                print *, 'nr',nr,'print res'
+        else 
+                print *,'nr',nr, 'no res'
+        end if
 
 !   print *, 'nodes_x for reach  ', nr, nodes_x(nr,1:15)
 
@@ -290,6 +315,8 @@ do nr=1,nreach !loop through all the reaches from first to last reach
 ! End of reach loop
 !
 end do
+
+! print *, no_celm
 
 if(ns_max_test.gt.ns_max) then
   write(*,*) 'RBM is terminating because'

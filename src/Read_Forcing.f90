@@ -45,8 +45,8 @@ do nr=1,nreach
         ! 
         Q_avg=0.5*(Q_in(no_heat)+Q_out(no_heat))
         Q_diff(no_heat)=Q_diff(no_heat)/delta_n
-        dt(no_heat)=dx(no_heat)/u(no_heat)  ! time it takes for water to travel to headwater
-
+        dt(no_heat)=dx(no_heat)/u(no_heat)  ! time(sec) to travel between segments,  u=velocity(ft/sec)
+  !   print *, no_heat,dt(no_heat)/86400
         !
         !  Added check to see if travel time of parcel exceeds the
         !  computational interval.  If so, it writes to file fort.45.
@@ -61,22 +61,9 @@ do nr=1,nreach
         !
         !        Calculate the next upstream dam and time for water to get there 
         !
-
-        ! write(*,*)  'reach: ', nr,"cell #: ", no_cells(nr)
-       if(reservoir) THEN
-
-           
-
-      !      x_res_array =  x_res(nr, 1:nseg) ! array of the reservoir #'s in Network file           
-      !      res_index = which(x_res_array.gt.0) ! which of those nodes have a reservoir
-      !      nodes_x  ! X,Y matrix of nodes of each reach
-
-
-       !     dt_res =dx_res(no_heat)/u(no_heat)
-
-
-        END IF
-
+     !  if(reservoir) THEN
+     !        dt_res(no_heat) =dx_res(no_heat)/u(no_heat)
+     !   END IF
 
     end do
 
