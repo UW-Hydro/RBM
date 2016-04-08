@@ -206,6 +206,7 @@ do nyear=start_year,end_year
       res_run = .false.  ! re-initialize reservoir fun T/F array
       res_start = .false. ! re-initialize T/F for reservoir start
       Q_trib_tot = 0 ! re-set the tributary flow to 0
+      T_trib_tot = 0 ! re-set the tributary flow to 0
       !
       ! Read the hydrologic and meteorologic forcings
       !
@@ -401,18 +402,23 @@ do nyear=start_year,end_year
                 Q_res_in(nresx) = Q_in(nncell)
                 T_res_in(nresx) = T_res_in_x ! this will be advection from this reach to reservoir
                 res_start(i) = .true.    ! logical so it won't add another T_res_in
+                Q_trib_tot_x = 0   ! initialize trib flow in this reser. as 0
+                T_trib_in_x = 0   ! initialize trib temp in this reser. as 0
 
              ! loop to calculate reservoir temperature  
              else if (reservoir .and. res_end_node(i) .eq. segment_cell(nr,ns) .and. .not. res_run(i) ) then
                 nresx = i 
                 
+                ! ----- add tributary flow to reach inflow to reservoir ---
                 do j = res_start_node(nresx), res_end_node(nresx)
                         
-                   T_res_in_x =  (T_res_in_x*Q_trib_tot_x + T_trib_tot(j)* Q_trib_tot(j)) &
+                   T_trib_in_x =  (T_trib_in_x*Q_trib_tot_x + T_trib_tot(j)* Q_trib_tot(j)) &
                         /(Q_trib_tot_x + Q_trib_tot(j)) 
                    Q_trib_tot_x = Q_trib_tot_x + Q_trib_tot(j)
                 end do
-                   T_res_in(nresx) = (T_res_in(nresx)*Q_res_in(nresx) + T_res_in_x*Q_trib_tot_x) &
+            !    print *, 'Q-in', Q_res_in(nresx), 'Q-trib', Q_trib_tot_x
+                 ! --- combine trib flow/temp and reach flow/temp ---
+                   T_res_in(nresx) = (T_res_in(nresx)*Q_res_in(nresx) + T_trib_in_x*Q_trib_tot_x) &
                         / (Q_res_in(nresx) +  Q_trib_tot_x)
                    Q_res_in(nresx) = Q_res_in(nresx) + Q_trib_tot_x
               call stream_density(nresx)
