@@ -76,7 +76,7 @@ do nr=1,nreach
     no_heat=no_heat+1 
     Q_in(no_heat)=Q_out(no_heat-1)
     Q_out(no_heat)=Q_in(no_heat)
-    Q_trib(nr)=Q_out(no_heat)    
+    Q_trib(nr)=Q_out(no_heat)   ! flow out this reach is Q_trib 
     nrec_heat=heat_cells*(ndays-1)+no_heat
     read(36,*) ncell &
          ,dbt(no_heat),ea(no_heat) &
