@@ -13,6 +13,8 @@ real(8):: time
 real   :: x,x_bndry,xd,xdd,xd_year,x_head,xwpd,year
 real,dimension(:),allocatable:: T_head,T_smth,T_trib
 real,dimension(:,:,:),allocatable:: temp
+integer,dimension(:,:,:),allocatable:: res_run
+
 !
 !
 logical:: DONE
@@ -45,7 +47,7 @@ Implicit None
 !
 character (len=200):: temp_file
 !
-integer :: njb, resx2
+integer :: njb, resx2, i
 integer, dimension(:), allocatable :: resx
 !
 real             :: tntrp
@@ -93,7 +95,7 @@ allocate (surface_area(nres))
 allocate (T_epil(nres))
 T_epil = 15
 allocate (T_hypo(heat_cells))
-T_hypo = 15
+T_hypo = 10
 allocate (stream_T_in(nres))
 stream_T_in = 15
 allocate (density_epil(nres))
@@ -112,6 +114,12 @@ allocate (temp_change_ep(nres))
 temp_change_ep = 0
 allocate (temp_change_hyp(nres))
 temp_change_hyp = 0
+allocate (res_run(nres))
+res_run = .false.
+allocate (T_res(nres))
+T_res = 15
+allocate (T_res_in(nres))
+T_res_in = 15
 !  allocate(temp_out(4))
 ! temp_out = (7:10)
 !
@@ -135,12 +143,12 @@ T_smth=4.0
 !
 !    initialize reservoir geometery variables
 !
-depth_e = res_depth_feet(:) * depth_e_frac
+depth_e = res_depth_feet(:) * depth_e_frac * ft_to_m  ! ft_to_m converst from feet to m
 ! print *,'res_depth',res_depth_feet(:),'depth_e_frac',depth_e_frac,  'depth_e', depth_e(:)
-depth_h = res_depth_feet(:) * depth_h_frac
-surface_area = res_width_feet(:) *  res_length_feet(:)
-volume_e_x = surface_area(:) * depth_e(:)
-volume_h_x = surface_area(:) * depth_h(:)
+depth_h = res_depth_feet(:) * depth_h_frac * ft_to_m  ! ft_to_m converst from feet to m
+surface_area = res_width_feet(:) *  res_length_feet(:) * ft_to_m * ft_to_m  ! ft_to_m converst from feet to m
+volume_e_x = surface_area(:) * depth_e(:) 
+volume_h_x = surface_area(:) * depth_h(:) 
 
 ! depth_e_inital = depth_e
 ! volume_e_initial = volume_e_x
@@ -178,6 +186,9 @@ do nyear=start_year,end_year
     year=nyear
     xd=nd
     xd_year=nd_year
+
+    print *, 'xd', xd
+        print *, 'nd', nd   
     !     Start the numbers of days-to-date counter
     !
     ndays=ndays+1
@@ -187,6 +198,7 @@ do nyear=start_year,end_year
     do ndd=1,nwpd
       xdd = ndd
       time=year+(xd+(xdd-0.5)*hpd)/xd_year 
+      res_run = .false.  ! re-initialize reservoir fun T/F array
       !
       ! Read the hydrologic and meteorologic forcings
       !
@@ -244,6 +256,9 @@ do nyear=start_year,end_year
           !
           !     Interpolation at the upstream boundary
           !
+
+          ! start previous time step temperature if statements
+
           if(nseg.eq.1) then   ! if water was at headwater 
             T_0 = T_head(nr)
 
@@ -277,7 +292,7 @@ do nyear=start_year,end_year
             !     Call the interpolation function
             !
             T_0=tntrp(xa,ta,x,nterp(npndx))
-          end if
+          end if   ! end previous time step temperature if statements
           !
        300 continue
        350 continue
@@ -348,57 +363,63 @@ do nyear=start_year,end_year
               end if
               dt_calc=dt(nncell)
               dt_total=dt_total+dt_calc
-          end do
+          end do ! end loop cycling through all segments parcel passed through
 
           if (T_0.lt.0.5) T_0=0.5
           temp(nr,ns,n2)=T_0
           T_trib(nr)=T_0
-
-
-          
-     ! Step 1: run each step of the reservoir subroutine
-        ! COULD: A) put loop here or B) put loop after reach loop
-        
-     ! Step 2: each cell with a reservoir - overwrite temp(nr, ns, n2)
-
-
+       
           !
           !             Stream Reservoir Subroutine
           !
 
 
 
-          do nresx=1,nres   ! loop through all the reservoir
+         ! if(any(segment_cell(nr,ns) == res_start_node(:))) print *,'segment_cell_reservoir', segment_cell(nr,ns)
+            do i = 1, nres
+              if (res_start_node(i) .eq. segment_cell(nr,ns) .and. .not. res_run(i) ) then
+                nresx = i 
+              T_res_in(nresx) = T_res_in_x
+              call stream_density(nresx)
 
-                call stream_density(nresx)
-          !  call stream_density(T_epil(nresx), T_hypo(nresx), stream_T_in(nresx) &
-           !             ,  density_epil(nresx),density_hypo(nresx), density_in(nresx), nresx)
-            call flow_subroutine( flow_in_epi_x, flow_in_hyp_x, flow_epi_hyp_x &
-                , flow_out_epi_x, flow_out_hyp_x, ratio_sp, ratio_pen, nresx)! ,density_epil(nresx), density_hypo(nresx), density_in(nresx))
+              call flow_subroutine(flow_in_epi_x, flow_in_hyp_x, flow_epi_hyp_x&
+                , flow_out_epi_x, flow_out_hyp_x, ratio_sp, ratio_pen, nresx)
 
-            ! insert a loop to calculate incoming energy for each cell 
-            call energy(T_epil(nresx), q_surf, res_end_node(nresx))
- 
-            call reservoir_subroutine (nresx)
+              call energy(T_epil(nresx), q_surf, res_end_node(nresx))
 
+              call reservoir_subroutine (nresx, nd)
 
-          end do
-          !
-          !   Write all temperature output UW_JRY_11/08/2013
-          !   The temperature is output at the beginning of the 
-          !   reach.  It is, of course, possible to get output at
-          !   other points by some additional code that keys on the
-          !   value of ndelta (now a vector)(UW_JRY_11/08/2013)
-          !
-          call WRITE(time,nd,nr,ncell,ns,T_0,T_head(nr),dbt(ncell),Q_out(ncell))
-          !
-          !     End of computational element loop
-          !
-print *,'day',nd, 'T_epil', T_epil
-        end do ! end single reach loop (goes through all segs in reach)
+              T_0 = T_res(nresx) !T_res is weighted average temperature
+
+              res_run(i) = .true.  !set reservoir run to "true"
+   ! print *,'first segment_cell_reservoir', segment_cell(nr,ns) , 'T_0', T_0            
+             ! if segment on reservoir cell but reservoir already been simulated 
+             else if(res_start_node(i) .eq. segment_cell(nr,ns) .and. res_run(i)) then
+                nresx = i
+                T_0 = T_res(nresx)
+   ! print *,'later segment_cell_reservoir', segment_cell(nr,ns), 'T_0', T_0  
+             endif
+            end do
+            T_res_in_x = T_0  ! saved temperature from previous segment, when it
+                ! gets to the start node of a reservoir, this becomes stream_ T_in            
         !
-        !     End of reach loop
+        !   Write all temperature output UW_JRY_11/08/2013
+        !   The temperature is output at the beginning of the 
+        !   reach.  It is, of course, possible to get output at
+        !   other points by some additional code that keys on the
+        !   value of ndelta (now a vector)(UW_JRY_11/08/2013)
         !
+        call WRITE(time,nd,nr,ncell,ns,T_0,T_head(nr),dbt(ncell),Q_out(ncell))
+        !
+        !     End of computational element loop
+        !
+   ! print *,'day',nnd, 'T_epil', T_epil
+
+      end do ! end single reach loop (goes through all segs in reach)
+      !
+      !     End of reach loop
+      !
+ print *, 'size of Q_in', size(Q_in)
       end do   ! end total reach loop
       ntmp=n1
       n1=n2
