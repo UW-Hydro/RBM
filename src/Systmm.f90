@@ -47,7 +47,7 @@ Implicit None
 !
 character (len=200):: temp_file
 !
-integer :: njb, resx2, i
+integer :: njb, resx2, i, j
 integer, dimension(:), allocatable :: resx
 !
 real             :: tntrp
@@ -116,10 +116,15 @@ allocate (temp_change_hyp(nres))
 temp_change_hyp = 0
 allocate (res_run(nres))
 res_run = .false.
+allocate (res_start(nres))
+res_start = .false.
 allocate (T_res(nres))
 T_res = 15
 allocate (T_res_in(nres))
 T_res_in = 15
+allocate (Q_trib_tot(heat_cells))
+allocate (T_trib_tot(heat_cells))
+allocate (Q_res_in(nres))
 !  allocate(temp_out(4))
 ! temp_out = (7:10)
 !
@@ -199,6 +204,8 @@ do nyear=start_year,end_year
       xdd = ndd
       time=year+(xd+(xdd-0.5)*hpd)/xd_year 
       res_run = .false.  ! re-initialize reservoir fun T/F array
+      res_start = .false. ! re-initialize T/F for reservoir start
+      Q_trib_tot = 0 ! re-set the tributary flow to 0
       !
       ! Read the hydrologic and meteorologic forcings
       !
@@ -321,6 +328,11 @@ do nyear=start_year,end_year
                   if(Q_trib(nr_trib).gt.0.0) then
                     Q2=Q1+Q_trib(nr_trib)  !Q1 is reach inflow, Q2 is total flow
                     T_0=(Q1*T_0+Q_trib(nr_trib)*T_trib(nr_trib))/Q2 !adjust temp based on trib temp/flow
+
+                    ! --- calculate tributary temperature and flow (to add to reservoir) ---    
+                    T_trib_tot(nncell) = (T_trib_tot(nncell)*Q_trib_tot(nncell) + Q_trib(nr_trib)*T_trib(nr_trib)) &
+                        / Q_trib(nr_trib) + Q_trib_tot(nncell)
+                    Q_trib_tot(nncell) = Q_trib(nr_trib) + Q_trib_tot(nncell) 
                   end if 
                   !
                   Q1=Q_out(nncell) !
@@ -334,6 +346,12 @@ do nyear=start_year,end_year
                 T_dist=T_head(nr)
                 T_0=(Q1*T_0+Q_diff(nncell)*T_dist)/Q2
                 Q1=Q2
+
+                ! adding flow to tributatry flow for reservoir modeling
+                T_trib_tot(nncell) = (T_trib_tot(nncell)*Q_trib_tot(nncell) + Q_diff(nncell)*T_dist) &
+                        / Q_trib(nr_trib) + Q_diff(nncell)
+
+                Q_trib_tot(nncell) = Q_trib_tot(nncell) + Q_diff(nncell) 
               end if
 
 
@@ -373,17 +391,35 @@ do nyear=start_year,end_year
           !             Stream Reservoir Subroutine
           !
 
-
+           T_res_in_x = T_0  ! saved temperature from previous segment,when it
+            ! gets to the start node of a reservoir            
 
          ! if(any(segment_cell(nr,ns) == res_start_node(:))) print *,'segment_cell_reservoir', segment_cell(nr,ns)
             do i = 1, nres
-              if (res_start_node(i) .eq. segment_cell(nr,ns) .and. .not. res_run(i) ) then
+              if(reservoir .and. res_start_node(i) .eq. segment_cell(nr,ns) .and. .not. res_start(i) ) then
+                nresx = i                
+                Q_res_in(nresx) = Q_in(nncell)
+                T_res_in(nresx) = T_res_in_x ! this will be advection from this reach to reservoir
+                res_start(i) = .true.    ! logical so it won't add another T_res_in
+
+             ! loop to calculate reservoir temperature  
+             else if (reservoir .and. res_end_node(i) .eq. segment_cell(nr,ns) .and. .not. res_run(i) ) then
                 nresx = i 
-              T_res_in(nresx) = T_res_in_x
+                
+                do j = res_start_node(nresx), res_end_node(nresx)
+                        
+                   T_res_in_x =  (T_res_in_x*Q_trib_tot_x + T_trib_tot(j)* Q_trib_tot(j)) &
+                        /(Q_trib_tot_x + Q_trib_tot(j)) 
+                   Q_trib_tot_x = Q_trib_tot_x + Q_trib_tot(j)
+                end do
+                   T_res_in(nresx) = (T_res_in(nresx)*Q_res_in(nresx) + T_res_in_x*Q_trib_tot_x) &
+                        / (Q_res_in(nresx) +  Q_trib_tot_x)
+                   Q_res_in(nresx) = Q_res_in(nresx) + Q_trib_tot_x
               call stream_density(nresx)
 
               call flow_subroutine(flow_in_epi_x, flow_in_hyp_x, flow_epi_hyp_x&
-                , flow_out_epi_x, flow_out_hyp_x, ratio_sp, ratio_pen, nresx)
+                , flow_out_epi_x, flow_out_hyp_x, ratio_sp, ratio_pen &
+                , nresx, dt_comp)
 
               call energy(T_epil(nresx), q_surf, res_end_node(nresx))
 
@@ -394,14 +430,12 @@ do nyear=start_year,end_year
               res_run(i) = .true.  !set reservoir run to "true"
    ! print *,'first segment_cell_reservoir', segment_cell(nr,ns) , 'T_0', T_0            
              ! if segment on reservoir cell but reservoir already been simulated 
-             else if(res_start_node(i) .eq. segment_cell(nr,ns) .and. res_run(i)) then
+             else if(reservoir .and. res_end_node(i) .eq. segment_cell(nr,ns) .and. res_run(i)) then
                 nresx = i
                 T_0 = T_res(nresx)
    ! print *,'later segment_cell_reservoir', segment_cell(nr,ns), 'T_0', T_0  
              endif
             end do
-            T_res_in_x = T_0  ! saved temperature from previous segment, when it
-                ! gets to the start node of a reservoir, this becomes stream_ T_in            
         !
         !   Write all temperature output UW_JRY_11/08/2013
         !   The temperature is output at the beginning of the 
@@ -419,7 +453,6 @@ do nyear=start_year,end_year
       !
       !     End of reach loop
       !
- print *, 'size of Q_in', size(Q_in)
       end do   ! end total reach loop
       ntmp=n1
       n1=n2

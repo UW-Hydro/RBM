@@ -20,7 +20,7 @@ module Block_Reservoir
         integer, dimension (:), allocatable :: xres
         integer :: xres2, nres
         real, dimension(:), allocatable :: dx_res, dt_res
-        real :: Q_res_in_1, T_res_in_1
+        ! real :: Q_res_in_1, T_res_in_1
 
         !----------------------------------------------------------------------
         !       variables from reservoir model
@@ -45,9 +45,9 @@ module Block_Reservoir
         real, parameter :: depth_e_frac=0.4, depth_h_frac=0.6
         real, dimension (:), allocatable :: Q_tot, Q_pen, Q_spill
         real, dimension (:), allocatable :: depth_e_inital, volume_e_initial, depth_h_inital, volume_h_initial
-        real, dimension (:), allocatable :: volume_e_x,volume_h_x, T_res, T_res_in
-        logical, dimension (:), allocatable :: res_run
-        real :: outflow_x, volume_tot, T_res_in_x
+        real, dimension (:), allocatable :: volume_e_x,volume_h_x, T_res, T_res_in, T_trib_tot, Q_res_in
+        logical, dimension (:), allocatable :: res_run, res_start ! logical to only get start of reservoir and model entire reservoir once each loop
+        real :: outflow_x, volume_tot, T_res_in_x, Q_trib_tot_x
         ! -------------------- energy terms -----------
         real, dimension (:), allocatable :: area
         ! real  :: flow_in_hyp_x, flow_in_epi_x, flow_out_epi_x, flow_out_hyp_x
