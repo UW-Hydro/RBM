@@ -94,7 +94,7 @@ do nr=1,nreach
     depth(no_heat)=depth(no_heat-1)
     width(no_heat)=width(no_heat-1)
     dt(no_heat)=0.5*dx(ncell)/u(no_heat)
-if(nnd.gt.100) stop
+! if(nnd.gt.13505) stop !13505
 end do
 
 END SUBROUTINE Read_Forcing

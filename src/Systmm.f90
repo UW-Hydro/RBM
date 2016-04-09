@@ -332,7 +332,7 @@ do nyear=start_year,end_year
 
                     ! --- calculate tributary temperature and flow (to add to reservoir) ---    
                     T_trib_tot(nncell) = (T_trib_tot(nncell)*Q_trib_tot(nncell) + Q_trib(nr_trib)*T_trib(nr_trib)) &
-                        / Q_trib(nr_trib) + Q_trib_tot(nncell)
+                        /( Q_trib(nr_trib) + Q_trib_tot(nncell))
                     Q_trib_tot(nncell) = Q_trib(nr_trib) + Q_trib_tot(nncell) 
                   end if 
                   !
@@ -350,7 +350,7 @@ do nyear=start_year,end_year
 
                 ! adding flow to tributatry flow for reservoir modeling
                 T_trib_tot(nncell) = (T_trib_tot(nncell)*Q_trib_tot(nncell) + Q_diff(nncell)*T_dist) &
-                        / Q_trib(nr_trib) + Q_diff(nncell)
+                        /( Q_trib(nr_trib) + Q_diff(nncell))
 
                 Q_trib_tot(nncell) = Q_trib_tot(nncell) + Q_diff(nncell) 
               end if
@@ -411,13 +411,14 @@ do nyear=start_year,end_year
                 
                 ! ----- add tributary flow to reach inflow to reservoir ---
                 do j = res_start_node(nresx), res_end_node(nresx)
-                        
                    T_trib_in_x =  (T_trib_in_x*Q_trib_tot_x + T_trib_tot(j)* Q_trib_tot(j)) &
                         /(Q_trib_tot_x + Q_trib_tot(j)) 
                    Q_trib_tot_x = Q_trib_tot_x + Q_trib_tot(j)
+
                 end do
             !    print *, 'Q-in', Q_res_in(nresx), 'Q-trib', Q_trib_tot_x
                  ! --- combine trib flow/temp and reach flow/temp ---
+              !   print *,'nresx',nresx, 'T_res_in', T_res_in(nresx)
                    T_res_in(nresx) = (T_res_in(nresx)*Q_res_in(nresx) + T_trib_in_x*Q_trib_tot_x) &
                         / (Q_res_in(nresx) +  Q_trib_tot_x)
                    Q_res_in(nresx) = Q_res_in(nresx) + Q_trib_tot_x
@@ -459,6 +460,7 @@ do nyear=start_year,end_year
       !
       !     End of reach loop
       !
+
       end do   ! end total reach loop
       ntmp=n1
       n1=n2
@@ -470,6 +472,9 @@ do nyear=start_year,end_year
       4700 format(f10.4,f6.0,15(f6.1,f8.3))
       4750 format(f10.4,10(i4,f8.0))
     end do
+           write(32,*),time, T_epil(1:nres), T_hypo(1:nres) ! , flow_in_epi_x, flow_out_epi_x,
+       print *, 'time', time, T_epil(1:nres), T_hypo(1:nres)
+
     !
     !     End of main loop (ND=1,365/366)
     !
