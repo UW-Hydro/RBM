@@ -67,7 +67,7 @@ nyear2=end_year
 !
 jul_start = Julian(start_year,start_month,start_day)
 !
-read(90,*) nreach,flow_cells,heat_cells,nres,source, reservoir  !read in number of reservoir(nres)
+read(90,*) nreach,flow_cells,heat_cells,source,nres, reservoir  !read in number of reservoir(nres)
 !
 ! Allocate dynamic arrays
 !
@@ -218,8 +218,13 @@ do nr=1,nreach !loop through all the reaches from first to last reach
         !
         
         if(reservoir) then
-           read(90,'(5x,i5,5x,i5,8x,i5,6x,a8,6x,a10,7x,f10.0,i5,i6,2x,l5)')  &  ! nodes for each reach
-              node,nrow,ncol,lat,long,rmile1,ndelta(ncell),node_res,res_presx
+           read(90,'(5x,i5,5x,i5,8x,i5,6x,a8,6x,a10,7x,f10.0,i5,i6)')  &  ! nodes for each reach
+              node,nrow,ncol,lat,long,rmile1,ndelta(ncell),node_res
+           if(node_res .gt.0) then
+             res_presx = .true.
+           else
+             res_presx = .false.
+           end if
 
         !      X,Y matrix with nodes in each reach
             nodes_x(nr,ncell) = node    ! matrix of nodes for each cell
