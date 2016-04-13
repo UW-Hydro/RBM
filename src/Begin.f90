@@ -89,7 +89,7 @@ read(90,*) nreach,flow_cells,heat_cells,source,nres, reservoir  !read in number 
  allocate(head_cell(nreach))
  allocate(segment_cell(nreach,ns_max))
  allocate(x_dist(nreach,0:ns_max))
-
+ allocate(cell_segment(nreach,heat_cells))
 ! Allocate reservoir info
  allocate(dam_lat(nres))
  allocate(dam_lon(nres))
@@ -300,6 +300,8 @@ do nr=1,nreach !loop through all the reaches from first to last reach
          if(nndlta.lt.ndelta(ncell)) go to 200  
          no_celm(nr)=nseg
          segment_cell(nr,nseg)=ncell
+         cell_segment(nr,ncell) = nseg
+          print *, 'nseg', nseg
          x_dist(nr,nseg)=5280.*rmile1
     !     if(reservoir) x_dist_res(nr,nseg) = 5280.*rmile1
 !    print *,'nndlta',  nndlta, 'nr',nr,'nseg',nseg, 'x_dist', x_dist(nr,(nseg-1):nseg)

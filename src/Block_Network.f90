@@ -5,7 +5,7 @@ Module Block_Network
     integer, dimension(:), allocatable  ::no_celm,no_cells,ndelta,no_tribs
     integer, dimension(:), allocatable  ::head_cell
 !
-    integer, dimension(:,:), allocatable::segment_cell,trib
+    integer, dimension(:,:), allocatable::segment_cell,trib, cell_segment
 !
 !
 ! Integer variables 

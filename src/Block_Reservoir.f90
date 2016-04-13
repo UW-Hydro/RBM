@@ -16,9 +16,9 @@ module Block_Reservoir
         real , dimension(:), allocatable  :: rmile_node
         integer, dimension(:,:), allocatable  :: res_num, nodes_x, x_dist_res
         logical, dimension(:,:), allocatable  :: res_pres, res_upstream
-        logical :: reservoir ! the TRUE or FALSE in fifth line of _Network file whether reserovirs are present 
+        logical :: reservoir, res_upstreamx ! the first is TRUE or FALSE in fifth line of _Network file whether reserovirs are present 
         integer, dimension (:), allocatable :: xres
-        integer :: xres2, nres
+        integer :: xres2, nres, nm_start
         real, dimension(:), allocatable :: dx_res, dt_res
         ! real :: Q_res_in_1, T_res_in_1
 
