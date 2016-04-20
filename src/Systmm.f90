@@ -318,7 +318,7 @@ do nyear=start_year,end_year
 
           if(reservoir .and. res_upstreamx .and. .not. res_pres(nr,ncell)) then
             nm_start = ns - cell_segment(nr,res_end_node(resx2))
-            print *, 'no_dt(ns)', no_dt(ns), 'nm_start', nm_start 
+         !   print *, 'no_dt(ns)', no_dt(ns), 'nm_start', nm_start 
           else
             nm_start = no_dt(ns)
           end if
@@ -442,7 +442,7 @@ do nyear=start_year,end_year
 
             call energy(T_epil(nresx), q_surf, res_end_node(nresx))
 
-            call reservoir_subroutine (nresx, nd)
+            call reservoir_subroutine (nresx, nd,q_surf, time)
 
             T_0 = T_res(nresx) !T_res is weighted average temperature
 
@@ -486,7 +486,7 @@ do nyear=start_year,end_year
       
       temp_out(:) = T_res(:) !set reservoir temperature for next time step
     end do
-    if(nresx==4) print *,nyear, nd,  T_epil(nresx), T_hypo(nresx)
+   ! if(nresx==4) print *,nyear, nd,  T_epil(nresx), T_hypo(nresx)
 
     write(32,*),time, T_epil(1:nres), T_hypo(1:nres) ! , flow_in_epi_x, flow_out_epi_x,
   !     print *, 'time', time, T_epil(1:nres), T_hypo(1:nres)
