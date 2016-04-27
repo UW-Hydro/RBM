@@ -251,7 +251,7 @@ do nyear=start_year,end_year
           end do
           if (T_0.lt.0.5) T_0=0.5
             temp(nr,ns,n2)=T_0
-	    T_trib(nr)=T_0
+            T_trib(nr)=T_0
 !
 !   Write all temperature output UW_JRY_11/08/2013
 !   The temperature is output at the beginning of the 
@@ -281,6 +281,7 @@ do nyear=start_year,end_year
 !     End of main loop (ND=1,365/366)
 !
         end do
+
 !
 !     End of year loop
 !
