@@ -28,11 +28,11 @@ implicit none
          ! converts ft^3/sec to m^3/sec, multiplys by seconds per time step
 
         if ( density_in(nresx) .le. density_hypo(nresx) ) then
-                flow_in_hyp_x = 0 
-                flow_in_epi_x = Q1
+                flow_in_hyp_x = Q1 * 0.2 
+                flow_in_epi_x = Q1 * 0.8 ! majority of flow goes to epil.
         else
-                flow_in_hyp_x = Q1
-                flow_in_epi_x = 0
+                flow_in_hyp_x = Q1 * 0.8
+                flow_in_epi_x = Q1 * 0.2 ! majority flow goes to hypo
         end if
       !-------------- measured releases (penstock and spillway) ---------------
       !  read(56, *) datetime,Q_tot, Q_pen, Q_spill

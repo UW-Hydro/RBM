@@ -73,7 +73,7 @@ SUBROUTINE reservoir_subroutine(nresx, nd, q_surf,time)
          (T_hypo(nresx)*(volume_h_x(nresx)/volume_tot) ) ! weighted averge temp
 
 
- if(nresx.eq.1) then
+ if(nresx.eq.4) then
   ! write(46,*),time, advec_in_epix, advec_epi_hyp, advec_in_hypx, dif_epi_x &
   !      , dif_hyp_x, energy_x, temp_change_ep(nresx), temp_change_hyp(nresx) &
   !      , T_epil(nresx), T_hypo(nresx) 
@@ -81,7 +81,7 @@ SUBROUTINE reservoir_subroutine(nresx, nd, q_surf,time)
 !   write(47,*),time, K_z(nresx), surface_area(nresx),  T_hypo(nresx), T_epil(nresx),  volume_e_x(nresx)
  
   write(48,*),time,advec_in_epix, flow_in_epi_x, T_res_in(nresx),  T_epil(nresx), volume_e_x(nresx) &
-        , advec_in_hypx, flow_in_hyp_x, T_hypo(nresx), volume_h_x(nresx), flow_epi_hyp_x
+        , advec_in_hypx, flow_in_hyp_x, T_hypo(nresx), volume_h_x(nresx), flow_epi_hyp_x, temp_out(nresx), T_res(nresx)
  
 !    write(49, *), time 
  end if
