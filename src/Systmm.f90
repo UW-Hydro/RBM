@@ -332,7 +332,12 @@ do nyear=start_year,end_year
 
    if(ncell .eq. 82 .and. ns .eq. 34  ) write(83,*) nyear,nd &
                  , depth(nncell), z, nncell
-   if(ncell .eq. 71 .and. ns .eq. 12  )  write(71, *) nyear,nd,nseg, T_0, q_surf,q_dot, dt_calc,z
+
+  !do ncell:71,ns:12 for other
+
+   if(ncell .eq. 82 .and. ns .eq. 34  )  write(71, *) nyear,nd,nseg, T_0, q_surf &
+        , q_dot, dt_calc,z
+
             if(T_0.lt.0.0) T_0=0.0
             !
             !     Look for a tributary.
