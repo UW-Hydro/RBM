@@ -1,7 +1,7 @@
-SUBROUTINE Energy(T_surf,q_surf,ncell)
+SUBROUTINE Energy(T_surf,q_surf,ncell, ns, nyear, nd2)
    use Block_Energy
    implicit none
-   integer::i,ncell,nd
+   integer::i,ncell,nd, ns, nyear, nd2
    real::A,B,e0,q_surf,q_conv,q_evap,q_ws,td,T_surf
    real, dimension(2):: q_fit, T_fit
 !
@@ -19,6 +19,9 @@ SUBROUTINE Energy(T_surf,q_surf,ncell)
       q_ws=6.693E-2+1.471E-3*T_fit(i)
       q_fit(i)=q_ns(ncell)+q_na(ncell)-q_ws-q_evap+q_conv
    end do
+
+ 
+  ! if(ncell .eq. 82 .and. ns .eq. 34  )  write(82, *) nyear,nd,nseg, T_0, q_dot, dt_calc,z,rfac
 !
 !     q=AT+B
 !
@@ -29,6 +32,9 @@ SUBROUTINE Energy(T_surf,q_surf,ncell)
    A=(q_fit(1)-q_fit(2))/(T_fit(1)-T_fit(2))
    q_surf=0.5*(q_fit(1)+q_fit(2))
    B=(q_surf/A)-(T_fit(1)+T_fit(2))/2.
+
+
+  ! if(ncell .eq. 82 .and. ns .eq. 34  )  write(83,*) nyear,nd2,q_surf,q_fit(1),q_fit(2),T_fit(1),T_fit(2)
 !
 !     ******************************************************
 !               Return to Subroutine RIVMOD

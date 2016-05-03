@@ -5,7 +5,7 @@ integer:: nc,nd,ndd,nm,nr,ns, nresx
 integer:: nr_trib,ntrb,ntribs
 integer:: nrec_flow,nrec_heat
 integer:: n1,n2,nnd,nobs,ndays,nyear,nd_year,ntmp
-integer:: npart,nseg,nwpd 
+integer:: npart,nseg,nwpd, nd2 
 real::    dt_comp,dt_calc,dt_total,hpd,Q1,Q2,q_dot,q_surf,z
 real   :: rminsmooth
 real   :: T_0,T_dist
@@ -318,16 +318,26 @@ do nyear=start_year,end_year
 
           if(reservoir .and. res_upstreamx .and. .not. res_pres(nr,ncell)) then
             nm_start = ns - cell_segment(nr,res_end_node(resx2))
-            print *, 'no_dt(ns)', no_dt(ns), 'nm_start', nm_start 
+         !   print *, 'no_dt(ns)', no_dt(ns), 'nm_start', nm_start 
           else
             nm_start = no_dt(ns)
           end if
 
           do nm=nm_start,1,-1  ! cycle through each segment parcel passed through
             z=depth(nncell)
-            call energy(T_0,q_surf,nncell)
+            nd2 = nd  ! cut out later, just to print day in energy module
+            call energy(T_0,q_surf,nncell, ns, nyear, nd2)
             q_dot=(q_surf/(z*rfac))
             T_0=T_0+q_dot*dt_calc !adds heat added only during time parcel passed this segment
+
+   if(ncell .eq. 82 .and. ns .eq. 34  ) write(83,*) nyear,nd &
+                 , depth(nncell), z, nncell
+
+  !do ncell:71,ns:12 for other
+
+   if(ncell .eq. 82 .and. ns .eq. 34  )  write(71, *) nyear,nd,nseg, T_0, q_surf &
+        , q_dot, dt_calc,z
+
             if(T_0.lt.0.0) T_0=0.0
             !
             !     Look for a tributary.
@@ -395,6 +405,7 @@ do nyear=start_year,end_year
           dt_total=dt_total+dt_calc
         end do ! end loop cycling through all segments parcel passed through
 
+
         if (T_0.lt.0.5) T_0=0.5
         temp(nr,ns,n2)=T_0
         T_trib(nr)=T_0
@@ -418,7 +429,7 @@ do nyear=start_year,end_year
                 
             res_start(i) = .true.
             ! loop to calculate reservoir temperature  
-          else if (reservoir .and. res_end_node(i) .eq. segment_cell(nr,ns) .and. .not. res_run(i) ) then
+          else if (reservoir .and. res_end_node(i) .eq. segment_cell(nr,ns)   .and. .not. res_run(i) ) then
             nresx = i 
                 
             ! ----- add tributary flow to reach inflow to reservoir ---
@@ -442,7 +453,7 @@ do nyear=start_year,end_year
 
             call energy(T_epil(nresx), q_surf, res_end_node(nresx))
 
-            call reservoir_subroutine (nresx, nd)
+            call reservoir_subroutine (nresx, nd,q_surf, time)
 
             T_0 = T_res(nresx) !T_res is weighted average temperature
 
@@ -486,7 +497,7 @@ do nyear=start_year,end_year
       
       temp_out(:) = T_res(:) !set reservoir temperature for next time step
     end do
-    if(nresx==4) print *,nyear, nd,  T_epil(nresx), T_hypo(nresx)
+   ! if(nresx==4) print *,nyear, nd,  T_epil(nresx), T_hypo(nresx)
 
     write(32,*),time, T_epil(1:nres), T_hypo(1:nres) ! , flow_in_epi_x, flow_out_epi_x,
   !     print *, 'time', time, T_epil(1:nres), T_hypo(1:nres)
