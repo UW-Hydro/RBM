@@ -490,7 +490,7 @@ do nyear=start_year,end_year
 
     write(32,*),time, T_epil(1:nres), T_hypo(1:nres) ! , flow_in_epi_x, flow_out_epi_x,
   !     print *, 'time', time, T_epil(1:nres), T_hypo(1:nres)
-
+    write(30,*), time, volume_e_x(1:nresx), volume_h_x(1:nresx) 
     !
     !     End of main loop (ND=1,365/366)
     !
