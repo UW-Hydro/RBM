@@ -252,9 +252,9 @@ do nyear=start_year,end_year
           !
           !
 
-        print *, 'nyear',nyear,'nd',nd,'nr',nr,'nseg',nseg, 'T_0',T_0
+    !    print *, 'nyear',nyear,'nd',nd,'nr',nr,'nseg',nseg  !  , 'T_0',T_0
                
-          call upstream_subroutine(nseg,nr,ns,T_0, npndx, npart, n1)        
+          call upstream_subroutine(nseg,nr,ns,T_0, npndx, npart, n1, ncell)        
 
           !
           !     Now do the third-order interpolation to
