@@ -431,10 +431,10 @@ do nyear=start_year,end_year
                   /(Q_trib_tot_x + Q_trib_tot(j)) 
               Q_trib_tot_x = Q_trib_tot_x + Q_trib_tot(j)
 
+            print *,'nresx',nresx,'j',j, 'T_trib_in' ,T_trib_in_x,'T_trib_tot',T_trib_tot(j)
             end do
             !    print *, 'Q-in', Q_res_in(nresx), 'Q-trib', Q_trib_tot_x
             ! --- combine trib flow/temp and reach flow/temp ---
-            !   print *,'nresx',nresx, 'T_res_in', T_res_in(nresx)
             T_res_in(nresx) = (T_res_in(nresx)*Q_res_in(nresx) + T_trib_in_x*Q_trib_tot_x) &
                     / (Q_res_in(nresx) +  Q_trib_tot_x)
             Q_res_in(nresx) = Q_res_in(nresx) + Q_trib_tot_x

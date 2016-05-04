@@ -33,8 +33,8 @@ SUBROUTINE reservoir_subroutine(nresx, nd, q_surf,time)
          advec_in_epix  = flow_in_epi_x * (T_res_in(nresx) - T_epil(nresx)) /volume_e_x(nresx)
          advec_epi_hyp = flow_epi_hyp_x *  (T_epil(nresx) - T_hypo(nresx)) / volume_e_x(nresx)
          advec_in_hypx = flow_in_hyp_x * (T_res_in(nresx) - T_hypo(nresx)) /volume_h_x(nresx)
-! print *, 'advec_in_epix', advec_in_epix, 'flow_in_epi_x', flow_in_epi_x, 'T_res_in(nresx)', T_res_in(nresx) &
-!        , 'T_hypo(nresx)',T_hypo(nresx)
+!  print *, 'advec_in_epix', advec_in_epix, 'flow_in_epi_x', flow_in_epi_x, 'T_res_in(nresx)', T_res_in(nresx) &
+!         , 'T_hypo(nresx)',T_hypo(nresx)
   ! ------------------- calculate change in temperature  ---------------------
       ! ---------------- epilimnion -----------
          ! ------------ calculate total energy ----------
@@ -45,8 +45,8 @@ SUBROUTINE reservoir_subroutine(nresx, nd, q_surf,time)
 
 ! print *,'energy',energy_x, 'q_surf',q_surf, 'dt_comp',dt_comp, 'depth_e',depth_e(nresx),'density',density, 'kcal',heat_c_kcal
 !          temp_change_ep(nresx) = advec_in_epix + energy_x +  dif_epi_x !  - advec_out_epix - dV_dt_epi(nresx) ! units = C/day
-! print *, 'temp_change', temp_change_ep(nresx), 'advec_in', advec_in_epix &
-!        , 'energyx', energy_x, 'diffusion', dif_epi_x
+!  print *, 'temp_change_ep', temp_change_ep(nresx), 'advec_in', advec_in_epix &
+!         , 'energyx', energy_x, 'diffusion', dif_epi_x
  !    print *, 'T_epil', T_epil(nresx), 'T_hypo', T_hypo(nresx)
 
          !----- update epilimnion volume for next time step -------
@@ -67,9 +67,6 @@ SUBROUTINE reservoir_subroutine(nresx, nd, q_surf,time)
   !---------- calculate combined (hypo. and epil.) temperature of outflow -----
     epix = T_epil(nresx)*(flow_out_epi_x/outflow_x)  ! portion of temperature from epilim. 
     hypox= T_hypo(nresx)*(flow_out_hyp_x/outflow_x)  ! portion of temperature from hypol.
-
-   print *, 'nresx',nresx,'epix',epix,'hypox',hypox
-
     temp_out(nresx) = epix + hypox   ! average outflow temperature
     volume_tot = volume_e_x(nresx)  + volume_h_x(nresx)
     T_res(nresx) = (T_epil(nresx) * (volume_e_x(nresx)/volume_tot)) + &
