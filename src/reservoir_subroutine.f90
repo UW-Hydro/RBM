@@ -72,7 +72,6 @@ SUBROUTINE reservoir_subroutine(nresx, nd, q_surf,time)
     T_res(nresx) = (T_epil(nresx) * (volume_e_x(nresx)/volume_tot)) + &
          (T_hypo(nresx)*(volume_h_x(nresx)/volume_tot) ) ! weighted averge temp
 
-
  if(nresx.eq.4) then
   ! write(46,*),time, advec_in_epix, advec_epi_hyp, advec_in_hypx, dif_epi_x &
   !      , dif_hyp_x, energy_x, temp_change_ep(nresx), temp_change_hyp(nresx) &
