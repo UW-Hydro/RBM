@@ -11,7 +11,7 @@ real   :: rminsmooth
 real   :: T_0,T_dist
 real(8):: time
 real   :: x,x_bndry,xd,xdd,xd_year,x_head,xwpd,year
-real,dimension(:),allocatable:: T_head,T_smth,T_trib
+real,dimension(:),allocatable:: T_smth  ! ,T_trib, T_head
 real,dimension(:,:,:),allocatable:: temp
 integer,dimension(:,:,:),allocatable:: res_run
 
@@ -22,8 +22,8 @@ logical:: DONE
 ! Indices for lagrangian interpolation
 !
 integer:: npndx,ntrp
-integer, dimension(3):: ndltp=(/-2,-3,-3/)
-integer, dimension(3):: nterp=(/3,4,3/)
+!integer, dimension(3):: ndltp=(/-2,-3,-3/)
+!integer, dimension(3):: nterp=(/3,4,3/)
 
 !
 real, parameter:: pi=3.14159,rfac=304.8
@@ -48,10 +48,6 @@ Implicit None
 character (len=200):: temp_file
 !
 integer :: njb, resx2, i, j
-integer, dimension(:), allocatable :: resx
-!
-real             :: tntrp
-real,dimension(4):: ta,xa
 !
 ! array for each reservoir for if inflow from that parcel
 ! to reservoir has been calculated
@@ -245,65 +241,68 @@ do nyear=start_year,end_year
         DONE=.FALSE.
 
         do ns=1,no_celm(nr) ! cycle through all segments in a reach
+
           ncell=segment_cell(nr,ns) !cell of parcel for this time step
+          nseg=nstrt_elm(ns) !segment water was at previous time step
+          npndx=2
+
+          !
+          !
+          !      --------------   start RIVER loop  ----------------
+          !
+          !
+
+        print *, 'nyear',nyear,'nd',nd,'nr',nr,'nseg',nseg, 'T_0',T_0
+               
+          call upstream_subroutine(nseg,nr,ns,T_0, npndx, npart, n1)        
+
           !
           !     Now do the third-order interpolation to
           !     establish the starting temperature values
           !     for each parcel
           !
-          nseg=nstrt_elm(ns) !segment water was at previous time step
 
-          !
-          !     Perform polynomial interpolationnr_trib
-          !
-          !
-          !     Interpolation inside the domain
-          !
-          npndx=2
-          !
-          !     Interpolation at the upstream boundary
-          !
+   !       if(nseg.eq.1) then   ! if parcel started at headwater 
+   !         T_0 = T_head(nr)
+   !         res_upstreamx = .false.
+   !         resx2 = 0
 
-          ! start previous time step temperature if statements
-
-          if(nseg.eq.1) then   ! if parcel started at headwater 
-            T_0 = T_head(nr)
-            res_upstreamx = .false.
-            resx2 = 0
           ! if parcel started in reservoir
-          else if (reservoir.and.res_pres(nr,segment_cell(nr,nseg))) then 
-            T_0 = temp_out(res_num(nr,segment_cell(nr,nseg)))  !  
-            res_upstreamx = .true.
-            resx2 = res_num(nr,segment_cell(nr,nseg))
+   !       else if (reservoir.and.res_pres(nr,segment_cell(nr,nseg))) then 
+   !         T_0 = temp_out(res_num(nr,segment_cell(nr,nseg)))  !  
+   !         res_upstreamx = .true.
+   !         resx2 = res_num(nr,segment_cell(nr,nseg))
 
-          else if (reservoir.and.any(res_pres(nr,segment_cell(nr,ns):segment_cell(nr,nseg)))  ) then
+   !       else if (reservoir.and.any(res_pres(nr,segment_cell(nr,ns):segment_cell(nr,nseg)))  ) then
+
           ! these two lines gets reservoir number in reach
-            resx(segment_cell(nr,nseg): segment_cell(nr,ns)) = res_num(nr,segment_cell(nr,nseg):segment_cell(nr,ns))
-            resx2 = maxval(resx(segment_cell(nr,nseg):segment_cell(nr,ns)),1)
-            T_0 = temp_out(resx2)  ! temperature of reservoir parcel crossed
-            res_upstreamx = .true.
-          else 
-            res_upstreamx = .false.
-            resx2 = 0
+   !         resx(segment_cell(nr,nseg): segment_cell(nr,ns)) = res_num(nr,segment_cell(nr,nseg):segment_cell(nr,ns))
+   !         resx2 = maxval(resx(segment_cell(nr,nseg):segment_cell(nr,ns)),1)
+   !         T_0 = temp_out(resx2)  ! temperature of reservoir parcel crossed
+   !         res_upstreamx = .true.
+   !       else 
+   !         res_upstreamx = .false.
+   !         resx2 = 0
+
             !
             !     Interpolation at the downstream boundary
             !
-            if(nseg.eq.no_celm(nr)) npndx=3  ! if segment at previous time step was last segment
-            !
-            do ntrp=1,nterp(npndx)
-              npart=nseg+ntrp+ndltp(npndx)
-              xa(ntrp)=x_dist(nr,npart) !river mile at npart segment
-              ta(ntrp)=temp(nr,npart,n1)  !temperature at npart
-            end do
-            x=x_part(ns)
+   !         if(nseg.eq.no_celm(nr)) npndx=3  ! if segment at previous time step was last segment
+   !         !
+   !         do ntrp=1,nterp(npndx)
+   !           npart=nseg+ntrp+ndltp(npndx)
+   !           xa(ntrp)=x_dist(nr,npart) !river mile at npart segment
+   !           ta(ntrp)=temp(nr,npart,n1)  !temperature at npart
+   !         end do
+   !         x=x_part(ns)
             !
             !     Call the interpolation function
             !
-            T_0=tntrp(xa,ta,x,nterp(npndx))
-          end if   ! end previous time step temperature if statements
+    !        T_0=tntrp(xa,ta,x,nterp(npndx))
+    !      end if   ! end previous time step temperature if statements
           !
-   300 continue
-   350 continue
+    !   300 continue
+    !   350 continue
 
           !          dt_calc=dt_part(ns)
           nncell=segment_cell(nr,nstrt_elm(ns)) ! cell of previous time step
@@ -330,79 +329,72 @@ do nyear=start_year,end_year
             q_dot=(q_surf/(z*rfac))
             T_0=T_0+q_dot*dt_calc !adds heat added only during time parcel passed this segment
 
-   if(ncell .eq. 82 .and. ns .eq. 34  ) write(83,*) nyear,nd &
-                 , depth(nncell), z, nncell
+  ! if(ncell .eq. 82 .and. ns .eq. 34  ) write(83,*) nyear,nd &
+  !               , depth(nncell), z, nncell
 
   !do ncell:71,ns:12 for other
 
-   if(ncell .eq. 82 .and. ns .eq. 34  )  write(71, *) nyear,nd,nseg, T_0, q_surf &
-        , q_dot, dt_calc,z
+  ! if(ncell .eq. 82 .and. ns .eq. 34  )  write(71, *) nyear,nd,nseg, T_0, q_surf &
+  !      , q_dot, dt_calc,z
+
+  !      print *,'nwpd',nwpd, 'ns',ns,'nr',nr
 
             if(T_0.lt.0.0) T_0=0.0
+
+          call trib_subroutine(nncell, T_0,nr_trib, nr & 
+                ,ns, nseg, dt_calc, dt_total, n2, DONE, ncell0)
+
+
             !
             !     Look for a tributary.
             !
-            Q1=Q_in(nncell)  !
-            ntribs=no_tribs(nncell)
-            if(ntribs.gt.0.and..not.DONE) then
-              do ntrb=1,ntribs
-                nr_trib=trib(nncell,ntrb) ! gives nr (reach) for each trib
-                if(Q_trib(nr_trib).gt.0.0) then
-                  Q2=Q1+Q_trib(nr_trib)  !Q1 is reach inflow, Q2 is total flow
-                  T_0=(Q1*T_0+Q_trib(nr_trib)*T_trib(nr_trib))/Q2 !adjust temp based on trib temp/flow
+   !         Q1=Q_in(nncell)  !
+   !         ntribs=no_tribs(nncell)
+   !         if(ntribs.gt.0.and..not.DONE) then
+   !           do ntrb=1,ntribs
+   !             nr_trib=trib(nncell,ntrb) ! gives nr (reach) for each trib
+   !             if(Q_trib(nr_trib).gt.0.0) then
+   !               Q2=Q1+Q_trib(nr_trib)  !Q1 is reach inflow, Q2 is total flow
+   !               T_0=(Q1*T_0+Q_trib(nr_trib)*T_trib(nr_trib))/Q2 !adjust temp based on trib temp/flow
 
                   ! --- calculate tributary temperature and flow (to add to reservoir) ---    
-                  T_trib_tot(nncell) = (T_trib_tot(nncell)*Q_trib_tot(nncell) + Q_trib(nr_trib)*T_trib(nr_trib)) &
-                     /( Q_trib(nr_trib) + Q_trib_tot(nncell))
-                  Q_trib_tot(nncell) = Q_trib(nr_trib) + Q_trib_tot(nncell) 
-                end if 
-                !
-                Q1=Q_out(nncell) !
-                !
-              end do
-              DONE=.TRUE.
-            end if
+   !               T_trib_tot(nncell) = (T_trib_tot(nncell)*Q_trib_tot(nncell) + Q_trib(nr_trib)*T_trib(nr_trib)) &
+   !                  /( Q_trib(nr_trib) + Q_trib_tot(nncell))
+   !               Q_trib_tot(nncell) = Q_trib(nr_trib) + Q_trib_tot(nncell) 
+   !             end if 
+   !             !
+   !             Q1=Q_out(nncell) !
+   !             !
+   !           end do
+   !           DONE=.TRUE.
+   !         end if
 
-            if(ntribs.eq.0.and.Q_diff(nncell).gt.0) then !Q_diff is lateral flow in
-              Q2=Q1+Q_diff(nncell)
-              T_dist=T_head(nr)
-              T_0=(Q1*T_0+Q_diff(nncell)*T_dist)/Q2
-              Q1=Q2
+   !         if(ntribs.eq.0.and.Q_diff(nncell).gt.0) then !Q_diff is lateral flow in
+   !           Q2=Q1+Q_diff(nncell)
+   !           T_dist=T_head(nr)
+   !           T_0=(Q1*T_0+Q_diff(nncell)*T_dist)/Q2
+   !           Q1=Q2
 
               ! adding flow to tributatry flow for reservoir modeling
-              T_trib_tot(nncell) = (T_trib_tot(nncell)*Q_trib_tot(nncell) + Q_diff(nncell)*T_dist) &
-                    /( Q_trib(nr_trib) + Q_diff(nncell))
+   !           T_trib_tot(nncell) = (T_trib_tot(nncell)*Q_trib_tot(nncell) + Q_diff(nncell)*T_dist) &
+   !                 /( Q_trib(nr_trib) + Q_diff(nncell))
 
-              Q_trib_tot(nncell) = Q_trib_tot(nncell) + Q_diff(nncell) 
-            end if
+   !           Q_trib_tot(nncell) = Q_trib_tot(nncell) + Q_diff(nncell) 
+   !         end if
 
-
-            !  add up the advection entering reach
-            !
-            ! IF segment enters a reservoir, add up the Q_in_res 
-
-      !         if(reservoir .and. res_pres(segment_cell(nr,nseg)) .and. .not. res_inflow(node_res(nr,segment_cell(nr,nseg)) ) then
-      ! 
-      !           Q_res_in_1 = Q_res_in(res_inflow(node_res(nr,segment_cell(nr,nseg))))   
-      !           T_res_in_1 = T_res_in(res_inflow(node_res(nr,segment_cell(nr,nseg))))    
-      !           Q_res_in(res_inflow(node_res(nr,segment_cell(nr,nseg)))) = Q2 +  Q_res_in(res_inflow(node_res(nr,segment_cell(nr,nseg)))) 
-      !           T_res_in(res_inflow(node_res(nr,segment_cell(nr,nseg)))) = (Q_res_in_1*T_res_in_1 + Q2 * T_0)/Q_res_in(res_inflow(node_res(nr,segment_cell(nr,nseg))))
-      !           res_inflow(node_res(nr,segment_cell(nr,nseg))) = .true.
-      !         end if
-
-
-     500 continue
-          nseg=nseg+1  ! so nseg will be next segment down stream
-          nncell=segment_cell(nr,nseg)  ! node for next node downstream
+   !  500 continue
+   !       nseg=nseg+1  ! so nseg will be next segment down stream
+   !       nncell=segment_cell(nr,nseg)  ! node for next node downstream
           !
           !     Reset tributary flag if this is a new celln_write
           !
-          if(ncell0.ne.nncell) then
-            ncell0=nncell
-            DONE=.FALSE.
-          end if
-          dt_calc=dt(nncell)
-          dt_total=dt_total+dt_calc
+   !       if(ncell0.ne.nncell) then
+   !         ncell0=nncell
+   !         DONE=.FALSE.
+   !       end if
+   !       dt_calc=dt(nncell)
+   !       dt_total=dt_total+dt_calc
+
         end do ! end loop cycling through all segments parcel passed through
 
 
@@ -496,8 +488,10 @@ do nyear=start_year,end_year
       4750 format(f10.4,10(i4,f8.0))
       
       temp_out(:) = T_res(:) !set reservoir temperature for next time step
+
     end do
-   ! if(nresx==4) print *,nyear, nd,  T_epil(nresx), T_hypo(nresx)
+
+     if(nresx==4 .and. nd==180 ) print *,nyear, nd,  T_epil(nresx), T_hypo(nresx)
 
     write(32,*),time, T_epil(1:nres), T_hypo(1:nres) ! , flow_in_epi_x, flow_out_epi_x,
   !     print *, 'time', time, T_epil(1:nres), T_hypo(1:nres)
