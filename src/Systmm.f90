@@ -331,34 +331,19 @@ do nyear=start_year,end_year
             nd2 = nd  ! cut out later, just to print day in energy module
             call energy(T_0,q_surf,nncell, ns, nyear, nd2)
             q_dot=(q_surf/(z*rfac))
-
- !   if(nr .lt. 14 .and. nseg==13) print *,'T_0',T_0,'q_dot',q_dot,'dt_calc',dt_calc
- !   if(nr .lt. 14 .and.  isnan(T_0)) print *,' -------------- T_0 is NaN 1  ---- ', '  nr',nr,'nseg',nseg
             T_0=T_0+q_dot*dt_calc !adds heat added only during time parcel passed this segment
-
- !   if(nr .lt. 14 .and.  isnan(T_0)) print *,' -------------- T_0 is NaN 2 ---- ', '  nr',nr,'nseg',nseg
-  ! if(ncell .eq. 82 .and. ns .eq. 34  ) write(83,*) nyear,nd &
-  !               , depth(nncell), z, nncell
-
-  !do ncell:71,ns:12 for other
-
-  ! if(ncell .eq. 82 .and. ns .eq. 34  )  write(71, *) nyear,nd,nseg, T_0, q_surf &
-  !      , q_dot, dt_calc,z
-
-  !      print *,'nwpd',nwpd, 'ns',ns,'nr',nr
- ! if(nncell == 0) print *, 'nr -------------------------------------', nr, 'nseg',nseg,'nncell',nncell, ncell0
 
             if(T_0.lt.0.0) T_0=0.0
 
-          call trib_subroutine(nncell, T_0,nr_trib, nr & 
-                ,ns, nseg, n2, DONE, ncell0)
+          call trib_subroutine(nncell,ncell0, T_0,nr_trib, nr & 
+                ,ns, nseg, n2, DONE, dt_calc, dt_total)
 
-          if(ncell0.ne.nncell) then
-            ncell0=nncell
-            DONE=.FALSE.
-          end if
-          dt_calc=dt(nncell)
-          dt_total=dt_total+dt_calc
+     !     if(ncell0.ne.nncell) then
+     !       ncell0=nncell
+     !       DONE=.FALSE.
+     !     end if
+     !     dt_calc=dt(nncell)
+     !     dt_total=dt_total+dt_calc
 
 
   ! if(nr .gt. 7 .and. nr .lt. 14 .and. nseg .gt. 10 .and. nseg .lt. 25) print*,'nr',nr,'ns',ns,'nseg',nseg, 'T_0', T_0 &
