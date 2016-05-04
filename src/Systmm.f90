@@ -257,7 +257,7 @@ do nyear=start_year,end_year
     !    print *, 'nyear',nyear,'nd',nd,'nr',nr,'nseg',nseg  !  , 'T_0',T_0
     !     print *, 'ncell',ncell,  temp_out(:) ! 'upstream_subroutine','nr',nr,'ncell',ncell, 'nseg',nseg,'T_0',T_0
    
-          call upstream_subroutine(nseg,nr,ns,T_0, npndx, npart, n1, ncell)        
+          call upstream_subroutine(nseg,nr,ns,T_0, npndx, npart, n1, ncell, resx2)        
 
           !
           !     Now do the third-order interpolation to
@@ -265,27 +265,27 @@ do nyear=start_year,end_year
           !     for each parcel
           !
 
-  !        if(nseg.eq.1) then   ! if parcel started at headwater 
-  !          T_0 = T_head(nr)
-  !          res_upstreamx = .false.
-  !          resx2 = 0
+   !       if(nseg.eq.1) then   ! if parcel started at headwater 
+   !         T_0 = T_head(nr)
+   !         res_upstreamx = .false.
+   !         resx2 = 0
 
           ! if parcel started in reservoir
-  !        else if (reservoir.and.res_pres(nr,segment_cell(nr,nseg))) then 
-  !          T_0 = temp_out(res_num(nr,segment_cell(nr,nseg)))  !  
-  !          res_upstreamx = .true.
-  !          resx2 = res_num(nr,segment_cell(nr,nseg))
+   !       else if (reservoir.and.res_pres(nr,segment_cell(nr,nseg))) then 
+   !         T_0 = temp_out(res_num(nr,segment_cell(nr,nseg)))  !  
+   !         res_upstreamx = .true.
+   !         resx2 = res_num(nr,segment_cell(nr,nseg))
 
-  !        else if (reservoir.and.any(res_pres(nr,segment_cell(nr,ns):segment_cell(nr,nseg)))  ) then
+   !       else if (reservoir.and.any(res_pres(nr,segment_cell(nr,ns):segment_cell(nr,nseg)))  ) then
 
           ! these two lines gets reservoir number in reach
-  !          resx(segment_cell(nr,nseg): segment_cell(nr,ns)) = res_num(nr,segment_cell(nr,nseg):segment_cell(nr,ns))
-  !          resx2 = maxval(resx(segment_cell(nr,nseg):segment_cell(nr,ns)),1)
-  !          T_0 = temp_out(resx2)  ! temperature of reservoir parcel crossed
-  !          res_upstreamx = .true.
-  !        else 
-  !          res_upstreamx = .false.
-  !          resx2 = 0
+   !         resx(segment_cell(nr,nseg): segment_cell(nr,ns)) = res_num(nr,segment_cell(nr,nseg):segment_cell(nr,ns))
+   !         resx2 = maxval(resx(segment_cell(nr,nseg):segment_cell(nr,ns)),1)
+   !         T_0 = temp_out(resx2)  ! temperature of reservoir parcel crossed
+   !         res_upstreamx = .true.
+   !       else 
+   !         res_upstreamx = .false.
+   !         resx2 = 0
 
             !
             !     Interpolation at the downstream boundary
@@ -361,8 +361,8 @@ do nyear=start_year,end_year
           dt_total=dt_total+dt_calc
 
 
- if(nr .gt. 7 .and. nr .lt. 14 .and. nseg .gt. 10 .and. nseg .lt. 18) print*,'nr',nr,'ns',ns,'nseg',nseg, 'T_0', T_0 &
-     , 'dt_calc',dt_calc,'dt_ncell',dt(nncell),'nncell',nncell,   'dt_total',dt_total
+  ! if(nr .gt. 7 .and. nr .lt. 14 .and. nseg .gt. 10 .and. nseg .lt. 25) print*,'nr',nr,'ns',ns,'nseg',nseg, 'T_0', T_0 &
+  !   , 'dt_calc',dt_calc,'dt_ncell',dt(nncell),'nncell',nncell,   'dt_total',dt_total
 
            !
             !     Look for a tributary.
@@ -510,7 +510,7 @@ do nyear=start_year,end_year
 
     end do
 
-     if(nresx==4 .and. nd==180 ) print *,nyear, nd,  T_epil(nresx), T_hypo(nresx)
+     if(nresx==4 .and. nd==180 ) print *,'-----------------' , nd,'T_epil',  T_epil(nresx), 'T_hypo',T_hypo(nresx)
 
     write(32,*),time, T_epil(1:nres), T_hypo(1:nres) ! , flow_in_epi_x, flow_out_epi_x,
   !     print *, 'time', time, T_epil(1:nres), T_hypo(1:nres)
