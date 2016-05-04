@@ -333,6 +333,10 @@ do nyear=start_year,end_year
    if(ncell .eq. 82 .and. ns .eq. 34  ) write(83,*) nyear,nd &
                  , depth(nncell), z, nncell
 
+ if(nr .gt. 7 .and. nr .lt. 14 .and. nseg .gt. 10 .and. nseg .lt. 18) print*,'nr',nr,'ns',ns,'nseg',nseg, 'T_0', T_0 &
+     , 'dt_calc',dt_calc,'dt_ncell',dt(nncell),'nncell',nncell,'dt_total',dt_total
+
+
   !do ncell:71,ns:12 for other
 
    if(ncell .eq. 82 .and. ns .eq. 34  )  write(71, *) nyear,nd,nseg, T_0, q_surf &
