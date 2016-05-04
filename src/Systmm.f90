@@ -22,8 +22,8 @@ logical:: DONE
 ! Indices for lagrangian interpolation
 !
 integer:: npndx,ntrp
-!integer, dimension(3):: ndltp=(/-2,-3,-3/)
-!integer, dimension(3):: nterp=(/3,4,3/)
+! integer, dimension(3):: ndltp=(/-2,-3,-3/)
+! integer, dimension(3):: nterp=(/3,4,3/)
 
 !
 real, parameter:: pi=3.14159,rfac=304.8
@@ -48,6 +48,8 @@ Implicit None
 character (len=200):: temp_file
 !
 integer :: njb, resx2, i, j
+!real,dimension(4):: ta,xa
+real :: tntrp
 !
 ! array for each reservoir for if inflow from that parcel
 ! to reservoir has been calculated
@@ -263,33 +265,33 @@ do nyear=start_year,end_year
           !     for each parcel
           !
 
-   !       if(nseg.eq.1) then   ! if parcel started at headwater 
-   !         T_0 = T_head(nr)
-   !         res_upstreamx = .false.
-   !         resx2 = 0
+  !        if(nseg.eq.1) then   ! if parcel started at headwater 
+  !          T_0 = T_head(nr)
+  !          res_upstreamx = .false.
+  !          resx2 = 0
 
           ! if parcel started in reservoir
-   !       else if (reservoir.and.res_pres(nr,segment_cell(nr,nseg))) then 
-   !         T_0 = temp_out(res_num(nr,segment_cell(nr,nseg)))  !  
-   !         res_upstreamx = .true.
-   !         resx2 = res_num(nr,segment_cell(nr,nseg))
+  !        else if (reservoir.and.res_pres(nr,segment_cell(nr,nseg))) then 
+  !          T_0 = temp_out(res_num(nr,segment_cell(nr,nseg)))  !  
+  !          res_upstreamx = .true.
+  !          resx2 = res_num(nr,segment_cell(nr,nseg))
 
-   !       else if (reservoir.and.any(res_pres(nr,segment_cell(nr,ns):segment_cell(nr,nseg)))  ) then
+  !        else if (reservoir.and.any(res_pres(nr,segment_cell(nr,ns):segment_cell(nr,nseg)))  ) then
 
           ! these two lines gets reservoir number in reach
-   !         resx(segment_cell(nr,nseg): segment_cell(nr,ns)) = res_num(nr,segment_cell(nr,nseg):segment_cell(nr,ns))
-   !         resx2 = maxval(resx(segment_cell(nr,nseg):segment_cell(nr,ns)),1)
-   !         T_0 = temp_out(resx2)  ! temperature of reservoir parcel crossed
-   !         res_upstreamx = .true.
-   !       else 
-   !         res_upstreamx = .false.
-   !         resx2 = 0
+  !          resx(segment_cell(nr,nseg): segment_cell(nr,ns)) = res_num(nr,segment_cell(nr,nseg):segment_cell(nr,ns))
+  !          resx2 = maxval(resx(segment_cell(nr,nseg):segment_cell(nr,ns)),1)
+  !          T_0 = temp_out(resx2)  ! temperature of reservoir parcel crossed
+  !          res_upstreamx = .true.
+  !        else 
+  !          res_upstreamx = .false.
+  !          resx2 = 0
 
             !
             !     Interpolation at the downstream boundary
             !
    !         if(nseg.eq.no_celm(nr)) npndx=3  ! if segment at previous time step was last segment
-   !         !
+            !
    !         do ntrp=1,nterp(npndx)
    !           npart=nseg+ntrp+ndltp(npndx)
    !           xa(ntrp)=x_dist(nr,npart) !river mile at npart segment
@@ -299,14 +301,15 @@ do nyear=start_year,end_year
             !
             !     Call the interpolation function
             !
-    !        T_0=tntrp(xa,ta,x,nterp(npndx))
-    !      end if   ! end previous time step temperature if statements
+   !         T_0=tntrp(xa,ta,x,nterp(npndx))
+   !       end if   ! end previous time step temperature if statements
           !
-    !   300 continue
-    !   350 continue
+   !    300 continue
+   !    350 continue
 
           !          dt_calc=dt_part(ns)
           nncell=segment_cell(nr,nstrt_elm(ns)) ! cell of previous time step
+
           !
           !    Set NCELL0 for purposes of tributary input
           !
@@ -328,8 +331,12 @@ do nyear=start_year,end_year
             nd2 = nd  ! cut out later, just to print day in energy module
             call energy(T_0,q_surf,nncell, ns, nyear, nd2)
             q_dot=(q_surf/(z*rfac))
+
+ !   if(nr .lt. 14 .and. nseg==13) print *,'T_0',T_0,'q_dot',q_dot,'dt_calc',dt_calc
+ !   if(nr .lt. 14 .and.  isnan(T_0)) print *,' -------------- T_0 is NaN 1  ---- ', '  nr',nr,'nseg',nseg
             T_0=T_0+q_dot*dt_calc !adds heat added only during time parcel passed this segment
 
+ !   if(nr .lt. 14 .and.  isnan(T_0)) print *,' -------------- T_0 is NaN 2 ---- ', '  nr',nr,'nseg',nseg
   ! if(ncell .eq. 82 .and. ns .eq. 34  ) write(83,*) nyear,nd &
   !               , depth(nncell), z, nncell
 
@@ -339,14 +346,25 @@ do nyear=start_year,end_year
   !      , q_dot, dt_calc,z
 
   !      print *,'nwpd',nwpd, 'ns',ns,'nr',nr
+ ! if(nncell == 0) print *, 'nr -------------------------------------', nr, 'nseg',nseg,'nncell',nncell, ncell0
 
             if(T_0.lt.0.0) T_0=0.0
 
           call trib_subroutine(nncell, T_0,nr_trib, nr & 
-                ,ns, nseg, dt_calc, dt_total, n2, DONE, ncell0)
+                ,ns, nseg, n2, DONE, ncell0)
+
+          if(ncell0.ne.nncell) then
+            ncell0=nncell
+            DONE=.FALSE.
+          end if
+          dt_calc=dt(nncell)
+          dt_total=dt_total+dt_calc
 
 
-            !
+ if(nr .gt. 7 .and. nr .lt. 14 .and. nseg .gt. 10 .and. nseg .lt. 18) print*,'nr',nr,'ns',ns,'nseg',nseg, 'T_0', T_0 &
+     , 'dt_calc',dt_calc,'dt_ncell',dt(nncell),'nncell',nncell,   'dt_total',dt_total
+
+           !
             !     Look for a tributary.
             !
    !         Q1=Q_in(nncell)  !
@@ -402,7 +420,7 @@ do nyear=start_year,end_year
         if (T_0.lt.0.5) T_0=0.5
         temp(nr,ns,n2)=T_0
         T_trib(nr)=T_0
-       
+  !    if(nr .gt. 7 .and. nr .lt. 14)  print *,'nr',nr,'nseg',nseg, 'T_trib', T_0 
         !
         !             Stream Reservoir Subroutine
         !
@@ -431,7 +449,7 @@ do nyear=start_year,end_year
                   /(Q_trib_tot_x + Q_trib_tot(j)) 
               Q_trib_tot_x = Q_trib_tot_x + Q_trib_tot(j)
 
-            print *,'nresx',nresx,'j',j, 'T_trib_in' ,T_trib_in_x,'T_trib_tot',T_trib_tot(j)
+           !  print *,'nresx',nresx,'j',j, 'T_trib_in' ,T_trib_in_x,'T_trib_tot',T_trib_tot(j)
             end do
             !    print *, 'Q-in', Q_res_in(nresx), 'Q-trib', Q_trib_tot_x
             ! --- combine trib flow/temp and reach flow/temp ---

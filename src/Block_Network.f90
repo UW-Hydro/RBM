@@ -15,9 +15,12 @@ Module Block_Network
     integer,parameter::ns_max=200
     integer:: start_year,end_year
     integer:: n_default=2
+
+
 !
 ! Real variables
 !
     real:: delta_n,dt_comp
+    real,dimension(4):: ta,xa
  !   real, dimension(:), allocatable :: rmile_node
 end module Block_Network
