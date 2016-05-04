@@ -121,8 +121,8 @@ T_res_in = 15
 allocate (Q_trib_tot(heat_cells))
 allocate (T_trib_tot(heat_cells))
 allocate (Q_res_in(nres))
-!  allocate(temp_out(4))
-! temp_out = (7:10)
+! allocate(temp_out(4))
+temp_out = 10
 !
 ! Initialize some arrays
 !
@@ -253,7 +253,8 @@ do nyear=start_year,end_year
           !
 
     !    print *, 'nyear',nyear,'nd',nd,'nr',nr,'nseg',nseg  !  , 'T_0',T_0
-               
+    !     print *, 'ncell',ncell,  temp_out(:) ! 'upstream_subroutine','nr',nr,'ncell',ncell, 'nseg',nseg,'T_0',T_0
+   
           call upstream_subroutine(nseg,nr,ns,T_0, npndx, npart, n1, ncell)        
 
           !

@@ -67,6 +67,9 @@ SUBROUTINE reservoir_subroutine(nresx, nd, q_surf,time)
   !---------- calculate combined (hypo. and epil.) temperature of outflow -----
     epix = T_epil(nresx)*(flow_out_epi_x/outflow_x)  ! portion of temperature from epilim. 
     hypox= T_hypo(nresx)*(flow_out_hyp_x/outflow_x)  ! portion of temperature from hypol.
+
+   print *, 'nresx',nresx,'epix',epix,'hypox',hypox
+
     temp_out(nresx) = epix + hypox   ! average outflow temperature
     volume_tot = volume_e_x(nresx)  + volume_h_x(nresx)
     T_res(nresx) = (T_epil(nresx) * (volume_e_x(nresx)/volume_tot)) + &

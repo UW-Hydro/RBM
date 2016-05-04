@@ -114,7 +114,7 @@ read(90,*) nreach,flow_cells,heat_cells,source,nres, reservoir  !read in number 
  allocate(xres(0:ns_max))
  allocate(dx_res(0:heat_cells))
  allocate(temp_out(nres))
- temp_out(1:4) = (/ 7,8,9,10/) ! arbitrarily declaring temp_out for practice 
+ ! temp_out(1:4) = (/ 7,8,9,10/) ! arbitrarily declaring temp_out for practice 
 !
 ! Check to see if there are point source inputs
 ! 
