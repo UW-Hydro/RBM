@@ -6,7 +6,7 @@
 # Defining variables
 #
 objects = rbm10_VIC.o Begin.o Systmm.o Particle_Track.o \
-          Energy.o Julian.o tntrp.o Read_Forcing.o \
+          Energy.o Julian.o tntrp.o Read_Forcing.o trib_res_subroutine.o \
           Block_Energy.o Block_Hydro.o Block_Network.o Block_Reservoir.o Block_WQ.o\
 	  Write.o Block_Flow.o trib_subroutine.o upstream_subroutine.o \
 	  reservoir_subroutine.o flow_subroutine.o density_subroutine.o	  
@@ -59,8 +59,8 @@ trib_subroutine.o: block_hydro.mod block_network.mod block_flow.mod block_reserv
 	$(f90comp) -c trib_subroutine.f90
 upstream_subroutine.o: block_hydro.mod block_network.mod block_flow.mod block_reservoir.mod upstream_subroutine.f90
 	$(f90comp) -c upstream_subroutine.f90
-
-
+trib_res_subroutine.o: block_hydro.mod block_network.mod block_flow.mod block_reservoir.mod trib_res_subroutine.f90
+	$(f90comp) -c trib_res_subroutine.f90
 
 density_subroutine.o: block_reservoir.mod density_subroutine.f90
 	$(f90comp) -c density_subroutine.f90

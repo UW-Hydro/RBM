@@ -46,7 +46,7 @@ module Block_Reservoir
         real, dimension (:), allocatable :: Q_tot, Q_pen, Q_spill
         real, dimension (:), allocatable :: depth_e_inital, volume_e_initial, depth_h_inital, volume_h_initial
         real, dimension (:), allocatable :: volume_e_x,volume_h_x, T_res, T_res_in, T_trib_tot, Q_res_in
-        logical, dimension (:), allocatable :: res_run, res_start ! logical to only get start of reservoir and model entire reservoir once each loop
+        logical, dimension (:), allocatable :: res_run, res_start, trib_res! logical to only get start of reservoir and model entire reservoir once each loop
         real :: outflow_x, volume_tot, T_res_in_x, Q_trib_tot_x, T_trib_in_x
         ! -------------------- energy terms -----------
         real, dimension (:), allocatable :: area
