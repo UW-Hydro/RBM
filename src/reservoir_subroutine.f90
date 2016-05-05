@@ -74,6 +74,7 @@ SUBROUTINE reservoir_subroutine(nresx, nd, q_surf,time)
 
 
  if(nresx.eq.4) then
+  if(nd==180) print *, 'T_epil',T_epil(nresx), 'T_hypo', T_hypo(nresx)
   ! write(46,*),time, advec_in_epix, advec_epi_hyp, advec_in_hypx, dif_epi_x &
   !      , dif_hyp_x, energy_x, temp_change_ep(nresx), temp_change_hyp(nresx) &
   !      , T_epil(nresx), T_hypo(nresx) 

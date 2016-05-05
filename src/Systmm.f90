@@ -190,8 +190,7 @@ do nyear=start_year,end_year
     year=nyear
     xd=nd
     xd_year=nd_year
- !   print *, 'xd', xd
- !       print *, 'nd', nd   
+    !
     !     Start the numbers of days-to-date counter
     !
     ndays=ndays+1
@@ -236,7 +235,7 @@ do nyear=start_year,end_year
         !
         !     Establish particle tracks
         !
-          call Particle_Track(nr,x_head,x_bndry)
+        call Particle_Track(nr,x_head,x_bndry)
         !
         !
         DONE=.FALSE.
@@ -249,20 +248,16 @@ do nyear=start_year,end_year
         !
         ! -----------------------------------------------------------------------
 
-               ! if segment in river research, or the start of reservoir
-          if(res_pres(nr,ncell) .eqv. .false. .or. any(ncell == res_start_node(:))  ) then
+          ! if segment in river research, or the start of reservoir
+          if(res_pres(nr,segment_cell(nr,ns)) .eqv. .false. .or. any(segment_cell(nr,ns) == res_start_node(:))  ) then
 
             ncell=segment_cell(nr,ns) !cell of parcel for this time step
             nseg=nstrt_elm(ns) !segment water was at previous time step
             npndx=2
 
-            !    print *, 'nyear',nyear,'nd',nd,'nr',nr,'nseg',nseg  !  , 'T_0',T_0
-            !     print *, 'ncell',ncell,  temp_out(:) ! 'upstream_subroutine','nr',nr,'ncell',ncell, 'nseg',nseg,'T_0',T_0
-
             !
             !      subroutine to establish where parcel started
             !
-           
             call upstream_subroutine(nseg,nr,ns,T_0, npndx, npart, n1, ncell, resx2)        
 
 
@@ -309,26 +304,21 @@ do nyear=start_year,end_year
 
         ! -----------------------------------------------------------------------
         !
-        !                    Stream Reservoir Subroutine 
+        !                     Reservoir Subroutine 
         !
         ! -----------------------------------------------------------------------
 
+          ! if start cell is in reservoir, but not first cell
+          if(res_pres(nr,segment_cell(nr,ns))) then
 
-        ! if start cell is in reservoir, but not first cell
-          if(res_pres(nr,ncellx)) then
-
-          ncellx = segment_cell(nr,ns) ! cell (node) reservoir
+            ncellx = segment_cell(nr,ns) ! cell (node) reservoir
 
             ! ------ read in tributary flow -------
             if(trib_res(ncellx) .eqv. .false.)  then
-              call trib_res_subroutine(ncellx, nr_trib, nr, ns)    
-            else
-              trib_res(ncellx) = .true.
+              call trib_res_subroutine(ncellx, nr_trib, nr, ns) 
+              trib_res(ncellx) = .true. ! set flag to true, so doesn't run twice
+                                        ! for same cell
             end if
-
-        ! if(any(segment_cell(nr,ns) == res_start_node(:))) print *,'segment_cell_reservoir', segment_cell(nr,ns)
-
-         print *,'nd',nd,'T_epil',T_epil(nresx),  'T_hypo',T_hypo(nresx)
 
             do i = 1, nres
               
@@ -343,7 +333,7 @@ do nyear=start_year,end_year
                 
                 res_start(i) = .true.
 
-              ! ------------ end of reservoir - calculate the reservoir temperature -----------  
+                ! ------------ end of reservoir - calculate the reservoir temperature -----------  
               else if (reservoir .and. res_end_node(i) .eq. segment_cell(nr,ns)   .and. .not. res_run(i) ) then
                 nresx = i 
                 
@@ -353,16 +343,16 @@ do nyear=start_year,end_year
                       /(Q_trib_tot_x + Q_trib_tot(j)) 
                   Q_trib_tot_x = Q_trib_tot_x + Q_trib_tot(j)
 
-  ! print *,'nresx',nresx,'j',j, 'T_trib_in' ,T_trib_in_x,'T_trib_tot',T_trib_tot(j)
                 end do
 
-                ! --- combine trib flow/temp and reach flow/temp ---
+                ! -------- combine trib flow/temp and reach flow/temp----------
                 T_res_in(nresx) = (T_res_in(nresx)*Q_res_in(nresx) + T_trib_in_x*Q_trib_tot_x) &
                     / (Q_res_in(nresx) +  Q_trib_tot_x)
                 Q_res_in(nresx) = Q_res_in(nresx) + Q_trib_tot_x
+
                 call stream_density(nresx)
 
-                call flow_subroutine(flow_in_epi_x, flow_in_hyp_x, flow_epi_hyp_x&
+                call flow_subroutine(flow_in_epi_x, flow_in_hyp_x, flow_epi_hyp_x &
                   , flow_out_epi_x, flow_out_hyp_x, ratio_sp, ratio_pen &
                   , nresx, dt_comp)
 
@@ -375,33 +365,28 @@ do nyear=start_year,end_year
                 res_run(i) = .true.  !set reservoir run to "true"
 
 
-             !------ if segment on reservoir cell but reservoir already been simulated -------
+              !------ if segment on reservoir cell but reservoir already been simulated -------
               else if(reservoir .and. res_end_node(i) .eq. segment_cell(nr,ns) .and. res_run(i)) then
                 nresx = i
                 T_0 = T_res(nresx)
 
               end if ! end reservoir loop
 
-            end do ! end individual reservoir loop
+            end do ! end individual reservoir loop-cycles thru all reservoirs
 
           end if ! end reservoir if statement
 
-        !   The temperature is output at the beginning of the 
-        !   reach.  It is, of course, possible to get output at
-        !   other points by some additional code that keys on the
-        !   value of ndelta (now a vector)(UW_JRY_11/08/2013)
-        !
-        call WRITE(time,nd,nr,ncell,ns,T_0,T_head(nr),dbt(ncell),Q_out(ncell))
-        !
-        !     End of computational element loop
-        !
-   ! print *,'day',nnd, 'T_epil', T_epil
+          !   The temperature is output at the beginning of the reach 
+          call WRITE(time,nd,nr,ncell,ns,T_0,T_head(nr),dbt(ncell),Q_out(ncell))
 
-      end do ! end single segment loop
-      !
-      !     End of reach loop
-      !
+          !
+          !     End of computational element loop
+          !
+        end do ! end single segment loop
 
+        !
+        !     End of reach loop
+        !
       end do   ! end total reach loop
       ntmp=n1
       n1=n2
@@ -417,10 +402,7 @@ do nyear=start_year,end_year
 
     end do   ! end day loop
 
-     if(nresx==4 .and. nd==180 ) print *,'-----------------' , nd,'T_epil',  T_epil(nresx), 'T_hypo',T_hypo(nresx)
-
     write(32,*),time, T_epil(1:nres), T_hypo(1:nres) ! , flow_in_epi_x, flow_out_epi_x,
-  !     print *, 'time', time, T_epil(1:nres), T_hypo(1:nres)
 
     !
     !     End of main loop (ND=1,365/366)
