@@ -330,11 +330,11 @@ do nyear=start_year,end_year
             q_dot=(q_surf/(z*rfac))
             T_0=T_0+q_dot*dt_calc !adds heat added only during time parcel passed this segment
 
-   if(ncell .eq. 82 .and. ns .eq. 34  ) write(83,*) nyear,nd &
-                 , depth(nncell), z, nncell
+ !  if(ncell .eq. 82 .and. ns .eq. 34  ) write(83,*) nyear,nd &
+ !                , depth(nncell), z, nncell
 
- if(nr .gt. 7 .and. nr .lt. 14 .and. nseg .gt. 10 .and. nseg .lt. 18) print*,'nr',nr,'ns',ns,'nseg',nseg, 'T_0', T_0 &
-     , 'dt_calc',dt_calc,'dt_ncell',dt(nncell),'nncell',nncell,'dt_total',dt_total
+ ! if(nr .gt. 7 .and. nr .lt. 14 .and. nseg .gt. 10 .and. nseg .lt. 18) print*,'nr',nr,'ns',ns,'nseg',nseg, 'T_0', T_0 &
+ !    , 'dt_calc',dt_calc,'dt_ncell',dt(nncell),'nncell',nncell,'dt_total',dt_total
 
 
   !do ncell:71,ns:12 for other
@@ -356,9 +356,11 @@ do nyear=start_year,end_year
                   T_0=(Q1*T_0+Q_trib(nr_trib)*T_trib(nr_trib))/Q2 !adjust temp based on trib temp/flow
 
                   ! --- calculate tributary temperature and flow (to add to reservoir) ---    
-                  T_trib_tot(nncell) = (T_trib_tot(nncell)*Q_trib_tot(nncell) + Q_trib(nr_trib)*T_trib(nr_trib)) &
+                  if(nm==1) then  ! ONLY calculate trib inflow for last segment
+                    T_trib_tot(nncell) = (T_trib_tot(nncell)*Q_trib_tot(nncell) + Q_trib(nr_trib)*T_trib(nr_trib)) &
                      /( Q_trib(nr_trib) + Q_trib_tot(nncell))
-                  Q_trib_tot(nncell) = Q_trib(nr_trib) + Q_trib_tot(nncell) 
+                    Q_trib_tot(nncell) = Q_trib(nr_trib) + Q_trib_tot(nncell)
+                  end if
                 end if 
                 !
                 Q1=Q_out(nncell) !
@@ -374,10 +376,12 @@ do nyear=start_year,end_year
               Q1=Q2
 
               ! adding flow to tributatry flow for reservoir modeling
-              T_trib_tot(nncell) = (T_trib_tot(nncell)*Q_trib_tot(nncell) + Q_diff(nncell)*T_dist) &
+              if(nm==1) then  ! ONLY calculate trib inflow for last segment
+                T_trib_tot(nncell) = (T_trib_tot(nncell)*Q_trib_tot(nncell) + Q_diff(nncell)*T_dist) &
                     /( Q_trib(nr_trib) + Q_diff(nncell))
 
-              Q_trib_tot(nncell) = Q_trib_tot(nncell) + Q_diff(nncell) 
+                Q_trib_tot(nncell) = Q_trib_tot(nncell) + Q_diff(nncell) 
+              end if
             end if
 
 
@@ -438,9 +442,17 @@ do nyear=start_year,end_year
                 
             ! ----- add tributary flow to reach inflow to reservoir ---
             do j = res_start_node(nresx), res_end_node(nresx)
+
+!             if(Q_trib_tot_x == 0 .and. Q_trib_tot(j) == 0) then
+                    !      print *,'nresx',nresx,'j',j,'T_trib_in_x1',T_trib_in_x,'Q_trib_tot_x',Q_trib_tot_x&
+                    !   , 'T_trib_tot',T_trib_tot(j),'Q_trib_tot',Q_trib_tot(j)&
+                    !   ,'Q_trib_tot_x',Q_trib_tot_x,'Q_trib_tot(j)',Q_trib_tot(j)
+
               T_trib_in_x =  (T_trib_in_x*Q_trib_tot_x + T_trib_tot(j)* Q_trib_tot(j)) &
                   /(Q_trib_tot_x + Q_trib_tot(j)) 
               Q_trib_tot_x = Q_trib_tot_x + Q_trib_tot(j)
+
+           if(Q_trib_tot_x == 0)  print *,'nresx',nresx,'j',j, 'Q_trib_tot_x',Q_trib_tot_x
 
             end do
             !    print *, 'Q-in', Q_res_in(nresx), 'Q-trib', Q_trib_tot_x
