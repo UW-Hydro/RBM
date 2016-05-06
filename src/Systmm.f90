@@ -447,11 +447,11 @@ do nyear=start_year,end_year
                     !      print *,'nresx',nresx,'j',j,'T_trib_in_x1',T_trib_in_x,'Q_trib_tot_x',Q_trib_tot_x&
                     !   , 'T_trib_tot',T_trib_tot(j),'Q_trib_tot',Q_trib_tot(j)&
                     !   ,'Q_trib_tot_x',Q_trib_tot_x,'Q_trib_tot(j)',Q_trib_tot(j)
-
-              T_trib_in_x =  (T_trib_in_x*Q_trib_tot_x + T_trib_tot(j)* Q_trib_tot(j)) &
+              if(Q_trib_tot_x .gt. 0 .or. Q_trib_tot(j) .gt. 0) then
+                T_trib_in_x =  (T_trib_in_x*Q_trib_tot_x + T_trib_tot(j)* Q_trib_tot(j)) &
                   /(Q_trib_tot_x + Q_trib_tot(j)) 
-              Q_trib_tot_x = Q_trib_tot_x + Q_trib_tot(j)
-
+                Q_trib_tot_x = Q_trib_tot_x + Q_trib_tot(j)
+              end if
            if(Q_trib_tot_x == 0)  print *,'nresx',nresx,'j',j, 'Q_trib_tot_x',Q_trib_tot_x
 
             end do
