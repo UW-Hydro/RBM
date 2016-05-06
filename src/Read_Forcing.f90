@@ -26,7 +26,7 @@ do nr=1,nreach
         read(35,*) nnd,ncell &   !  flow file
            ,Q_in(no_heat),Q_out(no_heat),Q_diff(no_heat) &  
            ,depth(no_heat),width(no_heat),u(no_heat)
-
+        write(85,*),Q_in(no_heat),Q_out(no_heat),Q_diff(no_heat),depth(no_heat),width(no_heat),u(no_heat)
         !
         if(u(no_heat).lt.0.01) u(no_heat)=0.01
         if(ncell.ne.no_heat) write(*,*) 'Flow file error',ncell,no_heat 
@@ -35,6 +35,7 @@ do nr=1,nreach
             ,dbt(no_heat),ea(no_heat) &
             ,Q_ns(no_heat),Q_na(no_heat),rho &
             ,press(no_heat),wind(no_heat)
+        write(86,*),dbt(no_heat),ea(no_heat),Q_ns(no_heat),Q_na(no_heat),rho,press(no_heat),wind(no_heat)
         !          
         !  if(ncell.ne.no_heat) write(*,*) 'Heat file error',ncell,no_heat 
         !
@@ -94,7 +95,7 @@ do nr=1,nreach
     depth(no_heat)=depth(no_heat-1)
     width(no_heat)=width(no_heat-1)
     dt(no_heat)=0.5*dx(ncell)/u(no_heat)
- ! if(nnd.gt.50) stop !13505
+  if(nnd.gt.10) stop !13505
 end do
 
 END SUBROUTINE Read_Forcing

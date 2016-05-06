@@ -223,6 +223,8 @@ do nyear=start_year,end_year
         !     Determine smoothing parameters (UW_JRY_2011/06/21)
         !
         rminsmooth=1.0-smooth_param(nr)
+        print *,'nr',nr,'T_smth',T_smth(nr)
+
         T_smth(nr)=rminsmooth*T_smth(nr)+smooth_param(nr)*dbt(nc_head)
         !     
         !     Variable Mohseni parameters (UW_JRY_2011/06/16)
@@ -239,6 +241,7 @@ do nyear=start_year,end_year
         !
         !     Establish particle tracks
         !
+        print *,'T_head',T_head(nr),'dbt',dbt(nc_head),'T_smth',T_smth(nr)
           call Particle_Track(nr,x_head,x_bndry)
         !
         !
@@ -275,12 +278,13 @@ do nyear=start_year,end_year
             T_0 = temp_out(res_num(nr,segment_cell(nr,nseg)))  !  
             res_upstreamx = .true.
             resx2 = res_num(nr,segment_cell(nr,nseg))
-
+            print *,'T_01',T_0
           else if (reservoir.and.any(res_pres(nr,segment_cell(nr,ns):segment_cell(nr,nseg)))  ) then
           ! these two lines gets reservoir number in reach
             resx(segment_cell(nr,nseg): segment_cell(nr,ns)) = res_num(nr,segment_cell(nr,nseg):segment_cell(nr,ns))
             resx2 = maxval(resx(segment_cell(nr,nseg):segment_cell(nr,ns)),1)
             T_0 = temp_out(resx2)  ! temperature of reservoir parcel crossed
+            print *,'T_02',T_0
             res_upstreamx = .true.
           else 
             res_upstreamx = .false.
@@ -368,7 +372,7 @@ do nyear=start_year,end_year
               T_dist=T_head(nr)
               T_0=(Q1*T_0+Q_diff(nncell)*T_dist)/Q2
               Q1=Q2
-
+              print *, 'T_0',T_0
               ! adding flow to tributatry flow for reservoir modeling
               T_trib_tot(nncell) = (T_trib_tot(nncell)*Q_trib_tot(nncell) + Q_diff(nncell)*T_dist) &
                     /( Q_trib(nr_trib) + Q_diff(nncell))
@@ -416,7 +420,6 @@ do nyear=start_year,end_year
 
         T_res_in_x = T_0  ! saved temperature from previous segment,when it
         ! gets to the start node of a reservoir            
-
         ! if(any(segment_cell(nr,ns) == res_start_node(:))) print *,'segment_cell_reservoir', segment_cell(nr,ns)
         do i = 1, nres
           if(reservoir .and. res_start_node(i) .eq. segment_cell(nr,ns) .and. .not. res_start(i) ) then
@@ -434,16 +437,22 @@ do nyear=start_year,end_year
                 
             ! ----- add tributary flow to reach inflow to reservoir ---
             do j = res_start_node(nresx), res_end_node(nresx)
+              print *, 'T_trib_in_x1',T_trib_in_x,'Q_trib_tot_x',Q_trib_tot_x&
+                      , ' T_trib_tot',T_trib_tot(j),'Q_trib_tot',Q_trib_tot(j)&
+                      , 'Q_trib_tot_x',Q_trib_tot_x,'Q_trib_tot(j)',Q_trib_tot(j)
               T_trib_in_x =  (T_trib_in_x*Q_trib_tot_x + T_trib_tot(j)* Q_trib_tot(j)) &
                   /(Q_trib_tot_x + Q_trib_tot(j)) 
               Q_trib_tot_x = Q_trib_tot_x + Q_trib_tot(j)
-
+            print *, 'T_trib_in_x',T_trib_in_x
             end do
             !    print *, 'Q-in', Q_res_in(nresx), 'Q-trib', Q_trib_tot_x
             ! --- combine trib flow/temp and reach flow/temp ---
             !   print *,'nresx',nresx, 'T_res_in', T_res_in(nresx)
+            print *, 'T_res_in_test1',T_res_in(nresx)
             T_res_in(nresx) = (T_res_in(nresx)*Q_res_in(nresx) + T_trib_in_x*Q_trib_tot_x) &
                     / (Q_res_in(nresx) +  Q_trib_tot_x)
+            print *, 'T_res_in_test2',T_res_in(nresx),'Q_res_in',Q_res_in(nresx),'T_trib_in_x'&
+                     ,T_trib_in_x,'Q_trib_tot_x',Q_trib_tot_x,'Q_res_in',Q_res_in(nresx),'Q_trib_tot_x',Q_trib_tot_x
             Q_res_in(nresx) = Q_res_in(nresx) + Q_trib_tot_x
             call stream_density(nresx)
 
@@ -452,11 +461,11 @@ do nyear=start_year,end_year
                 , nresx, dt_comp)
 
             call energy(T_epil(nresx), q_surf, res_end_node(nresx))
-
+            print *,'T_epil',T_epil(nresx),'q_surf',q_surf, 'res_end_node',res_end_node(nresx), 'T_res_in',T_res_in(nresx)
             call reservoir_subroutine (nresx, nd,q_surf, time)
-
+            print *, 'T_res_in_new',T_res_in(nresx)
             T_0 = T_res(nresx) !T_res is weighted average temperature
-
+            print *,'T_res',T_0
             res_run(i) = .true.  !set reservoir run to "true"
    ! print *,'first segment_cell_reservoir', segment_cell(nr,ns) , 'T_0', T_0            
              ! if segment on reservoir cell but reservoir already been simulated 

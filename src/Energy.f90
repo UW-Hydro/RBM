@@ -33,7 +33,7 @@ SUBROUTINE Energy(T_surf,q_surf,ncell, ns, nyear, nd2)
    q_surf=0.5*(q_fit(1)+q_fit(2))
    B=(q_surf/A)-(T_fit(1)+T_fit(2))/2.
 
-
+  write(34,*), T_surf,q_surf
   ! if(ncell .eq. 82 .and. ns .eq. 34  )  write(83,*) nyear,nd2,q_surf,q_fit(1),q_fit(2),T_fit(1),T_fit(2)
 !
 !     ******************************************************
