@@ -281,6 +281,7 @@ do nyear=start_year,end_year
               nd2 = nd  ! cut out later, just to print day in energy module
               call energy(T_0,q_surf,nncell, ns, nyear, nd2)
               q_dot=(q_surf/(z*rfac))
+              q_surf = 0
               T_0=T_0+q_dot*dt_calc !adds heat added only during time parcel passed this segment
 
               if(T_0.lt.0.0) T_0=0.0
@@ -402,7 +403,7 @@ do nyear=start_year,end_year
 
     end do   ! end day loop
 
-    write(32,*),time, T_epil(1:nres), T_hypo(1:nres) ! , flow_in_epi_x, flow_out_epi_x,
+    write(32,*),time, T_epil(1), T_hypo(1) ! , flow_in_epi_x, flow_out_epi_x,
 
     !
     !     End of main loop (ND=1,365/366)

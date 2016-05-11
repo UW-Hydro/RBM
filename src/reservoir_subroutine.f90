@@ -38,6 +38,8 @@ SUBROUTINE reservoir_subroutine(nresx, nd, q_surf,time)
   ! ------------------- calculate change in temperature  ---------------------
       ! ---------------- epilimnion -----------
          ! ------------ calculate total energy ----------
+
+          q_surf = 0
           energy_x  = (q_surf * dt_comp ) / (depth_e(nresx) * density * heat_c_kcal ) ! kcal/sec*m2 to C/day
           temp_change_ep(nresx) = advec_in_epix + dif_epi_x + energy_x
 
