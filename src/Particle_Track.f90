@@ -22,26 +22,6 @@ DO ns=no_celm(nr),1,-1  ! loops from outlet upstream to headwater in each reach
     dt_part(ns)=dt(ncell)        ! time to travel between segments
     dt_total=dt_part(ns)         ! total elapsed travel time between segment
     x_part(ns)=x_dist(nr,ns)     ! river mile distance of that segment
- 
-
-    ! 
-    !      Calculate time to next upstream reservoir 
-    !
-
-    if(reservoir) then  !'reservoir' is just TRUE/FALSE statement in 5th line of Network file
-          
-       ! dt_part_res = dt_res(ncell)  ! time for water in cell to get to next upstream dam
-
-        if(res_upstream(nr,ncell))THEN ! if cell downstream of reservoir
-
-      !  if  ELSE('if dam not upstream')
-
-         END IF
-
-    ELSE   ! if reservoir presence is "FALSE"
-
-    END IF
-
 
     100 CONTINUE
 
@@ -78,15 +58,6 @@ DO ns=no_celm(nr),1,-1  ! loops from outlet upstream to headwater in each reach
 
         GO TO 100   ! loops back to top, until the if statement isn't satisfied!
 
-  !  ELSE IF(                ) Then    ! if the travel time puts water in reservoir
-
-
-
-
-
-
-   !     GO TO 100
-
     ElSE    ! if time to travel between segments is greater than computational interval
         !
         !     For the last segment of particle travel, adjust the particle location
@@ -112,5 +83,6 @@ DO ns=no_celm(nr),1,-1  ! loops from outlet upstream to headwater in each reach
     no_dt(ns)=nx_s    ! number of segments water traveled through
 
 END DO
+
 
 END SUBROUTINE Particle_Track
