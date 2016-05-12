@@ -20,7 +20,7 @@
       IMPLICIT NONE
 !
       INTEGER :: YEAR
-
+!
       LEAP_YEAR = .FALSE.
       IF (MOD(YEAR,4) .EQ. 0)   LEAP_YEAR = .TRUE.
       IF (MOD(YEAR,100) .EQ. 0) LEAP_YEAR = .FALSE.
