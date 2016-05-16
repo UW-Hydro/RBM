@@ -90,7 +90,10 @@ ds_flow = xray.open_dataset(cfg['INPUT']['flow_output_nc'])
 if cfg['INPUT']['flow_data_type']=='RVIC': # if RVIC output, remove the last junk time step
     da_flow = ds_flow['streamflow'][:-1,:,:]
 elif cfg['INPUT']['flow_data_type']=='reservoir': # if simple reservoir model output, 
-                                                  # directly extract stramflow
+                                                  # directly extract streamflow
+    da_flow = ds_flow['streamflow']
+elif cfg['INPUT']['flow_data_type']=='RVIC_nojunk': # if RVIC output, no junk time step 
+                                                  # directly extract streamflow
     da_flow = ds_flow['streamflow']
 
 #=== Select time range ===#
@@ -98,6 +101,8 @@ da_flow = da_flow.sel(time=slice(start_date_str, end_date_str))
 
 #=== Convert units ===#
 if cfg['INPUT']['flow_data_type']=='RVIC': # if RVIC output, convert m3/s to cfs
+    da_flow = da_flow * pow(1000.0/25.4/12, 3)
+if cfg['INPUT']['flow_data_type']=='RVIC_nojunk': # if RVIC output, convert m3/s to cfs
     da_flow = da_flow * pow(1000.0/25.4/12, 3)
 
 #=== Set zero flow to 5.0 cfs ====#
