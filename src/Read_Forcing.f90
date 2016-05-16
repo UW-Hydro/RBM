@@ -47,6 +47,7 @@ do nr=1,nreach
         Q_avg=0.5*(Q_in(no_heat)+Q_out(no_heat))
         Q_diff(no_heat)=Q_diff(no_heat)/delta_n
         dt(no_heat)=dx(no_heat)/u(no_heat)  ! time(sec) to travel between segments,  u=velocity(ft/sec)
+
   !   print *, no_heat,dt(no_heat)/86400
         !
         !  Added check to see if travel time of parcel exceeds the
@@ -95,7 +96,9 @@ do nr=1,nreach
     depth(no_heat)=depth(no_heat-1)
     width(no_heat)=width(no_heat-1)
     dt(no_heat)=0.5*dx(ncell)/u(no_heat)
-  if(nnd.gt.10) stop !13505
+
+
+!if(nnd.gt.10) stop !13505
 end do
 
 END SUBROUTINE Read_Forcing
