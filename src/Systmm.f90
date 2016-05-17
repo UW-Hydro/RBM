@@ -14,6 +14,7 @@ real   :: x,x_bndry,xd,xdd,xd_year,x_head,xwpd,year
 real,dimension(:),allocatable:: T_smth  ! ,T_trib, T_head
 real,dimension(:,:,:),allocatable:: temp
 integer,dimension(:,:,:),allocatable:: res_run
+logical :: Leap_Year
 !
 !
 logical:: DONE
@@ -54,7 +55,7 @@ real :: tntrp
 ! to reservoir has been calculated
 logical, dimension(heat_cells) :: res_inflow
 res_inflow = .false.  
-
+!logical :: Leap_Year
 !
 !     stream reservoir 
 !
@@ -125,7 +126,7 @@ allocate (Q_res_in(nres))
 ! allocate(temp_out(4))
 temp_out = 10
 allocate (trib_res(heat_cells))
-[CONSIDER ADDING A SUBROUTINE THAT INTIALIZES VARIABLES LIKE:T_epil, T_hyp, K_z, etc - JRY]
+![CONSIDER ADDING A SUBROUTINE THAT INTIALIZES VARIABLES LIKE:T_epil, T_hyp, K_z, etc - JRY]
 !
 ! Initialize some arrays
 !
@@ -220,6 +221,8 @@ do nyear=start_year,end_year
         !     Determine smoothing parameters (UW_JRY_2011/06/21)
         !
         rminsmooth=1.0-smooth_param(nr)
+        print *,'nr',nr,'T_smth',T_smth(nr)
+
         T_smth(nr)=rminsmooth*T_smth(nr)+smooth_param(nr)*dbt(nc_head)
         !     
         !     Variable Mohseni parameters (UW_JRY_2011/06/16)
