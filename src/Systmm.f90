@@ -14,7 +14,7 @@ real   :: x,x_bndry,xd,xdd,xd_year,x_head,xwpd,year
 real,dimension(:),allocatable:: T_smth  ! ,T_trib, T_head
 real,dimension(:,:,:),allocatable:: temp
 integer,dimension(:,:,:),allocatable:: res_run
-logical :: Leap_Year
+!logical :: LEAP_YEAR
 !
 !
 logical:: DONE
@@ -34,6 +34,21 @@ real, parameter:: pi=3.14159,rfac=304.8
 !
 !
 contains
+
+      LOGICAL FUNCTION LEAP_YEAR (YEAR)
+!
+      IMPLICIT NONE
+!
+      INTEGER :: YEAR
+!
+      LEAP_YEAR = .FALSE.
+      IF (MOD(YEAR,4) .EQ. 0)   LEAP_YEAR = .TRUE.
+      IF (MOD(YEAR,100) .EQ. 0) LEAP_YEAR = .FALSE.
+      IF (MOD(YEAR,400) .EQ. 0) LEAP_YEAR = .TRUE.
+      RETURN
+      END FUNCTION LEAP_YEAR
+
+
 !
 SUBROUTINE SYSTMM(temp_file)
 !
@@ -55,7 +70,7 @@ real :: tntrp
 ! to reservoir has been calculated
 logical, dimension(heat_cells) :: res_inflow
 res_inflow = .false.  
-!logical :: Leap_Year
+!logical :: LEAP_YEAR
 !
 !     stream reservoir 
 !
@@ -184,7 +199,7 @@ do nyear=start_year,end_year
   write(*,*) ' Simulation Year - ',nyear,start_year,end_year
   nd_year=365
   !if (mod(nyear,4).eq.0) nd_year=366
-  if (Leap_Year) nd_year = 366
+  if (LEAP_YEAR(nyear)) nd_year = 366
   !
   !     Day loop starts
   !
