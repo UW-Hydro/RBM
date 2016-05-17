@@ -48,14 +48,15 @@ Implicit None
 character (len=200):: temp_file
 !
 integer :: njb, resx2, i, j
-!real,dimension(4):: ta,xa
-real :: tntrp
 !
+real :: tntrp
+!real,dimension(4):: ta,xa
 ! array for each reservoir for if inflow from that parcel
 ! to reservoir has been calculated
 logical, dimension(heat_cells) :: res_inflow
+logical :: LEAP_YEAR
+
 res_inflow = .false.  
-!FUNCTION Leap_Year(nyear)
 !
 !     stream reservoir 
 !
@@ -184,16 +185,7 @@ do nyear=start_year,end_year
   write(*,*) ' Simulation Year - ',nyear,start_year,end_year
   nd_year=365
   !if (mod(nyear,4).eq.0) nd_year=366
-      FUNCTION Leap_Year(nyear)
-        leap_year = .FALSE.
-      IF (MOD(nyear,4) .EQ. 0)   leap_year = .TRUE.
-      IF (MOD(nyear,100) .EQ. 0) leap_year = .FALSE.
-      IF (MOD(nyear,400) .EQ. 0) leap_year = .TRUE.
-      RETURN
-      END FUNCTION Leap_Year
-
-
-  if(Leap_Year) nd_year = 366
+  if (LEAP_YEAR(nyear)) nd_year = 366
   !
   !     Day loop starts
   !
@@ -230,7 +222,7 @@ do nyear=start_year,end_year
         !     Determine smoothing parameters (UW_JRY_2011/06/21)
         !
         rminsmooth=1.0-smooth_param(nr)
-        print *,'nr',nr,'T_smth',T_smth(nr)
+        !print *,'nr',nr,'T_smth',T_smth(nr)
 
         T_smth(nr)=rminsmooth*T_smth(nr)+smooth_param(nr)*dbt(nc_head)
         !     
