@@ -14,7 +14,6 @@ real   :: x,x_bndry,xd,xdd,xd_year,x_head,xwpd,year
 real,dimension(:),allocatable:: T_smth  ! ,T_trib, T_head
 real,dimension(:,:,:),allocatable:: temp
 integer,dimension(:,:,:),allocatable:: res_run
-[REMOVE ALL BLANK LINES - JRY]
 !
 !
 logical:: DONE
@@ -183,8 +182,8 @@ hpd=1./xwpd
 do nyear=start_year,end_year
   write(*,*) ' Simulation Year - ',nyear,start_year,end_year
   nd_year=365
-  [NEED A MORE GENERAL LEAP YEAR ROUTINE. I HAVE ONE IF NEEDED - JRY]
-  if (mod(nyear,4).eq.0) nd_year=366
+  !if (mod(nyear,4).eq.0) nd_year=366
+  if (Leap_Year) nd_year = 366
   !
   !     Day loop starts
   !
@@ -238,7 +237,6 @@ do nyear=start_year,end_year
         !     Establish particle tracks
         !
         call Particle_Track(nr,x_head,x_bndry)
-        [I'M STILL NOT CERTAIN HOW THIS PROGRAM WORKS, BUT YOU SHOULD BE DOING PARTICLE TRACKING IN THE RIVER SEGMENTS, ONLY - JRY]
         !
         !
         DONE=.FALSE.
@@ -256,7 +254,6 @@ do nyear=start_year,end_year
 
             ncell=segment_cell(nr,ns) !cell of parcel for this time step
             nseg=nstrt_elm(ns) !segment water was at previous time step
-            [WE'LL NEED TO REVISE THE HANDLING OF INTERPOLATION AT THE BOUNDARIES - JRY]
             npndx=2
 
             !
@@ -361,7 +358,6 @@ do nyear=start_year,end_year
                   , nresx, dt_comp)
 
                 call energy(T_epil(nresx), q_surf, res_end_node(nresx))
-[ENERGY SHOULD BE CALLED IN THE MODULE THAT DOES RIVER SEGMENTS AND IN THE MODULE THAT DOES RESERVOIRS - JRY]
                 call reservoir_subroutine (nresx, nd,q_surf, time)
 
                 T_0 = T_res(nresx) !T_res is weighted average temperature
@@ -401,9 +397,7 @@ do nyear=start_year,end_year
       4650 format(16x,12(6x,f6.0,6x))
       4700 format(f10.4,f6.0,15(f6.1,f8.3))
       4750 format(f10.4,10(i4,f8.0))
-[THESE FORMAT STATEMENTS ARE PROBABLY VESTIGES OF AN EARLIER VERSION AND UNNECESSARY - JRY]      
       temp_out(:) = T_res(:) !set reservoir temperature for next time step
-[I'M  NOT SURE YOUR CAN DO THIS WITHOUT STORING ALL VALUES FOR BOTH TIME = N and TIME = N+1 - JRY] 
     end do   ! end day loop
 
     write(32,*),time, T_epil(1:nres), T_hypo(1:nres) ! , flow_in_epi_x, flow_out_epi_x,
