@@ -14,7 +14,6 @@ real   :: x,x_bndry,xd,xdd,xd_year,x_head,xwpd,year
 real,dimension(:),allocatable:: T_smth  ! ,T_trib, T_head
 real,dimension(:,:,:),allocatable:: temp
 integer,dimension(:,:,:),allocatable:: res_run
-
 !
 !
 logical:: DONE
@@ -126,6 +125,7 @@ allocate (Q_res_in(nres))
 ! allocate(temp_out(4))
 temp_out = 10
 allocate (trib_res(heat_cells))
+[CONSIDER ADDING A SUBROUTINE THAT INTIALIZES VARIABLES LIKE:T_epil, T_hyp, K_z, etc - JRY]
 !
 ! Initialize some arrays
 !
@@ -182,7 +182,8 @@ hpd=1./xwpd
 do nyear=start_year,end_year
   write(*,*) ' Simulation Year - ',nyear,start_year,end_year
   nd_year=365
-  if (mod(nyear,4).eq.0) nd_year=366
+  !if (mod(nyear,4).eq.0) nd_year=366
+  if (Leap_Year) nd_year = 366
   !
   !     Day loop starts
   !
@@ -367,14 +368,15 @@ do nyear=start_year,end_year
 
              !   print *, 'T_trib_in_x',  T_trib_in_x, 'Q_trib_tot_x', Q_trib_tot_x
               !  print *,'nresx',nresx,  'Q_res_in',Q_res_in(nresx),'T_res_in', T_res_in(nresx)  
-                call stream_density(nresx)
+                call stream_density(T_res_in(nresx), density_in(nresx))
+                call stream_density(T_epil(nresx), density_epil(nresx))
+                call stream_density(T_hypo(nresx), density_hypo(nresx))
 
                 call flow_subroutine(flow_in_epi_x, flow_in_hyp_x, flow_epi_hyp_x &
                   , flow_out_epi_x, flow_out_hyp_x, ratio_sp, ratio_pen &
                   , nresx, dt_comp)
 
                 call energy(T_epil(nresx), q_surf, res_end_node(nresx))
-
                 call reservoir_subroutine (nresx, nd,q_surf, time)
 
                 T_0 = T_res(nresx) !T_res is weighted average temperature
@@ -414,7 +416,7 @@ do nyear=start_year,end_year
     end do   ! end day loop
 
     temp_out(:) = T_res(:) !set reservoir temperature for next time step
-    write(32,*),time, T_epil(1), T_hypo(1) ! , flow_in_epi_x, flow_out_epi_x,
+    write(32,*),time, T_epil(1:nres), T_hypo(1:nres) ! , flow_in_epi_x, flow_out_epi_x,
     !
     !     End of main loop (ND=1,365/366)
     !
@@ -423,7 +425,8 @@ do nyear=start_year,end_year
   !     End of year loop
   !
 end do  ! end of large loop
-!
+!            dt_calc=dt(nncell) ! showed up after John's merge (5/17/16)
+!            dt_total=dt_total+dt_calc ! showed up after John's merge (5/17/16)
 !
 !     ******************************************************
 !                        return to rmain
