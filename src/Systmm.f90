@@ -183,7 +183,8 @@ do nyear=start_year,end_year
   write(*,*) ' Simulation Year - ',nyear,start_year,end_year
   nd_year=365
   !if (mod(nyear,4).eq.0) nd_year=366
-  if (Leap_Year) nd_year = 366
+  Leap_Year(nyear)
+  if () nd_year = 366
   !
   !     Day loop starts
   !

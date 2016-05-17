@@ -9,7 +9,7 @@ objects = rbm10_VIC.o Begin.o Systmm.o Particle_Track.o \
           Energy.o Julian.o tntrp.o Read_Forcing.o trib_res_subroutine.o \
           Block_Energy.o Block_Hydro.o Block_Network.o Block_Reservoir.o Block_WQ.o\
 	  Write.o Block_Flow.o trib_subroutine.o upstream_subroutine.o \
-	  reservoir_subroutine.o flow_subroutine.o density_subroutine.o	  
+	  reservoir_subroutine.o flow_subroutine.o density_subroutine.o Leap_Year.o	  
 f90comp = gfortran
 # Makefile
 rbm10_VIC: $(objects)
@@ -55,6 +55,9 @@ Energy.o: block_energy.mod Energy.f90
 	$(f90comp) -c Energy.f90
 Particle_Track.o: block_hydro.mod block_network.mod Particle_Track.f90
 	$(f90comp) -c Particle_Track.f90
+Leap_Year.o:  Leap_Year.f90
+	$(f90comp) -c Leap_Year.f90
+
 trib_subroutine.o: block_hydro.mod block_network.mod block_flow.mod block_reservoir.mod trib_subroutine.f90
 	$(f90comp) -c trib_subroutine.f90
 upstream_subroutine.o: block_hydro.mod block_network.mod block_flow.mod block_reservoir.mod upstream_subroutine.f90
