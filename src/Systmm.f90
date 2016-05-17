@@ -232,13 +232,6 @@ do nyear=start_year,end_year
         temp(nr,no_celm(nr)+1,n1)=temp(nr,no_celm(nr),n1)
         x_head=x_dist(nr,0) ! calculated distance to headw based on first x_dist value (the cell furthest upstream)
         x_bndry=x_head-50.0 
-        !
-        !     Establish particle tracks
-        !
-        call Particle_Track(nr,x_head,x_bndry)
-        !
-        !
-        DONE=.FALSE.
 
         do ns=1,no_celm(nr) ! cycle through all segments in a reach
 
@@ -247,6 +240,13 @@ do nyear=start_year,end_year
         !                      start RIVER loop  
         !
         ! -----------------------------------------------------------------------
+
+
+          !     Establish particle tracks
+
+          call Particle_Track(nr,x_head,x_bndry)
+
+          DONE=.FALSE.
 
           ! if segment in river research, or the start of reservoir
           if(res_pres(nr,segment_cell(nr,ns)) .eqv. .false. ) then !.or. any(segment_cell(nr,ns) == res_start_node(:)) 
@@ -411,16 +411,10 @@ do nyear=start_year,end_year
       !
       !     End of weather period loop (NDD=1,NWPD)
       !
-      4650 format(16x,12(6x,f6.0,6x))
-      4700 format(f10.4,f6.0,15(f6.1,f8.3))
-      4750 format(f10.4,10(i4,f8.0))
-      
-      temp_out(:) = T_res(:) !set reservoir temperature for next time step
-
     end do   ! end day loop
 
+    temp_out(:) = T_res(:) !set reservoir temperature for next time step
     write(32,*),time, T_epil(1), T_hypo(1) ! , flow_in_epi_x, flow_out_epi_x,
-
     !
     !     End of main loop (ND=1,365/366)
     !
