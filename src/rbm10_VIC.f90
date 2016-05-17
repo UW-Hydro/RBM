@@ -48,6 +48,7 @@ character (len=200 ):: outPrefix
 character (len=200 ):: flow_file
 character (len=200 ):: heat_file
 character (len=200 ):: net_file
+character (len=200 ):: reservoir_file
 character (len=200 ):: temp_file
 character (len=200 ):: spatial_file
 character (len=8)   :: start_data,end_data     
@@ -74,7 +75,7 @@ call getarg ( 2, outPrefix )
 !
 ! Identify input/output files
 !
-net_file      = TRIM(inPrefix)//'_Network'
+net_file      = TRIM(inPrefix)//'_Network_2'
 spatial_file  = TRIM(outPrefix)//'.Spat'
 temp_file     = TRIM(outPrefix)//'.Temp'
 !
@@ -100,6 +101,14 @@ temp_file     = TRIM(outPrefix)//'.Temp'
         !     
         open(unit=36,FILE=TRIM(heat_file), ACCESS='SEQUENTIAL', FORM='FORMATTED', STATUS='old')
         !
+        !
+        !
+        read(90,'(A)') reservoir_file
+        !
+        !
+        open(unit=37,FILE=TRIM(reservoir_file), ACCESS='SEQUENTIAL',FORM='FORMATTED', STATUS='old')
+        !
+        !
         !     Call systems programs to get started
         !
         !     SUBROUTINE BEGIN reads control file, sets up topology and
@@ -110,6 +119,8 @@ temp_file     = TRIM(outPrefix)//'.Temp'
         !     SUBROUTINE BEGIN reads in river system information from the NETWORK file
         !
 CALL BEGIN(spatial_file)
+        write(*, *) 'test print'
+
 !
 !     SUBROUTINE SYSTMM performs the simulations
 !
@@ -121,6 +132,7 @@ write(*,*) ' Closing files after simulation'
 
 CLOSE(35)
 CLOSE(36)
+CLOSE(37)
 CLOSE(90)
 STOP
 END PROGRAM RBM10_VIC

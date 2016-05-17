@@ -19,5 +19,7 @@ module Block_Hydro
     real, dimension(:,:), allocatable  :: temp_nps,thermal
     real, dimension(:,:), allocatable  :: x_dist
     real, dimension(:,:,:), allocatable :: temp
+    real, dimension(:), allocatable :: Q_trib_tot
+    real, dimension(:), allocatable :: T_trib, T_head
 
 end module Block_Hydro
