@@ -49,14 +49,14 @@ Read_Forcing.o: block_energy.mod block_hydro.mod block_network.mod Read_Forcing.
 	$(f90comp) -c Read_Forcing.f90 
 systm.mod: Systmm.o Systmm.f90
 	$(f90comp) -c Systmm.f90
+Leap_Year.o:  Leap_Year.f90
+	$(f90comp) -c Leap_Year.f90
 Systmm.o: block_network.mod block_energy.mod block_hydro.mod block_reservoir.mod block_flow.mod Systmm.f90
 	$(f90comp) -c Systmm.f90
 Energy.o: block_energy.mod Energy.f90
 	$(f90comp) -c Energy.f90
 Particle_Track.o: block_hydro.mod block_network.mod Particle_Track.f90
 	$(f90comp) -c Particle_Track.f90
-Leap_Year.o:  Leap_Year.f90
-	$(f90comp) -c Leap_Year.f90
 
 trib_subroutine.o: block_hydro.mod block_network.mod block_flow.mod block_reservoir.mod trib_subroutine.f90
 	$(f90comp) -c trib_subroutine.f90
@@ -64,7 +64,8 @@ upstream_subroutine.o: block_hydro.mod block_network.mod block_flow.mod block_re
 	$(f90comp) -c upstream_subroutine.f90
 trib_res_subroutine.o: block_hydro.mod block_network.mod block_flow.mod block_reservoir.mod trib_res_subroutine.f90
 	$(f90comp) -c trib_res_subroutine.f90
-
+Leap_Year.o: Leap_Year.f90
+	$(f90comp) -c Leap_Year.f90
 density_subroutine.o: block_reservoir.mod density_subroutine.f90
 	$(f90comp) -c density_subroutine.f90
 flow_subroutine.o: block_reservoir.mod flow_subroutine.f90
