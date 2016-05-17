@@ -34,21 +34,6 @@ real, parameter:: pi=3.14159,rfac=304.8
 !
 !
 contains
-
-      LOGICAL FUNCTION LEAP_YEAR (YEAR)
-!
-      IMPLICIT NONE
-!
-      INTEGER :: YEAR
-!
-      LEAP_YEAR = .FALSE.
-      IF (MOD(YEAR,4) .EQ. 0)   LEAP_YEAR = .TRUE.
-      IF (MOD(YEAR,100) .EQ. 0) LEAP_YEAR = .FALSE.
-      IF (MOD(YEAR,400) .EQ. 0) LEAP_YEAR = .TRUE.
-      RETURN
-      END FUNCTION LEAP_YEAR
-
-
 !
 SUBROUTINE SYSTMM(temp_file)
 !
@@ -63,14 +48,16 @@ Implicit None
 character (len=200):: temp_file
 !
 integer :: njb, resx2, i, j
-!real,dimension(4):: ta,xa
-real :: tntrp
 !
+real :: tntrp
+!real,dimension(4):: ta,xa
 ! array for each reservoir for if inflow from that parcel
 ! to reservoir has been calculated
 logical, dimension(heat_cells) :: res_inflow
+logical :: LEAP_YEAR
+
 res_inflow = .false.  
-!logical :: LEAP_YEAR
+
 !
 !     stream reservoir 
 !
