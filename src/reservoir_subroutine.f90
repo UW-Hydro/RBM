@@ -31,7 +31,7 @@ SUBROUTINE reservoir_subroutine(nresx, nd, q_surf,time)
 !        ,'T_hypo', T_hypo(nresx),'T_epil',T_epil(nresx), 'vol', volume_e_x(nresx)
   ! --------------------- calculate advection terms --------------------------- 
          advec_in_epix  = flow_in_epi_x * (T_res_in(nresx) - T_epil(nresx)) /volume_e_x(nresx)
-         advec_epi_hyp = flow_epi_hyp_x *  (T_epil(nresx) - T_hypo(nresx)) / volume_e_x(nresx)
+         advec_epi_hyp = flow_epi_hyp_x *  (T_epil(nresx) - T_hypo(nresx)) / volume_h_x(nresx)
          advec_in_hypx = flow_in_hyp_x * (T_res_in(nresx) - T_hypo(nresx)) /volume_h_x(nresx)
  ! print*, 'advec_in_epix', advec_in_epix, 'flow_in_epi_x', flow_in_epi_x, 'T_res_in(nresx)', T_res_in(nresx) &
  !        , 'T_hypo(nresx)',T_hypo(nresx)
@@ -83,7 +83,8 @@ SUBROUTINE reservoir_subroutine(nresx, nd, q_surf,time)
 !   write(47,*),time, K_z(nresx), surface_area(nresx),  T_hypo(nresx), T_epil(nresx),  volume_e_x(nresx)
  
   write(48,*),time,advec_in_epix, flow_in_epi_x, T_res_in(nresx),  T_epil(nresx), volume_e_x(nresx) &
-        , advec_in_hypx, flow_in_hyp_x, T_hypo(nresx), volume_h_x(nresx), flow_epi_hyp_x, temp_out(nresx), T_res(nresx)
+        , advec_in_hypx, flow_in_hyp_x, T_hypo(nresx), volume_h_x(nresx), flow_epi_hyp_x, temp_out(nresx)&
+        , T_res(nresx), advec_epi_hyp, dif_hyp_x 
  
 !    write(49, *), time 
  end if

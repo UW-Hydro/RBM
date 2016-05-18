@@ -155,7 +155,8 @@ depth_h = res_depth_feet(:) * depth_h_frac * ft_to_m  ! ft_to_m converst from fe
 surface_area = res_width_feet(:) *  res_length_feet(:) * ft_to_m * ft_to_m  ! ft_to_m converst from feet to m
 volume_e_x = surface_area(:) * depth_e(:) 
 volume_h_x = surface_area(:) * depth_h(:) 
-
+print *, 'depth_epil', depth_e
+print *, 'depth_hypo', depth_h
 ! depth_e_inital = depth_e
 ! volume_e_initial = volume_e_x
 ! depth_h_inital = depth_h
@@ -266,11 +267,7 @@ do nyear=start_year,end_year
             !      subroutine to establish where parcel started
             !
 
-                   if( ns .eq. 2 )    write(92,*) time, segment_cell(nr,ns),ns,  T_0
             call upstream_subroutine(nseg,nr,ns,T_0, npndx, npart, n1, ncell, resx2)        
-
-                   if( ns .eq. 2 )    write(93,*) time, segment_cell(nr,ns),ns,  T_0
-
             nncell=segment_cell(nr,nstrt_elm(ns)) ! cell of previous time step
 
             !    set ncell0 for purposes of tributary input
