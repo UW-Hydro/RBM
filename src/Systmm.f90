@@ -246,16 +246,16 @@ do nyear=start_year,end_year
         !                      start RIVER loop  
         !
         ! -----------------------------------------------------------------------
+ 
+          ! if segment in river research, or the first segment of reservoir
+          if(res_pres(nr,segment_cell(nr,ns)) .eqv. .false. .or. any(segment_cell(nr,ns) == res_start_node(:))) then 
 
+            !     Establish particle tracks
 
-          !     Establish particle tracks
+            call Particle_Track(nr,x_head,x_bndry)
 
-          call Particle_Track(nr,x_head,x_bndry)
+            DONE=.FALSE. ! logical for verifying if all tribs have been read in
 
-          DONE=.FALSE.
-
-          ! if segment in river research, or the start of reservoir
-          if(res_pres(nr,segment_cell(nr,ns)) .eqv. .false. ) then !.or. any(segment_cell(nr,ns) == res_start_node(:)) 
 
             ncell=segment_cell(nr,ns) !cell of parcel for this time step
             nseg=nstrt_elm(ns) !segment water was at previous time step
@@ -303,18 +303,17 @@ do nyear=start_year,end_year
             T_trib(nr)=T_0        ! temp of this reach, to calc trib inflow
 
             ! ---- loop to give downstream reservoir the temperature ---
-            do i = 1, nres
+        !    do i = 1, nres
               
-              if(reservoir .and. ncell + 1 == res_start_node(i))then
+         !     if(reservoir .and. ncell + 1 == res_start_node(i))then
                   !this loop is so T_res_in is for segment upstream of first
                   !  node in the reservoir
-                  if(segment_cell(ns,nr) .eq. segment_cell(ns-1,nr) ) then 
-                    T_res_in(i) = T_0
-                  end if
+         !         if(segment_cell(ns,nr) .eq. segment_cell(ns-1,nr) ) then 
+          !          T_res_in(i) = T_0
+           !       end if
                !    print *,'nres',nres, 'nd',nd,'i',i, 'ncell', ncell, 'T_0',T_0
-              end if
-            end do
-
+         !     end if
+         !   end do
           end if   ! end river if loop
 
         ! -----------------------------------------------------------------------
@@ -324,9 +323,14 @@ do nyear=start_year,end_year
         ! -----------------------------------------------------------------------
 
           ! if start cell is in reservoir, but not first cell
-          if(res_pres(nr,segment_cell(nr,ns))) then
+          if(reservoir .and. res_pres(nr,segment_cell(nr,ns))) then
 
             ncellx = segment_cell(nr,ns) ! cell (node) reservoir
+
+         !   if(res_pres(nr, segment_cell(nr,ns-1)) .eqv. .false.)then
+              !this loop is to get T_res_in if first segment in reservoir
+          !    T_res_in(i) = T_0
+         !  end if
 
             ! ------ read in tributary flow and temperature -------
               !this if loop adds previous trib flow/temp to current trib flow/temp
@@ -342,7 +346,7 @@ do nyear=start_year,end_year
               if(reservoir .and. res_start_node(i) .eq. segment_cell(nr,ns) .and. .not. res_start(i) ) then
                 nresx = i                
                 Q_res_in(nresx) = Q_in(nncell)
-               ! T_res_in(nresx) = T_res_in_x ! this will be advection from this reach to reservoir
+                T_res_in(nresx) = T_0 ! this will be advection from this reach to reservoir
                 Q_trib_tot_x = 0   ! initialize trib flow in this reser. as 0
                 T_trib_in_x = 0   ! initialize trib temp in this reser. as 0
                 res_start(i) = .true.    ! logical so it won't add another T_res_in
