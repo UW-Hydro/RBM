@@ -94,7 +94,7 @@ allocate (surface_area(nres))
 allocate (T_epil(nres))
 T_epil = 15
 allocate (T_hypo(heat_cells))
-T_hypo = 10
+T_hypo = 15
 allocate (stream_T_in(nres))
 stream_T_in = 15
 allocate (density_epil(nres))
@@ -118,9 +118,9 @@ res_run = .false.
 allocate (res_start(nres))
 res_start = .false.
 allocate (T_res(nres))
-T_res = 15
+T_res = 10
 allocate (T_res_in(nres))
-T_res_in = 15
+T_res_in = 10
 allocate (Q_trib_tot(heat_cells))
 allocate (T_trib_tot(heat_cells))
 allocate (Q_res_in(nres))
@@ -135,7 +135,7 @@ dt_part=0.
 x_part=0.
 no_dt=0
 nstrt_elm=0
-temp=15
+temp=10
 ! Initialize headwaters temperatures
 !
 T_head=15
@@ -289,6 +289,7 @@ do nyear=start_year,end_year
               call energy(T_0,q_surf,nncell, ns, nyear, nd2)
               q_dot=(q_surf/(z*rfac))
             !  print *,'nd',nd,'ncell',ncell, 'T_0', T_0
+              q_dot = 0  ! ONLY for the simple test
               T_0=T_0+q_dot*dt_calc !adds heat added only during time parcel passed this segment
 
               if(T_0.lt.0.0) T_0=0.0

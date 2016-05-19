@@ -38,7 +38,11 @@ SUBROUTINE reservoir_subroutine(nresx, nd, q_surf,time)
   ! ------------------- calculate change in temperature  ---------------------
       ! ---------------- epilimnion -----------
          ! ------------ calculate total energy ----------
+          q_surf = 0  ! ONLY for RBM test
+          dif_hyp_x = 0  ! ONLY for RBM test
+          dif_epi_x = 0  ! ONLY for RBM test
           energy_x  = (q_surf * dt_comp ) / (depth_e(nresx) * density * heat_c_kcal ) ! kcal/sec*m2 to C/day
+          ! energy_x = 0.01
           temp_change_ep(nresx) = advec_in_epix + dif_epi_x + energy_x
 
   ! if(nresx==1) print *,nd,'tempchange',temp_change_ep(nresx),'advec', advec_in_epix,'dif',dif_epi_x, 'energy',energy_x ! ,q_surf,  dt_comp, depth_e(nresx), density,  heat_c_kcal
@@ -74,8 +78,8 @@ SUBROUTINE reservoir_subroutine(nresx, nd, q_surf,time)
          (T_hypo(nresx)*(volume_h_x(nresx)/volume_tot) ) ! weighted averge temp
 
 
- if(nresx.eq.4) then
-  if(nd==180) print *, 'T_epil',T_epil(nresx), 'T_hypo', T_hypo(nresx)
+ if(nresx.eq.1) then
+ ! if(nd==180) print *, 'T_epil',T_epil(nresx), 'T_hypo', T_hypo(nresx)
   ! write(46,*),time, advec_in_epix, advec_epi_hyp, advec_in_hypx, dif_epi_x &
   !      , dif_hyp_x, energy_x, temp_change_ep(nresx), temp_change_hyp(nresx) &
   !      , T_epil(nresx), T_hypo(nresx) 
@@ -84,8 +88,7 @@ SUBROUTINE reservoir_subroutine(nresx, nd, q_surf,time)
  
   write(48,*),time,advec_in_epix, flow_in_epi_x, T_res_in(nresx),  T_epil(nresx), volume_e_x(nresx) &
         , advec_in_hypx, flow_in_hyp_x, T_hypo(nresx), volume_h_x(nresx), flow_epi_hyp_x, temp_out(nresx)&
-        , T_res(nresx), advec_epi_hyp, dif_hyp_x 
- 
+        , T_res(nresx), advec_epi_hyp, dif_hyp_x, energy_x 
 !    write(49, *), time 
  end if
 end subroutine reservoir_subroutine
