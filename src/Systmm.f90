@@ -118,14 +118,14 @@ res_run = .false.
 allocate (res_start(nres))
 res_start = .false.
 allocate (T_res(nres))
-T_res = 10
+T_res = 15
 allocate (T_res_in(nres))
-T_res_in = 10
+T_res_in = 15
 allocate (Q_trib_tot(heat_cells))
 allocate (T_trib_tot(heat_cells))
 allocate (Q_res_in(nres))
 ! allocate(temp_out(4))
-temp_out = 10
+temp_out = 15
 allocate (trib_res(heat_cells))
 ![CONSIDER ADDING A SUBROUTINE THAT INTIALIZES VARIABLES LIKE:T_epil, T_hyp, K_z, etc - JRY]
 !
@@ -135,7 +135,7 @@ dt_part=0.
 x_part=0.
 no_dt=0
 nstrt_elm=0
-temp=10
+temp=15
 ! Initialize headwaters temperatures
 !
 T_head=15
@@ -209,6 +209,9 @@ do nyear=start_year,end_year
       Q_trib_tot = 0 ! re-set the tributary flow to 0
       T_trib_tot = 0 ! re-set the tributary flow to 0
       trib_res = .false.
+
+   !   if(ns .gt. 7) print * ,'nd',nd, ' ------------------------------ start of year -------------------- '
+
       !
       ! Read the hydrologic and meteorologic forcings
       !
@@ -251,8 +254,8 @@ do nyear=start_year,end_year
           if(res_pres(nr,segment_cell(nr,ns)) .eqv. .false. .or. any(segment_cell(nr,ns) == res_start_node(:))) then 
 
             !     Establish particle tracks
-
-            call Particle_Track(nr,x_head,x_bndry)
+!     if(ns .gt. 7)  print *,'nd',nd,'ns',ns, '-------------------- start of T_0 --------------','T_0', T_0
+            call Particle_Track(nr,x_head,x_bndry) ! added 'nd' just for testing purposes
 
             DONE=.FALSE. ! logical for verifying if all tribs have been read in
 
@@ -266,9 +269,9 @@ do nyear=start_year,end_year
             !
             !      subroutine to establish where parcel started
             !
-
             call upstream_subroutine(nseg,nr,ns,T_0, npndx, npart, n1, ncell, resx2)        
             nncell=segment_cell(nr,nstrt_elm(ns)) ! cell of previous time step
+  !    if(ns .gt. 7)  print *,'after upstream_subroutine', '  ns',ns,'T_0',T_0
 
             !    set ncell0 for purposes of tributary input
             ncell0=nncell
@@ -282,27 +285,47 @@ do nyear=start_year,end_year
             else
               nm_start = no_dt(ns)
             end if
+!  print *,'before read segment','   nd   ',nd, 'segment', ns, 'nr_trib', nr_trib
 
             do nm=nm_start,1,-1  ! cycle through each segment parcel passed through
               z=depth(nncell)
               nd2 = nd  ! cut out later, just to print day in energy module
               call energy(T_0,q_surf,nncell, ns, nyear, nd2)
+             !   if(ns == 9) print *, ' -------------------- T_0 pre energy--------------', T_0
               q_dot=(q_surf/(z*rfac))
-            !  print *,'nd',nd,'ncell',ncell, 'T_0', T_0
+ ! print *,'T_0 before the energy --------------',  'nd',nd,'ncell',ncell
+ !   print *, 'T_0 at start', T_0
               q_dot = 0  ! ONLY for the simple test
               T_0=T_0+q_dot*dt_calc !adds heat added only during time parcel passed this segment
+ ! print *, 'T_0 post energy', T_0
 
               if(T_0.lt.0.0) T_0=0.0
-              call trib_subroutine(nncell,ncell0, T_0,nr_trib, nr & 
+
+  !     if(ns .gt. 7)  print *,'after energy', 'ns',ns,'T_0',T_0, 'nm',nm
+     !  print *, 'segment', ns, 'nr_trib', nr_trib
+
+! if(ns .gt. 7) then
+!        print *,'nd',nd, 'ns',ns,'nncell',nncell,'nm_start',nm_start,'nm',nm,'heat_cells',heat_cells
+!        print *, 'T_0 pre trib flow', T_0
+! end if
+ 
+          !  if(nncell .ne. heat_cells) then
+             call trib_subroutine(nncell,ncell0, T_0,nr_trib, nr & 
                           ,ns, nseg, n2, DONE, dt_calc, dt_total)
+          !   end if 
+!  if(ns .gt. 7) print *,'ns',ns, 'T_0 post trib flow', T_0
+   !    if(ns .gt. 7)  print *,'trib_subroutine', 'ns',ns,'T_0',T_0, 'nm',nm
 
             end do ! end loop cycling through all segments parcel passed through
 
 
+!    print *, 'nr_trib after trib read', nr_trib
+
             if (T_0.lt.0.5) T_0=0.5 ! set so lowest temp can be is 0.5
+!print *, 'nd', nd, 'ns', ns, 'T_0 before interpolation', T_0
             temp(nr,ns,n2)=T_0    ! temperature will be used next simulation
             T_trib(nr)=T_0        ! temp of this reach, to calc trib inflow
-
+! print *, 'ns', ns, 'Trib flow (that comes from this)', T_trib(nr)
             ! ---- loop to give downstream reservoir the temperature ---
         !    do i = 1, nres
               
@@ -383,7 +406,7 @@ do nyear=start_year,end_year
                   , nresx, dt_comp)
 
                 call energy(T_epil(nresx), q_surf, res_end_node(nresx))
-                call reservoir_subroutine (nresx, nd,q_surf, time)
+                call reservoir_subroutine (nresx, nd,q_surf, time, nd_year)
 
                 T_0 = T_res(nresx) !T_res is weighted average temperature
 

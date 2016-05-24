@@ -1,4 +1,4 @@
-SUBROUTINE reservoir_subroutine(nresx, nd, q_surf,time)
+SUBROUTINE reservoir_subroutine(nresx, nd, q_surf,time, nd_year)
 ! SUBROUTINE reservoir_subroutine(T_epil,T_hypo, volume_e_x,volume_h_x)
    use Block_Reservoir
    use Block_Flow
@@ -8,7 +8,7 @@ SUBROUTINE reservoir_subroutine(nresx, nd, q_surf,time)
 
  real :: dayx, q_surf
  real(8):: time
- integer :: nd,  nresx, nyear
+ integer :: nd,  nresx, nyear, nd_year
 !  real, dimension (:), allocatable :: T_epil,T_hypo,volume_e_x,volume_h_x,stream_T_in
 
 
@@ -24,6 +24,10 @@ SUBROUTINE reservoir_subroutine(nresx, nd, q_surf,time)
                   K_z(nresx) = 0.001  ! set the diffusion coeff. in m^2/day
                   K_z(nresx) = K_z(nresx) / (depth_e(nresx)/2) ! divide by approx thickness of thermocl.
         end if
+
+        ! ################ This is specially for energy test###########!                
+        !    K_z(nresx) = 0
+
   ! -------------------- calculate temperature terms  -------------------------
       dif_epi_x  = K_z(nresx) * surface_area(nresx) *  (T_hypo(nresx) - T_epil(nresx)) / volume_e_x(nresx)
       dif_hyp_x  = K_z(nresx) * surface_area(nresx) *  (T_epil(nresx) - T_hypo(nresx)) / volume_h_x(nresx)
@@ -38,14 +42,18 @@ SUBROUTINE reservoir_subroutine(nresx, nd, q_surf,time)
   ! ------------------- calculate change in temperature  ---------------------
       ! ---------------- epilimnion -----------
          ! ------------ calculate total energy ----------
-          q_surf = 0  ! ONLY for RBM test
-          dif_hyp_x = 0  ! ONLY for RBM test
-          dif_epi_x = 0  ! ONLY for RBM test
-          energy_x  = (q_surf * dt_comp ) / (depth_e(nresx) * density * heat_c_kcal ) ! kcal/sec*m2 to C/day
-          ! energy_x = 0.01
-          temp_change_ep(nresx) = advec_in_epix + dif_epi_x + energy_x
 
-  ! if(nresx==1) print *,nd,'tempchange',temp_change_ep(nresx),'advec', advec_in_epix,'dif',dif_epi_x, 'energy',energy_x ! ,q_surf,  dt_comp, depth_e(nresx), density,  heat_c_kcal
+   ! ################ This is specially for energy test###########!                
+       !   q_surf = 0  ! ONLY for RBM test
+       !   dif_hyp_x = 0  ! ONLY for RBM test
+       !   dif_epi_x = 0  ! ONLY for RBM test
+
+         energy_x  = (q_surf * dt_comp ) / (depth_e(nresx) * density * heat_c_kcal ) ! kcal/sec*m2 to C/day
+
+   ! ################ This is specially for energy test###########!                
+   !      energy_x = (15.0 - 14.89) * sin(2*3.14159/nd_year * nd)
+
+         temp_change_ep(nresx) = advec_in_epix + dif_epi_x + energy_x
 
 ! print *,'energy',energy_x, 'q_surf',q_surf, 'dt_comp',dt_comp, 'depth_e',depth_e(nresx),'density',density, 'kcal',heat_c_kcal
 !          temp_change_ep(nresx) = advec_in_epix + energy_x +  dif_epi_x !  - advec_out_epix - dV_dt_epi(nresx) ! units = C/day
@@ -77,6 +85,8 @@ SUBROUTINE reservoir_subroutine(nresx, nd, q_surf,time)
     T_res(nresx) = (T_epil(nresx) * (volume_e_x(nresx)/volume_tot)) + &
          (T_hypo(nresx)*(volume_h_x(nresx)/volume_tot) ) ! weighted averge temp
 
+  T_res(nresx) = T_epil(nresx)
+!  print *,'nd',nd, 'T_res', T_res(nresx), 'T_h', T_hypo(nresx), 'T_e',T_epil(nresx)
 
  if(nresx.eq.1) then
  ! if(nd==180) print *, 'T_epil',T_epil(nresx), 'T_hypo', T_hypo(nresx)

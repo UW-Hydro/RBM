@@ -15,6 +15,8 @@ logical :: DONE
             !   Loop to add all tributary flow and temperature entering segment
             !
             !
+
+  !   print *, 'trib_subroutine loop', '   no_tribs(nncell)', no_tribs(nncell),'nncell', nncell
             Q1=Q_in(nncell)  !flow entering cell from reach
             ntribs=no_tribs(nncell)
 
@@ -22,13 +24,20 @@ logical :: DONE
             if(ntribs.gt.0.and..not.DONE) then
 
               ! -------------- cycle through each tributary ----------
+!  print *, 'segment in trib subroutine', ns, 'nr_trib', nr_trib,'ntribs',ntribs
               do ntrb=1,ntribs
                 nr_trib=trib(nncell,ntrb) ! gives nr (reach) for each trib
+             !   if(nncell .eq. heat_cells) nr_trib = 0
                 if(Q_trib(nr_trib).gt.0.0) then
+
+!  print *,'cell', nncell,'ns',ns, 'stream temperature', T_0, 'trib_temperature', T_trib
 
                   ! --- add trib flow and temperature to total flow and temp --
                   Q2=Q1+Q_trib(nr_trib)  !Q1 is reach inflow, Q2 is total flow
                   T_0=(Q1*T_0+Q_trib(nr_trib)*T_trib(nr_trib))/Q2 !adjust temp based on trib temp/flow
+
+
+             !   if(ns == 9) print *, 'T_0 after a trib flow', T_0
 
                 end if
                 !
@@ -63,5 +72,6 @@ logical :: DONE
           ! ------ add time to pass between segments to total time ------
           dt_calc=dt(nncell)
           dt_total=dt_total+dt_calc
+!    print *, 'segment in end of trib subroutine', ns, 'nr_trib', nr_trib
 
 end subroutine trib_subroutine

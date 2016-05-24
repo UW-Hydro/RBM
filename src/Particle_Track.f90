@@ -23,6 +23,8 @@ DO ns=no_celm(nr),1,-1  ! loops from outlet upstream to headwater in each reach
     dt_total=dt_part(ns)         ! total elapsed travel time between segment
     x_part(ns)=x_dist(nr,ns)     ! river mile distance of that segment
 
+!  print *,'nd',nd, 'ns',ns, 'dt_part(ns)', dt_part(ns)
+
     100 CONTINUE
 
     !

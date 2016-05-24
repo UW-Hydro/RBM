@@ -30,8 +30,9 @@ integer, dimension(3):: nterp=(/3,4,3/)
             T_0 = temp_out(res_num(nr,segment_cell(nr,nseg)))  !  
             res_upstreamx = .true.
             resx2 = res_num(nr,segment_cell(nr,nseg))
-
-      !if(ns .eq. 3) print *,'ns',ns,'nseg',nseg, 'T_0', T_0
+           
+  ! if(ns .gt. 7) print *,'parcel started in reservoir',  '  nseg',nseg,'T_0',T_0
+   !if(ns .eq. 3) print *,'ns',ns,'nseg',nseg, 'T_0', T_0
           ! -----------  if parcel is in reservoir (didn't finish downstream) -----------
           !              BUT not first cell in reservoir - since upstream flow is read in
           else if (reservoir.and.any(res_pres(nr,segment_cell(nr,ns):segment_cell(nr,nseg))) .and. &
@@ -43,12 +44,15 @@ integer, dimension(3):: nterp=(/3,4,3/)
             T_0 = temp_out(resx2)  ! temperature of reservoir parcel crossed
             res_upstreamx = .true.
 
+  ! if(ns .gt. 7) print *,'if parcel is in reservoir', '  nseg',nseg,'T_0',T_0
+
           ! ----------- if parcel started in river and ended in river  -----------
           !            (i.e. did not start in headw, did not start in reservoir)
           !            OR if start node in the reservoir
           else
             res_upstreamx = .false.
             resx2 = 0
+
 
             !
             !  third order interpolation at the downstream boundary
@@ -67,6 +71,11 @@ integer, dimension(3):: nterp=(/3,4,3/)
             !
             T_0=tntrp(xa,ta,x,nterp(npndx))
 
+   !     print *,'---------------', ' ns', ns
+   !     print *, 'nterp',nterp(npndx),'ta', ta
+   !     print *, 'xa',xa, 'x',x
+
+   !    if(ns .gt. 7) print *,'if parcel started and ended in river', '  nseg',nseg,'T_0',T_0
           ! ------------------------- end of the large if loop ----------------
           end if
 

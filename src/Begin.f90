@@ -187,7 +187,12 @@ do nr=1,nreach !loop through all the reaches from first to last reach
     if (trib_cell.gt.0) then
       no_tribs(trib_cell)=no_tribs(trib_cell)+1
       trib(trib_cell,no_tribs(trib_cell))=nr
+      ! if(no_cells(nr) == heat_cells) no_tribs(trib_cell) = 0
+      print *, 'trib_cell', trib_cell
+      print *,'trib cell present:    ' , 'no_cells(nr)', no_cells(nr), 'no_tribs', no_tribs(trib_cell)
     end if
+
+
     !
     !     Reading Mohseni parameters for each headwaters (UW_JRY_2011/06/18)
     !
