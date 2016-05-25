@@ -423,7 +423,7 @@ do nyear=start_year,end_year
             end do ! end individual reservoir loop-cycles thru all reservoirs
 
           end if ! end reservoir if statement
-
+ if(ncell.eq.1 .and. ns .eq.1) write(21,*),T_0,tntrp_x,q_dot*dt_calc,ntribs, Q_diff(nncell),T_head(nr)
           !   The temperature is output at the beginning of the reach 
           call WRITE(time,nd,nr,ncell,ns,T_0,T_head(nr),dbt(ncell),Q_out(ncell))
 

@@ -71,6 +71,8 @@ integer, dimension(3):: nterp=(/3,4,3/)
             !
             T_0=tntrp(xa,ta,x,nterp(npndx))
 
+            tntrp_x = tntrp(xa,ta,x,nterp(npndx))  ! non-essential - just to print output
+
    !     print *,'---------------', ' ns', ns
    !     print *, 'nterp',nterp(npndx),'ta', ta
    !     print *, 'xa',xa, 'x',x

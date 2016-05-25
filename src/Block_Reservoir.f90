@@ -54,7 +54,7 @@ module Block_Reservoir
         ! real ::  flow_epi_hyp_x
         real  :: epix, hypox, dif_epi_x, dif_hyp_x, energy_x
         real :: advec_in_epix, advec_out_epix, advec_in_hypx, advec_out_hypx
-        real :: advec_epi_hyp
+        real :: advec_epi_hyp,tntrp_x 
 
         ! --------------- path and directories of input and output files -------
         character(len=300 ) :: reservoir_file
