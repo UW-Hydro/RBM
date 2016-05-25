@@ -392,6 +392,7 @@ do nyear=start_year,end_year
                 if(Q_trib_tot_x .gt. 0) then
                         T_res_in(nresx) = (T_res_in(nresx)*Q_res_in(nresx) + T_trib_in_x*Q_trib_tot_x) &
                           / (Q_res_in(nresx) +  Q_trib_tot_x)
+       if(nresx .eq. 4) write(41,*),nd, Q_res_in(nresx), Q_trib_tot_x
                         Q_res_in(nresx) = Q_res_in(nresx) + Q_trib_tot_x
                 end if
 
