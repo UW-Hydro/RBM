@@ -374,6 +374,7 @@ do nyear=start_year,end_year
                 Q_trib_tot_x = 0   ! initialize trib flow in this reser. as 0
                 T_trib_in_x = 0   ! initialize trib temp in this reser. as 0
                 res_start(i) = .true.    ! logical so it won't add another T_res_in
+                if(nresx .eq. 4) write(93, *),  nd,  T_0
               end if
 
               ! ------------ end of reservoir - calculate the reservoir temperature -----------  
@@ -392,9 +393,9 @@ do nyear=start_year,end_year
                 if(Q_trib_tot_x .gt. 0) then
                         T_res_in(nresx) = (T_res_in(nresx)*Q_res_in(nresx) + T_trib_in_x*Q_trib_tot_x) &
                           / (Q_res_in(nresx) +  Q_trib_tot_x)
-       if(nresx .eq. 4) write(41,*),nd, Q_res_in(nresx), Q_trib_tot_x
                         Q_res_in(nresx) = Q_res_in(nresx) + Q_trib_tot_x
                 end if
+                if(nresx .eq. 4) write(94,*),  nd, T_res_in(nresx)
 
              !   print *, 'T_trib_in_x',  T_trib_in_x, 'Q_trib_tot_x', Q_trib_tot_x
               !  print *,'nresx',nresx,  'Q_res_in',Q_res_in(nresx),'T_res_in', T_res_in(nresx)  
