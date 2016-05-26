@@ -319,13 +319,6 @@ do nyear=start_year,end_year
             end do ! end loop cycling through all segments parcel passed through
 
 
-!    print *, 'nr_trib after trib read', nr_trib
-
-            if (T_0.lt.0.5) T_0=0.5 ! set so lowest temp can be is 0.5
-!print *, 'nd', nd, 'ns', ns, 'T_0 before interpolation', T_0
-            temp(nr,ns,n2)=T_0    ! temperature will be used next simulation
-            T_trib(nr)=T_0        ! temp of this reach, to calc trib inflow
-! print *, 'ns', ns, 'Trib flow (that comes from this)', T_trib(nr)
             ! ---- loop to give downstream reservoir the temperature ---
         !    do i = 1, nres
               
@@ -339,7 +332,8 @@ do nyear=start_year,end_year
          !     end if
          !   end do
           end if   ! end river if loop
-
+!  if(ns .gt. 32 .and. ns .lt. 40) i
+!   print *, 'nd', nd,'ns',ns,'cell',ncell, 'T_0', T_0
         ! -----------------------------------------------------------------------
         !
         !                     Reservoir Subroutine 
@@ -375,6 +369,8 @@ do nyear=start_year,end_year
                 T_trib_in_x = 0   ! initialize trib temp in this reser. as 0
                 res_start(i) = .true.    ! logical so it won't add another T_res_in
                 if(nresx .eq. 1) write(93, *),  nd,  T_0
+       if(nyear .eq. 1980 .and. nd .gt. 150 .and. nd .lt. 160)   print *, 'nd' &
+            , nd,'cell',ncellx,'res',nresx, 'T_res_in - initial', T_res_in(nresx)
               end if
 
               ! ------------ end of reservoir - calculate the reservoir temperature -----------  
@@ -383,22 +379,35 @@ do nyear=start_year,end_year
                 
                 ! ----- add tributary flow to reach inflow to reservoir ---
                 do j = res_start_node(nresx), res_end_node(nresx)
-                  T_trib_in_x =  (T_trib_in_x*Q_trib_tot_x + T_trib_tot(j)* Q_trib_tot(j)) &
-                      /(Q_trib_tot_x + Q_trib_tot(j)) 
-                  Q_trib_tot_x = Q_trib_tot_x + Q_trib_tot(j)
+
+                  T_res_in(nresx) =  (T_res_in(nresx) * Q_res_in(nresx) + T_trib_tot(j)*Q_trib_tot(j)) &
+                      /(Q_res_in(nresx) + Q_trib_tot(j))
+                  Q_res_in(nresx) = Q_res_in(nresx) + Q_trib_tot(j)
+
+       if(nyear .eq. 1980 .and. nd .gt. 150 .and. nd .lt. 160)  print *, 'nd' &
+                 , nd,'cell',ncellx,'res',nresx, 'T_res_in - trib add', T_res_in(nresx)
+
+             !     T_trib_in_x =  (T_trib_in_x*Q_trib_tot_x + T_trib_tot(j)* Q_trib_tot(j)) &
+             !         /(Q_trib_tot_x + Q_trib_tot(j)) 
+             !     Q_trib_tot_x = Q_trib_tot_x + Q_trib_tot(j)
 
                 end do
+       if(nyear .eq. 1980 .and. nd .gt. 150 .and. nd .lt. 160)  print *, 'nd' &
+            , nd,'cell',ncellx,'res',nresx, 'T_res_in - final', T_res_in(nresx)
 
                 ! -------- combinei all  trib flow/temp and reach flow/temp----------
-                if(Q_trib_tot_x .gt. 0) then
-                        T_res_in(nresx) = (T_res_in(nresx)*Q_res_in(nresx) + T_trib_in_x*Q_trib_tot_x) &
-                          / (Q_res_in(nresx) +  Q_trib_tot_x)
-                        Q_res_in(nresx) = Q_res_in(nresx) + Q_trib_tot_x
-                end if
-                if(nresx .eq. 1) write(94,*),  nd, T_res_in(nresx)
-
+             !   if(Q_trib_tot_x .gt. 0) then
+             !           T_res_in(nresx) = (T_res_in(nresx)*Q_res_in(nresx) + T_trib_in_x*Q_trib_tot_x) &
+             !             / (Q_res_in(nresx) +  Q_trib_tot_x)
+             !           Q_res_in(nresx) = Q_res_in(nresx) + Q_trib_tot_x
+             !   end if
+           if(nresx .eq. 1) write(94,*),  nd, T_res_in(nresx)
+      !    print *, 'nd', nd,'ns',ns,'cell',ncellx, 'res', nresx,'T_res_in(nresx)',T_res_in(nresx)
              !   print *, 'T_trib_in_x',  T_trib_in_x, 'Q_trib_tot_x', Q_trib_tot_x
               !  print *,'nresx',nresx,  'Q_res_in',Q_res_in(nresx),'T_res_in', T_res_in(nresx)  
+
+        !     print *, 'nd', nd,'ns',ns,'cell',ncellx,'res',nresx, 'T_res_in - before final', T_res_in(nresx)
+
                 call stream_density(T_res_in(nresx), density_in(nresx))
                 call stream_density(T_epil(nresx), density_epil(nresx))
                 call stream_density(T_hypo(nresx), density_hypo(nresx))
@@ -426,9 +435,12 @@ do nyear=start_year,end_year
 
           end if ! end reservoir if statement
  if(ncell.eq.1 .and. ns .eq.1) write(21,*),T_0,tntrp_x,q_dot*dt_calc,ntribs, Q_diff(nncell),T_head(nr)
+           if (T_0.lt.0.5) T_0=0.5 ! set so lowest temp can be is 0.5
+!print *, 'nd', nd, 'ns', ns, 'T_0 before interpolation', T_0
+            temp(nr,ns,n2)=T_0    ! temperature will be used next simulation
+            T_trib(nr)=T_0        ! temp of this reach, to calc trib inflow
           !   The temperature is output at the beginning of the reach 
           call WRITE(time,nd,nr,ncell,ns,T_0,T_head(nr),dbt(ncell),Q_out(ncell))
-
           !
           !     End of computational element loop
           !
@@ -445,7 +457,7 @@ do nyear=start_year,end_year
       !     End of weather period loop (NDD=1,NWPD)
       !
     end do   ! end day loop
-
+ 
     temp_out(:) = T_res(:) !set reservoir temperature for next time step
     write(32,*),time, T_epil(1:nres), T_hypo(1:nres) ! , flow_in_epi_x, flow_out_epi_x,
     !
