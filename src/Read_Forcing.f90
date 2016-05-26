@@ -101,7 +101,7 @@ do nr=1,nreach
 
 ! print *,'nd',nnd,'no_heat',no_heat, 'ncell', ncell, 'dx(ncell)', dx(ncell), 'u(no_heat)', u(no_heat), 'dt',dt(no_heat)
 
-!if(nnd.gt.10) stop !13505
+!if(nnd.gt.30) stop !13505
 end do
 
 END SUBROUTINE Read_Forcing

@@ -49,7 +49,7 @@ character (len=200):: temp_file
 !
 integer :: njb, resx2, i, j
 !
-real :: tntrp
+real :: tntrp, T_res_f
 !real,dimension(4):: ta,xa
 ! array for each reservoir for if inflow from that parcel
 ! to reservoir has been calculated
@@ -318,7 +318,7 @@ do nyear=start_year,end_year
 
             end do ! end loop cycling through all segments parcel passed through
 
-
+   !   if(any(segment_cell(nr,ns) == res_start_node(:))) print *,'nd',nd,'nr',nr,'T_0 - river', T_0
             ! ---- loop to give downstream reservoir the temperature ---
         !    do i = 1, nres
               
@@ -368,9 +368,9 @@ do nyear=start_year,end_year
                 Q_trib_tot_x = 0   ! initialize trib flow in this reser. as 0
                 T_trib_in_x = 0   ! initialize trib temp in this reser. as 0
                 res_start(i) = .true.    ! logical so it won't add another T_res_in
+   !   if(any(segment_cell(nr,ns) == res_start_node(:))) print *,'nd',nd,'nr',nr,'T_0 - res', T_0
                 if(nresx .eq. 1) write(93, *),  nd,  T_0
-       if(nyear .eq. 1980 .and. nd .gt. 150 .and. nd .lt. 160)   print *, 'nd' &
-            , nd,'cell',ncellx,'res',nresx, 'T_res_in - initial', T_res_in(nresx)
+         !     print *, 'nd', nd, 'nresx', nresx, 'T_res_in(nresx) - 93',T_res_in(nresx)
               end if
 
               ! ------------ end of reservoir - calculate the reservoir temperature -----------  
@@ -384,17 +384,11 @@ do nyear=start_year,end_year
                       /(Q_res_in(nresx) + Q_trib_tot(j))
                   Q_res_in(nresx) = Q_res_in(nresx) + Q_trib_tot(j)
 
-       if(nyear .eq. 1980 .and. nd .gt. 150 .and. nd .lt. 160)  print *, 'nd' &
-                 , nd,'cell',ncellx,'res',nresx, 'T_res_in - trib add', T_res_in(nresx)
-
              !     T_trib_in_x =  (T_trib_in_x*Q_trib_tot_x + T_trib_tot(j)* Q_trib_tot(j)) &
              !         /(Q_trib_tot_x + Q_trib_tot(j)) 
              !     Q_trib_tot_x = Q_trib_tot_x + Q_trib_tot(j)
 
                 end do
-       if(nyear .eq. 1980 .and. nd .gt. 150 .and. nd .lt. 160)  print *, 'nd' &
-            , nd,'cell',ncellx,'res',nresx, 'T_res_in - final', T_res_in(nresx)
-
                 ! -------- combinei all  trib flow/temp and reach flow/temp----------
              !   if(Q_trib_tot_x .gt. 0) then
              !           T_res_in(nresx) = (T_res_in(nresx)*Q_res_in(nresx) + T_trib_in_x*Q_trib_tot_x) &
@@ -402,6 +396,9 @@ do nyear=start_year,end_year
              !           Q_res_in(nresx) = Q_res_in(nresx) + Q_trib_tot_x
              !   end if
            if(nresx .eq. 1) write(94,*),  nd, T_res_in(nresx)
+       !       print *, 'nd', nd, 'nresx', nresx, 'T_res_in(nresx) - 94',T_res_in(nresx)
+
+            T_res_f = T_res_in(nresx)
       !    print *, 'nd', nd,'ns',ns,'cell',ncellx, 'res', nresx,'T_res_in(nresx)',T_res_in(nresx)
              !   print *, 'T_trib_in_x',  T_trib_in_x, 'Q_trib_tot_x', Q_trib_tot_x
               !  print *,'nresx',nresx,  'Q_res_in',Q_res_in(nresx),'T_res_in', T_res_in(nresx)  
@@ -417,7 +414,7 @@ do nyear=start_year,end_year
                   , nresx, dt_comp)
 
                 call energy(T_epil(nresx), q_surf, res_end_node(nresx))
-                call reservoir_subroutine (nresx, nd,q_surf, time, nd_year)
+                call reservoir_subroutine (nresx, nd,q_surf, time, nd_year,T_res_f)
 
                 T_0 = T_res(nresx) !T_res is weighted average temperature
 

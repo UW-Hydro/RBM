@@ -1,4 +1,4 @@
-SUBROUTINE reservoir_subroutine(nresx, nd, q_surf,time, nd_year)
+SUBROUTINE reservoir_subroutine(nresx, nd, q_surf,time, nd_year, T_res_f)
 ! SUBROUTINE reservoir_subroutine(T_epil,T_hypo, volume_e_x,volume_h_x)
    use Block_Reservoir
    use Block_Flow
@@ -6,7 +6,7 @@ SUBROUTINE reservoir_subroutine(nresx, nd, q_surf,time, nd_year)
 
  implicit none
 
- real :: dayx, q_surf
+ real :: dayx, q_surf, T_res_f
  real(8):: time
  integer :: nd,  nresx, nyear, nd_year
 !  real, dimension (:), allocatable :: T_epil,T_hypo,volume_e_x,volume_h_x,stream_T_in
@@ -30,15 +30,16 @@ SUBROUTINE reservoir_subroutine(nresx, nd, q_surf,time, nd_year)
 
  if(nresx .eq. 1) write(95,*),  nd, T_res_in(nresx)
 
+ !  print *, 'nd',nd, 'T_res_in(nresx) - 95, reservoir_sub', T_res_in(nresx),'T_res_f', T_res_f
   ! -------------------- calculate temperature terms  -------------------------
       dif_epi_x  = K_z(nresx) * surface_area(nresx) *  (T_hypo(nresx) - T_epil(nresx)) / volume_e_x(nresx)
       dif_hyp_x  = K_z(nresx) * surface_area(nresx) *  (T_epil(nresx) - T_hypo(nresx)) / volume_h_x(nresx)
 ! print *,'nres',nres, 'dif_epi_x', dif_epi_x,'K_z',K_z(nresx),  'surface_area(nresx)',surface_area(nresx)&
 !        ,'T_hypo', T_hypo(nresx),'T_epil',T_epil(nresx), 'vol', volume_e_x(nresx)
   ! --------------------- calculate advection terms --------------------------- 
-         advec_in_epix  = flow_in_epi_x * (T_res_in(nresx) - T_epil(nresx)) /volume_e_x(nresx)
+         advec_in_epix  = flow_in_epi_x * (T_res_f - T_epil(nresx)) /volume_e_x(nresx)
          advec_epi_hyp = flow_epi_hyp_x *  (T_epil(nresx) - T_hypo(nresx)) / volume_h_x(nresx)
-         advec_in_hypx = flow_in_hyp_x * (T_res_in(nresx) - T_hypo(nresx)) /volume_h_x(nresx)
+         advec_in_hypx = flow_in_hyp_x * (T_res_f - T_hypo(nresx)) /volume_h_x(nresx)
  ! print*, 'advec_in_epix', advec_in_epix, 'flow_in_epi_x', flow_in_epi_x, 'T_res_in(nresx)', T_res_in(nresx) &
  !        , 'T_hypo(nresx)',T_hypo(nresx)
   ! ------------------- calculate change in temperature  ---------------------
