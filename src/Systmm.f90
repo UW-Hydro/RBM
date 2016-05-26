@@ -210,8 +210,6 @@ do nyear=start_year,end_year
       T_trib_tot = 0 ! re-set the tributary flow to 0
       trib_res = .false.
 
-   !   if(ns .gt. 7) print * ,'nd',nd, ' ------------------------------ start of year -------------------- '
-
       !
       ! Read the hydrologic and meteorologic forcings
       !
@@ -226,7 +224,6 @@ do nyear=start_year,end_year
         !     Determine smoothing parameters (UW_JRY_2011/06/21)
         !
         rminsmooth=1.0-smooth_param(nr)
-        !print *,'nr',nr,'T_smth',T_smth(nr)
 
         T_smth(nr)=rminsmooth*T_smth(nr)+smooth_param(nr)*dbt(nc_head)
         !     
@@ -254,24 +251,19 @@ do nyear=start_year,end_year
           if(res_pres(nr,segment_cell(nr,ns)) .eqv. .false. .or. any(segment_cell(nr,ns) == res_start_node(:))) then 
 
             !     Establish particle tracks
-!     if(ns .gt. 7)  print *,'nd',nd,'ns',ns, '-------------------- start of T_0 --------------','T_0', T_0
             call Particle_Track(nr,x_head,x_bndry) ! added 'nd' just for testing purposes
 
             DONE=.FALSE. ! logical for verifying if all tribs have been read in
-
 
             ncell=segment_cell(nr,ns) !cell of parcel for this time step
             nseg=nstrt_elm(ns) !segment water was at previous time step
             npndx=2
             
-         !   print *, 'ncell',ncell, 'ns',ns, 'nseg',nseg
-
             !
             !      subroutine to establish where parcel started
             !
             call upstream_subroutine(nseg,nr,ns,T_0, npndx, npart, n1, ncell, resx2)        
             nncell=segment_cell(nr,nstrt_elm(ns)) ! cell of previous time step
-  !    if(ns .gt. 7)  print *,'after upstream_subroutine', '  ns',ns,'T_0',T_0
 
             !    set ncell0 for purposes of tributary input
             ncell0=nncell
@@ -285,70 +277,36 @@ do nyear=start_year,end_year
             else
               nm_start = no_dt(ns)
             end if
-!  print *,'before read segment','   nd   ',nd, 'segment', ns, 'nr_trib', nr_trib
 
             do nm=nm_start,1,-1  ! cycle through each segment parcel passed through
               z=depth(nncell)
               nd2 = nd  ! cut out later, just to print day in energy module
               call energy(T_0,q_surf,nncell, ns, nyear, nd2)
-             !   if(ns == 9) print *, ' -------------------- T_0 pre energy--------------', T_0
               q_dot=(q_surf/(z*rfac))
- ! print *,'T_0 before the energy --------------',  'nd',nd,'ncell',ncell
- !   print *, 'T_0 at start', T_0
-              q_dot = 0  ! ONLY for the simple test
+ 
+        ! ################ This is specially for simple energy test###########!                
+        !     q_dot = 0  ! ONLY for the simple test
+
               T_0=T_0+q_dot*dt_calc !adds heat added only during time parcel passed this segment
- ! print *, 'T_0 post energy', T_0
 
               if(T_0.lt.0.0) T_0=0.0
 
-  !     if(ns .gt. 7)  print *,'after energy', 'ns',ns,'T_0',T_0, 'nm',nm
-     !  print *, 'segment', ns, 'nr_trib', nr_trib
-
-! if(ns .gt. 7) then
-!        print *,'nd',nd, 'ns',ns,'nncell',nncell,'nm_start',nm_start,'nm',nm,'heat_cells',heat_cells
-!        print *, 'T_0 pre trib flow', T_0
-! end if
- 
-          !  if(nncell .ne. heat_cells) then
              call trib_subroutine(nncell,ncell0, T_0,nr_trib, nr & 
                           ,ns, nseg, n2, DONE, dt_calc, dt_total)
-          !   end if 
-!  if(ns .gt. 7) print *,'ns',ns, 'T_0 post trib flow', T_0
-   !    if(ns .gt. 7)  print *,'trib_subroutine', 'ns',ns,'T_0',T_0, 'nm',nm
 
             end do ! end loop cycling through all segments parcel passed through
 
-   !   if(any(segment_cell(nr,ns) == res_start_node(:))) print *,'nd',nd,'nr',nr,'T_0 - river', T_0
-            ! ---- loop to give downstream reservoir the temperature ---
-        !    do i = 1, nres
-              
-         !     if(reservoir .and. ncell + 1 == res_start_node(i))then
-                  !this loop is so T_res_in is for segment upstream of first
-                  !  node in the reservoir
-         !         if(segment_cell(ns,nr) .eq. segment_cell(ns-1,nr) ) then 
-          !          T_res_in(i) = T_0
-           !       end if
-               !    print *,'nres',nres, 'nd',nd,'i',i, 'ncell', ncell, 'T_0',T_0
-         !     end if
-         !   end do
           end if   ! end river if loop
-!  if(ns .gt. 32 .and. ns .lt. 40) i
-!   print *, 'nd', nd,'ns',ns,'cell',ncell, 'T_0', T_0
         ! -----------------------------------------------------------------------
         !
         !                     Reservoir Subroutine 
         !
         ! -----------------------------------------------------------------------
 
-          ! if start cell is in reservoir, but not first cell
+          ! -------------  if cell is in reservoir ----------------
           if(reservoir .and. res_pres(nr,segment_cell(nr,ns))) then
 
             ncellx = segment_cell(nr,ns) ! cell (node) reservoir
-
-         !   if(res_pres(nr, segment_cell(nr,ns-1)) .eqv. .false.)then
-              !this loop is to get T_res_in if first segment in reservoir
-          !    T_res_in(i) = T_0
-         !  end if
 
             ! ------ read in tributary flow and temperature -------
               !this if loop adds previous trib flow/temp to current trib flow/temp
@@ -368,9 +326,6 @@ do nyear=start_year,end_year
                 Q_trib_tot_x = 0   ! initialize trib flow in this reser. as 0
                 T_trib_in_x = 0   ! initialize trib temp in this reser. as 0
                 res_start(i) = .true.    ! logical so it won't add another T_res_in
-   !   if(any(segment_cell(nr,ns) == res_start_node(:))) print *,'nd',nd,'nr',nr,'T_0 - res', T_0
-                if(nresx .eq. 1) write(93, *),  nd,  T_0
-         !     print *, 'nd', nd, 'nresx', nresx, 'T_res_in(nresx) - 93',T_res_in(nresx)
               end if
 
               ! ------------ end of reservoir - calculate the reservoir temperature -----------  
@@ -384,26 +339,9 @@ do nyear=start_year,end_year
                       /(Q_res_in(nresx) + Q_trib_tot(j))
                   Q_res_in(nresx) = Q_res_in(nresx) + Q_trib_tot(j)
 
-             !     T_trib_in_x =  (T_trib_in_x*Q_trib_tot_x + T_trib_tot(j)* Q_trib_tot(j)) &
-             !         /(Q_trib_tot_x + Q_trib_tot(j)) 
-             !     Q_trib_tot_x = Q_trib_tot_x + Q_trib_tot(j)
-
                 end do
-                ! -------- combinei all  trib flow/temp and reach flow/temp----------
-             !   if(Q_trib_tot_x .gt. 0) then
-             !           T_res_in(nresx) = (T_res_in(nresx)*Q_res_in(nresx) + T_trib_in_x*Q_trib_tot_x) &
-             !             / (Q_res_in(nresx) +  Q_trib_tot_x)
-             !           Q_res_in(nresx) = Q_res_in(nresx) + Q_trib_tot_x
-             !   end if
-           if(nresx .eq. 1) write(94,*),  nd, T_res_in(nresx)
-       !       print *, 'nd', nd, 'nresx', nresx, 'T_res_in(nresx) - 94',T_res_in(nresx)
 
-            T_res_f = T_res_in(nresx)
-      !    print *, 'nd', nd,'ns',ns,'cell',ncellx, 'res', nresx,'T_res_in(nresx)',T_res_in(nresx)
-             !   print *, 'T_trib_in_x',  T_trib_in_x, 'Q_trib_tot_x', Q_trib_tot_x
-              !  print *,'nresx',nresx,  'Q_res_in',Q_res_in(nresx),'T_res_in', T_res_in(nresx)  
-
-        !     print *, 'nd', nd,'ns',ns,'cell',ncellx,'res',nresx, 'T_res_in - before final', T_res_in(nresx)
+   !         T_res_f = T_res_in(nresx)
 
                 call stream_density(T_res_in(nresx), density_in(nresx))
                 call stream_density(T_epil(nresx), density_epil(nresx))
@@ -414,7 +352,7 @@ do nyear=start_year,end_year
                   , nresx, dt_comp)
 
                 call energy(T_epil(nresx), q_surf, res_end_node(nresx))
-                call reservoir_subroutine (nresx, nd,q_surf, time, nd_year,T_res_f)
+                call reservoir_subroutine (nresx, nd,q_surf, time, nd_year)
 
                 T_0 = T_res(nresx) !T_res is weighted average temperature
 
@@ -431,12 +369,11 @@ do nyear=start_year,end_year
             end do ! end individual reservoir loop-cycles thru all reservoirs
 
           end if ! end reservoir if statement
- if(ncell.eq.1 .and. ns .eq.1) write(21,*),T_0,tntrp_x,q_dot*dt_calc,ntribs, Q_diff(nncell),T_head(nr)
-           if (T_0.lt.0.5) T_0=0.5 ! set so lowest temp can be is 0.5
-!print *, 'nd', nd, 'ns', ns, 'T_0 before interpolation', T_0
-            temp(nr,ns,n2)=T_0    ! temperature will be used next simulation
-            T_trib(nr)=T_0        ! temp of this reach, to calc trib inflow
-          !   The temperature is output at the beginning of the reach 
+
+          if (T_0.lt.0.5) T_0=0.5 ! set so lowest temp can be is 0.5
+          temp(nr,ns,n2)=T_0    ! temperature will be used next simulation
+          T_trib(nr)=T_0        ! temp of this reach, to calc trib inflow
+
           call WRITE(time,nd,nr,ncell,ns,T_0,T_head(nr),dbt(ncell),Q_out(ncell))
           !
           !     End of computational element loop
