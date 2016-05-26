@@ -28,6 +28,8 @@ SUBROUTINE reservoir_subroutine(nresx, nd, q_surf,time, nd_year)
         ! ################ This is specially for energy test###########!                
         !    K_z(nresx) = 0
 
+ if(nresx .eq. 1) write(95,*),  nd, T_res_in(nresx)
+
   ! -------------------- calculate temperature terms  -------------------------
       dif_epi_x  = K_z(nresx) * surface_area(nresx) *  (T_hypo(nresx) - T_epil(nresx)) / volume_e_x(nresx)
       dif_hyp_x  = K_z(nresx) * surface_area(nresx) *  (T_epil(nresx) - T_hypo(nresx)) / volume_h_x(nresx)
