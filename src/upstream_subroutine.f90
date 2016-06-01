@@ -9,8 +9,8 @@ implicit none
 
 integer :: resx2, npndx, npart, ntrp, nseg, nr, ns, n1, ncell
 real :: x, T_0, tntrp
-integer, dimension(3):: ndltp=(/-2,-3,-3/)
-integer, dimension(3):: nterp=(/3,4,3/)
+integer, dimension(3):: ndltp=(/-2,-2,-2/)
+integer, dimension(3):: nterp=(/3,2,2/)
 
           !
           !   Loop to establish where parcel started
