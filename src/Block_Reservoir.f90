@@ -35,7 +35,7 @@ module Block_Reservoir
         real, dimension (:), allocatable :: K_z    !diffusion coefficient (m^2/sec)
 
         ! -------------------- temperature and meterological variables ------
-        real, dimension (:), allocatable :: temp_change_ep, temp_change_hyp, temp_out ! energy
+        real, dimension (:), allocatable :: temp_change_ep, temp_change_hyp, temp_out, temp_out_i ! energy
         real, dimension (:), allocatable :: T_epil,T_hypo, stream_T_in
         real, dimension (:), allocatable :: density_epil, density_hypo, density_in
 

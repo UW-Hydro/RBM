@@ -33,7 +33,7 @@ SUBROUTINE reservoir_subroutine(nresx, nd, q_surf,time, nd_year, nyear)
         end if
 
         ! ################ This is specially for energy test###########!                
-        !    K_z(nresx) = 0
+            K_z(nresx) = 0
 
       ! -------------------- calculate temperature terms  -------------------------
       dif_epi_x  = K_z(nresx) * surface_area(nresx) *  (T_hypo(nresx) - T_epil(nresx)) / volume_e_x(nresx)
@@ -51,14 +51,15 @@ SUBROUTINE reservoir_subroutine(nresx, nd, q_surf,time, nd_year, nyear)
            ! ------------ calculate total energy ----------
 
    ! ################ This is specially for energy test###########!                
-       !   q_surf = 0  ! ONLY for RBM test
-       !   dif_hyp_x = 0  ! ONLY for RBM test
-       !   dif_epi_x = 0  ! ONLY for RBM test
+          q_surf = 0  ! ONLY for RBM test
+          dif_hyp_x = 0  ! ONLY for RBM test
+          dif_epi_x = 0  ! ONLY for RBM test
 
          energy_x  = (q_surf * dt_comp ) / (depth_e(nresx) * density * heat_c_kcal ) ! kcal/sec*m2 to C/day
 
    ! ################ This is specially for energy test###########!                
-   !      energy_x = (15.0 - 14.89) * sin(2*3.14159/nd_year * nd)
+     !    energy_x = (15.0 - 14.89) * sin(2*3.14159/nd_year * nd)
+         energy_x = 0
 
          temp_change_ep(nresx) = advec_in_epix + dif_epi_x + energy_x
 
@@ -85,7 +86,7 @@ SUBROUTINE reservoir_subroutine(nresx, nd, q_surf,time, nd_year, nyear)
          (T_hypo(nresx)*(volume_h_x(nresx)/volume_tot) ) ! weighted averge temp
 
    ! ################ This is specially for energy test ###########!                
-   !   T_res(nresx) = T_epil(nresx)
+      T_res(nresx) = T_epil(nresx)
 
  ! non-essential - only to print out specific calculated variables
  if(nresx.eq.4) then

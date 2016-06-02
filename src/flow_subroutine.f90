@@ -60,11 +60,11 @@ implicit none
      !  end if
 
      !##############This is only for energy test case###################!
-     !      flow_in_epi_x = Q1
-     !      flow_in_hyp_x = 0
-     !      flow_out_hyp_x = 0 ! * ftsec_to_msec * dt_comp
-     !      flow_out_epi_x = Q2
-     !      flow_epi_hyp_x = 0
+           flow_in_epi_x = Q1
+           flow_in_hyp_x = 0
+           flow_out_hyp_x = 0 ! * ftsec_to_msec * dt_comp
+           flow_out_epi_x = Q2
+           flow_epi_hyp_x = 0
 
  ! print *, 'flow_in_epi_x', flow_in_epi_x, 'flow_in_hyp_x', flow_in_hyp_x,'flow_out_hyp_x', flow_out_hyp_x
       ! ------------------------- calculate dV/dt terms ---------------------------

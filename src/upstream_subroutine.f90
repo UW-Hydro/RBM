@@ -25,14 +25,15 @@ integer, dimension(3):: nterp=(/3,2,2/)
             !  print *,'ncell',ncell, 'T_0', T_0
 !            if(ns .eq. 3) print *,'headw',  'T_head',   T_head(nr)
 
-          ! ------- if parcel started in reservoir but finished downstream -----------
+          ! ------- if parcel started in reservoir and finished downstream -----------
           else if (reservoir.and.res_pres(nr,segment_cell(nr,nseg))) then
-            T_0 = temp_out(res_num(nr,segment_cell(nr,nseg)))  !  
+            T_0 = temp_out_i(res_num(nr,segment_cell(nr,nseg)))  !  
             res_upstreamx = .true.
             resx2 = res_num(nr,segment_cell(nr,nseg))
            
   ! if(ns .gt. 7) print *,'parcel started in reservoir',  '  nseg',nseg,'T_0',T_0
    !if(ns .eq. 3) print *,'ns',ns,'nseg',nseg, 'T_0', T_0
+
           ! -----------  if parcel is in reservoir (didn't finish downstream) -----------
           !              BUT not first cell in reservoir - since upstream flow is read in
           else if (reservoir.and.any(res_pres(nr,segment_cell(nr,ns):segment_cell(nr,nseg))) .and. &
@@ -41,7 +42,7 @@ integer, dimension(3):: nterp=(/3,2,2/)
             !-- these two lines gets reservoir number in reach ---
             resx(segment_cell(nr,nseg): segment_cell(nr,ns)) = res_num(nr,segment_cell(nr,nseg):segment_cell(nr,ns))
             resx2 = maxval(resx(segment_cell(nr,nseg):segment_cell(nr,ns)),1)
-            T_0 = temp_out(resx2)  ! temperature of reservoir parcel crossed
+            T_0 = temp_out_i(resx2)  ! temperature of reservoir parcel crossed
             res_upstreamx = .true.
 
   ! if(ns .gt. 7) print *,'if parcel is in reservoir', '  nseg',nseg,'T_0',T_0
