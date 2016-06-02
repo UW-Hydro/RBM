@@ -1,4 +1,4 @@
-SUBROUTINE reservoir_subroutine(nresx, nd, q_surf,time, nd_year)
+SUBROUTINE reservoir_subroutine(nresx, nd, q_surf,time, nd_year, nyear)
 ! SUBROUTINE reservoir_subroutine(T_epil,T_hypo, volume_e_x,volume_h_x)
    use Block_Reservoir
    use Block_Flow
@@ -14,7 +14,14 @@ SUBROUTINE reservoir_subroutine(nresx, nd, q_surf,time, nd_year)
 
  ! ---------------- turnover loop driven only by T_epil and T_hyp ----------
         dayx = nd  ! day of year
+        if(dayx == 1) flag_turnover = .false.
         if ( ( T_epil(nresx) - T_hypo(nresx)) .lt. (2) .and. dayx .gt. 245) then !245 is September 1st
+
+                if(flag_turnover(nresx) .eqv. .false.) then
+                      write(67, *) nyear,dayx,nresx, T_epil(nresx), T_hypo(nresx)
+                      flag_turnover(nresx) = .true.
+                end if 
+
                 if( (T_epil(nresx) - T_hypo(nresx)) .lt. (0) ) then
                          K_z(nresx) = 1 ! set high K_z when moderately unstable
                 else

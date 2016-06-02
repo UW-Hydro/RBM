@@ -64,6 +64,7 @@ res_inflow = .false.
 !
 ! Allocate the arrays
 !
+allocate (flag_turnover(nres))
 allocate (temp(nreach,-2:ns_max,2))
 allocate (T_head(nreach))
 allocate (T_smth(nreach))
@@ -352,7 +353,7 @@ do nyear=start_year,end_year
                   , nresx, dt_comp)
 
                 call energy(T_epil(nresx), q_surf, res_end_node(nresx))
-                call reservoir_subroutine (nresx, nd,q_surf, time, nd_year)
+                call reservoir_subroutine (nresx, nd,q_surf, time, nd_year,nyear)
 
                 T_0 = T_res(nresx) !T_res is weighted average temperature
 
