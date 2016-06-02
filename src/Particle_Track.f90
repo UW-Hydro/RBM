@@ -6,7 +6,23 @@ integer, intent(IN):: nr
 real, intent(IN):: x_head, x_bndry 
 integer:: ncell, ns, nx_part, nx_s
 real:: dt_total
-
+!
+!**********************************************************************************
+!
+!                      TWO-LAYER MODEL NOTES
+!
+!*!**********************************************************************************
+!
+! The array, no_celm(nr),contains the number of cells in a reach, where cells are the
+! smallest longitudinal unit (there are ndelta of them in each segment). This subroutine
+! will track all the particles in no_celm(nr) unless, of course, it is modified to 
+! include only those that are riverine and not in reservoirs. Which are riverine and 
+! which are reservoir should be established in the NETWORK file and the logic created 
+! where the NETWORK file is read in SUBROUTINE BEGIN. It will be necessary to ensure
+! that the logic is incorporated in this subroutine and although it should not be 
+! difficult, it will require some care.  JRY 1/14/2016.
+!
+!*!**********************************************************************************
 !
 !     First do the reverse particle tracking
 !
