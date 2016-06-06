@@ -1,0 +1,19 @@
+site_name: River Basin Model (RBM)
+site_author: UW Hydro | Computational Hydrology
+copyright: 'Copyright &copy; 2016, <a href="www.hydro.washington.edu/">University of Washington Computational Hydrology Group</a>.'
+
+pages:
+# Main pages
+- ['index.md', 'Home']
+# About 
+- ['about/publications.md', 'About', 'Publications']
+- ['about/hydro_models.md', 'About', 'Hydrology Models']
+# User Guide
+- ['user_guide/basics.md', 'User Guide', 'Basics']
+# Model Development pages
+- ['model_development/physics.md', 'Model Development', 'Physical Processes']
+- ['model_development/open_source.md', 'Model Development', 'Open Source']
+# Support
+- ['support/contact.md', 'Support', 'Contact']
+- ['support/faq.md', 'Support', 'Frequently Asked Questions']
+theme: readthedocs
