@@ -251,8 +251,9 @@ do nyear=start_year,end_year
         ! -----------------------------------------------------------------------
  
           ! if segment in river research, or the first segment of reservoir
-          if(res_pres(nr,segment_cell(nr,ns)) .eqv. .false. .or. any(segment_cell(nr,ns) == res_start_node(:))) then 
-
+         if((res_pres(nr,segment_cell(nr,ns)) .eqv. .false.)  .or. &
+            (any(segment_cell(nr,ns) == res_start_node(:)) .and. res_pres(nr,segment_cell(nr,ns-1)) .eqv. .false.) ) then
+! print *, 'ns', ns, 'segment in river'
             !     Establish particle tracks
             call Particle_Track(nr,x_head,x_bndry) ! added 'nd' just for testing purposes
 
@@ -308,6 +309,7 @@ do nyear=start_year,end_year
 
           ! -------------  if cell is in reservoir ----------------
           if(reservoir .and. res_pres(nr,segment_cell(nr,ns))) then
+! print *, 'ns', ns, 'segment in reservoir'
 
             ncellx = segment_cell(nr,ns) ! cell (node) reservoir
 
@@ -329,10 +331,12 @@ do nyear=start_year,end_year
                 Q_trib_tot_x = 0   ! initialize trib flow in this reser. as 0
                 T_trib_in_x = 0   ! initialize trib temp in this reser. as 0
                 res_start(i) = .true.    ! logical so it won't add another T_res_in
+            !    print *, 'nd',nd,'ns',ns, 'T_res_in', T_res_in(nresx)
               end if
 
               ! ------------ end of reservoir - calculate the reservoir temperature -----------  
-              if (reservoir .and. res_end_node(i) .eq. segment_cell(nr,ns)   .and. .not. res_run(i) ) then
+              if (reservoir .and. res_end_node(i) .eq. segment_cell(nr,ns) .and. .not. res_pres(nr,segment_cell(nr,ns+1)) &
+                 .and. .not. res_run(i) ) then
                 nresx = i 
                 
                 ! ----- add tributary flow to reach inflow to reservoir ---
@@ -343,6 +347,7 @@ do nyear=start_year,end_year
                   Q_res_in(nresx) = Q_res_in(nresx) + Q_trib_tot(j)
 
                 end do
+          !  print *, 'nd',nd,'ns',ns, 'T_res_in', T_res_in(nresx)
 
    !         T_res_f = T_res_in(nresx)
 
@@ -394,6 +399,7 @@ do nyear=start_year,end_year
       !     End of weather period loop (NDD=1,NWPD)
       !
     end do   ! end day loop
+  !  print *, 'temp_out Systmm', temp_out(:)
     temp_out_i(:) = temp_out(:) !set reservoir temperature for next time step
     write(32,*),time, T_epil(1:nres), T_hypo(1:nres) ! , flow_in_epi_x, flow_out_epi_x,
     !

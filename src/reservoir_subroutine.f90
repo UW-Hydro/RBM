@@ -63,8 +63,8 @@ SUBROUTINE reservoir_subroutine(nresx, nd, q_surf,time, nd_year, nyear)
 
          temp_change_ep(nresx) = advec_in_epix + dif_epi_x + energy_x
 
-!  print *, 'temp_change_ep', temp_change_ep(nresx), 'advec_in', advec_in_epix &
-!         , 'energyx', energy_x, 'diffusion', dif_epi_x
+ ! print *, 'temp_change_ep', temp_change_ep(nresx), 'advec_in', advec_in_epix &
+ !        , 'energyx', energy_x, 'diffusion', dif_epi_x
 
          !----- update epilimnion volume for next time step -------
           T_epil(nresx) = T_epil(nresx) + temp_change_ep(nresx)
@@ -81,6 +81,8 @@ SUBROUTINE reservoir_subroutine(nresx, nd, q_surf,time, nd_year, nyear)
       epix = T_epil(nresx)*(flow_out_epi_x/outflow_x)  ! portion of temperature from epilim. 
       hypox= T_hypo(nresx)*(flow_out_hyp_x/outflow_x)  ! portion of temperature from hypol.
       temp_out(nresx) = epix + hypox   ! average outflow temperature
+  !   print *,'temp_out res_sub', temp_out(nresx), 'epix', epix, 'hypox',hypox,'T_epil' &
+  !       , T_epil(nresx), 'flow_out_epi', flow_out_epi_x 
       volume_tot = volume_e_x(nresx)  + volume_h_x(nresx)
       T_res(nresx) = (T_epil(nresx) * (volume_e_x(nresx)/volume_tot)) + &
          (T_hypo(nresx)*(volume_h_x(nresx)/volume_tot) ) ! weighted averge temp
