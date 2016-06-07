@@ -253,7 +253,7 @@ do nyear=start_year,end_year
           ! if segment in river research, or the first segment of reservoir
          if((res_pres(nr,segment_cell(nr,ns)) .eqv. .false.)  .or. &
             (any(segment_cell(nr,ns) == res_start_node(:)) .and. res_pres(nr,segment_cell(nr,ns-1)) .eqv. .false.) ) then
-! print *, 'ns', ns, 'segment in river'
+
             !     Establish particle tracks
             call Particle_Track(nr,x_head,x_bndry) ! added 'nd' just for testing purposes
 
@@ -289,7 +289,7 @@ do nyear=start_year,end_year
               q_dot=(q_surf/(z*rfac))
  
         ! ################ This is specially for simple energy test###########!                
-             q_dot = 0  ! ONLY for the simple test
+        !     q_dot = 0  ! ONLY for the simple test
 
               T_0=T_0+q_dot*dt_calc !adds heat added only during time parcel passed this segment
 

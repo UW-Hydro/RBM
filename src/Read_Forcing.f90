@@ -99,11 +99,11 @@ do nr=1,nreach
     dt(no_heat)=0.5*dx(ncell)/u(no_heat)
 
    ! ################ This is specially for simple energy test###########!                
-   dt(no_heat)=dx(ncell)/u(no_heat)
+  ! dt(no_heat)=dx(ncell)/u(no_heat)
 
 ! print *,'nd',nnd,'no_heat',no_heat, 'ncell', ncell, 'dx(ncell)', dx(ncell), 'u(no_heat)', u(no_heat), 'dt',dt(no_heat)
 
-!if(nnd.gt.4) stop !13505
+if(nnd.gt.8) stop !13505
 end do
 
 END SUBROUTINE Read_Forcing
