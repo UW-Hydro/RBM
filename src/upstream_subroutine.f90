@@ -46,7 +46,7 @@ integer, dimension(3):: nterp=(/3,2,2/)
             T_0 = temp_out_i(res_num(nr,segment_cell(nr,nseg)))  !  
             res_upstreamx = .true.
             resx2 = res_num(nr,segment_cell(nr,nseg))
-  print *, 'nseg', nseg, 'ns',ns,'T_0',T_0, 'parcel started in res, finished downstream'
+ ! print *, 'nseg', nseg, 'ns',ns,'T_0',T_0, 'parcel started in res, finished downstream'
 ! print *, 'res_num', res_num(nr,segment_cell(nr,nseg)),'T_0', T_0
 ! print *, 'temp_out', temp_out_i(:)
   ! if(ns .gt. 7) print *,'parcel started in reservoir',  '

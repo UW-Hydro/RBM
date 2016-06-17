@@ -24,7 +24,7 @@ integer:: node_res
 !
 ! Logical variables
 !
-logical:: first_cell,source, res_presx
+logical:: first_cell, res_presx
 !
 ! Real variables
 !
@@ -52,8 +52,7 @@ implicit none
 !   Mohseni parameters, if used
 !
 !
-!
-!     Card Group I
+!      Read in start and end date
 !
 read(90,*) start_date,end_date
 read(start_date,'(i4,2i2)') start_year,start_month,start_day
@@ -67,7 +66,7 @@ nyear2=end_year
 !
 jul_start = Julian(start_year,start_month,start_day)
 !
-read(90,*) nreach,flow_cells,heat_cells,source,nres, reservoir  !read in number of reservoir(nres)
+read(90,*) nreach,flow_cells,heat_cells,source,nsource,  nres, reservoir  !read in number of reservoir(nres)
 !
 ! Allocate dynamic arrays
 !
@@ -113,16 +112,40 @@ read(90,*) nreach,flow_cells,heat_cells,source,nres, reservoir  !read in number 
  allocate(rmile_node(0:ns_max))
  allocate(xres(0:ns_max))
  allocate(dx_res(0:heat_cells))
+allocate (source_cell(nsource)) !
+allocate (source_cell_tf(heat_cells))
+allocate (source_num_cell(heat_cells))
 !
 ! Check to see if there are point source inputs
 ! 
+
 if (source) then
+
+   source_cell_tf = .false. ! re-initalize T/F for point source thermal input
+
 !
-   read(90,'(A)') source_file ! (WUR_WF_MvV_2011/05/23)
- !  print *,'source file: ', source_file ! (WUR_WF_MvV_2011/05/23)
-   open(40,file=TRIM(source_file),status='old')
+   read(90,'(A)') source_file
+   print *,'source file: ', source_file
+   read(90,'(A)') source_list
+   print *,'source list: ', source_list
+
+   ! open file with the thermal plant flow data
+   open(40,file=TRIM(source_file),access='sequential',form='formatted',status='old')
+
+   ! open and read in thermal plant information
+   open(41, file=TRIM(source_list), access='sequential', form='formatted',status='old')
+   do sourcex = 1, nsource
+     read(41, *) sourcex2, source_cell(sourcex)
+     source_cell_tf(source_cell(sourcex)) = .true.
+     source_num_cell(source_cell(sourcex)) = sourcex
+
+        print *, 'source_cell',  source_cell(sourcex), 'sourcex', sourcex
+
+   end do
+
 !
 end if
+
 
 !
 !--------------------------read in reservoir info-----------------------------

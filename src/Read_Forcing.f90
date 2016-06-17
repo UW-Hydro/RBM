@@ -7,8 +7,16 @@ USE Block_Reservoir
 ! 
 IMPLICIT NONE
 !
-integer:: nc,ncell,nnd,no_flow,no_heat,nr,nrec_flow,nrec_heat
+integer:: nc,ncell,nnd,no_flow,no_heat,nr,nrec_flow,nrec_heat, ndx
 real:: Q_avg
+
+
+!       
+!        upload thermal point-source input
+! 
+if (source) then
+     read(40,*) ndx, flow_source(1:nsource)
+end if
 
 
 no_flow=0
@@ -103,7 +111,7 @@ do nr=1,nreach
 
 ! print *,'nd',nnd,'no_heat',no_heat, 'ncell', ncell, 'dx(ncell)', dx(ncell), 'u(no_heat)', u(no_heat), 'dt',dt(no_heat)
 
-if(nnd.gt.8) stop !13505
+!if(nnd.gt.8) stop !13505
 end do
 
 END SUBROUTINE Read_Forcing
