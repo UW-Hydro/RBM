@@ -123,14 +123,13 @@ if (source) then
 
    source_cell_tf = .false. ! re-initalize T/F for point source thermal input
 
-!
-   read(90,'(A)') source_file
-   print *,'source file: ', source_file
+   ! list of thermal plants
    read(90,'(A)') source_list
    print *,'source list: ', source_list
 
-   ! open file with the thermal plant flow data
-   open(40,file=TRIM(source_file),access='sequential',form='formatted',status='old')
+   ! file with flow data from thermal plants
+   read(90,'(A)') source_file
+   print *,'source file: ', source_file
 
    ! open and read in thermal plant information
    open(41, file=TRIM(source_list), access='sequential', form='formatted',status='old')
@@ -142,6 +141,9 @@ if (source) then
         print *, 'source_cell',  source_cell(sourcex), 'sourcex', sourcex
 
    end do
+
+   ! open file with the thermal plant flow data
+   open(40,file=TRIM(source_file),access='sequential',form='formatted',status='old')
 
 !
 end if

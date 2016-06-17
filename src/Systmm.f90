@@ -287,8 +287,6 @@ do nyear=start_year,end_year
               nm_start = no_dt(ns)
             end if
 
-    !    if(nncell .gt. 65 .and. nncell .lt. 68)  print *,nd,nncell,'T_0 pre-trib', T_0 
-
             do nm=nm_start,1,-1  ! cycle through each segment parcel passed through
               z=depth(nncell)
               nd2 = nd  ! cut out later, just to print day in energy module
@@ -306,8 +304,6 @@ do nyear=start_year,end_year
                           ,ns, nseg, n2, DONE, dt_calc, dt_total)
 
             end do ! end loop cycling through all segments parcel passed through
-
-     !   if(nncell .gt. 65 .and. nncell .lt. 68)  print *,nd,nncell,  'T_0 post-trib', T_0 
 
           end if   ! end river if loop
         ! -----------------------------------------------------------------------
@@ -391,8 +387,6 @@ do nyear=start_year,end_year
           temp(nr,ns,n2)=T_0    ! temperature will be used next simulation
           T_trib(nr)=T_0        ! temp of this reach, to calc trib inflow
 
-       ! if(ncell .gt. 64 .and. nncell .lt. 69)  print *,nd,ncell,  'T_0 post-trib', T_0 
-        if(ncell == 14)  print *,nd,ncell,  'T_0 post-trib', T_0 
 
           call WRITE(time,nd,nr,ncell,ns,T_0,T_head(nr),dbt(ncell),Q_out(ncell))
           !

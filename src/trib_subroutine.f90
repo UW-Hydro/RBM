@@ -60,7 +60,6 @@ logical :: DONE
 
 
           ! ------------- add point source thermal flow if present -----------
-     !   if(nncell .gt. 65 .and. nncell .lt. 68)  print *,nncell,'T_0 pre-trib', T_0 
 
             if(source) then
               if(source_cell_tf(nncell)) then
@@ -70,7 +69,6 @@ logical :: DONE
                ! print *, 'nncell', nncell, 'ncell0', ncell0
               end if
             end if
-      !  if(nncell .gt. 65 .and. nncell .lt. 68)  print *,nncell,'T_0 post-trib', T_0 
 
           nseg=nseg+1  ! so nseg will be next segment down stream
           nncell=segment_cell(nr,nseg)  ! node for next node downstream
