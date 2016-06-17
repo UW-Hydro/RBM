@@ -228,14 +228,6 @@ do nr=1,nreach !loop through all the reaches from first to last reach
     do nc=1,no_cells(nr)
         ncell=ncell+1
         !
-        !   Read the data for point sources
-        !
-        if (source) then
-        !
-        !  Place holder for point source input
-        !
-        end if 
-        !
         !     The headwaters index for each cell in this reach is given
         !     in the order the cells are read
         !

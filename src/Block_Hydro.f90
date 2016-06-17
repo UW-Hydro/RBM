@@ -3,7 +3,7 @@
 !
 module Block_Hydro
     integer, dimension(2000):: no_dt,nstrt_elm
-    integer :: nsource, source2, sourcex, sourcex2  ! number of thermal point-source inputs
+    integer :: nsource,  sourcex, sourcex2  ! number of thermal point-source inputs
     real, dimension(2000)   :: dt_part,x_part
 !
     real, dimension(:),   allocatable  :: depth
