@@ -7,7 +7,7 @@ use Block_Flow
 
 implicit none
 
-integer :: resx2, npndx, npart, ntrp, nseg, nr, ns, n1, ncell
+integer :: resx2, resx3,npndx, npart, ntrp, nseg, nr, ns, n1, ncell, i
 real :: x, T_0, tntrp
 integer, dimension(3):: ndltp=(/-2,-3,-3/)
 integer, dimension(3):: nterp=(/3,4,3/)
@@ -17,43 +17,64 @@ integer, dimension(3):: nterp=(/3,4,3/)
           !   (e.g. in reservoir, downstream of reservoir, headwater, etc.)
           !
 
+          ! --- if parcel started upstream of reservior and finished downstream -----
+          if (reservoir.and. any(res_pres(nr,segment_cell(nr,nseg):segment_cell(nr,ns)) ) &
+            .and. .not. res_pres(nr,segment_cell(nr,ns)) .and. .not. res_pres(nr,segment_cell(nr,nseg))) then
+
+              do i = nseg, ns, 1
+                if(res_pres(nr,segment_cell(nr,i))) then
+                 T_0 = temp_out_i(res_num(nr,segment_cell(nr,i)))  !  
+                 res_upstreamx = .true.
+                 resx2 = res_num(nr,segment_cell(nr,nseg))
+                end if
+               end do
+! print *, 'nseg', nseg, 'ns',ns,'T_0',T_0, 'parcel started upstream of res, finished downstream of res'
+
           ! -------------------- if parcel started at a headwater ------------
-          if(nseg.eq.1) then   
+          else if( nseg.eq.1 .and. &
+             ( (.not. res_pres(nr,segment_cell(nr,nseg))) .or. ( res_pres(nr,segment_cell(nr,ns))) ) ) then
             T_0 = T_head(nr)
             res_upstreamx = .false.
             resx2 = 0
             !  print *,'ncell',ncell, 'T_0', T_0
 !            if(ns .eq. 3) print *,'headw',  'T_head',   T_head(nr)
+! print *, 'nseg', nseg, 'ns',ns,'T_0',T_0, 'parcel started at headw'
 
-          ! ------- if parcel started in reservoir but finished downstream -----------
+
+          ! ------- if parcel started in reservoir and finished downstream  -----------
           else if (reservoir.and.res_pres(nr,segment_cell(nr,nseg))) then
-            T_0 = temp_out(res_num(nr,segment_cell(nr,nseg)))  !  
+            T_0 = temp_out_i(res_num(nr,segment_cell(nr,nseg)))  !  
             res_upstreamx = .true.
             resx2 = res_num(nr,segment_cell(nr,nseg))
-           
-  ! if(ns .gt. 7) print *,'parcel started in reservoir',  '  nseg',nseg,'T_0',T_0
+ ! print *, 'nseg', nseg, 'ns',ns,'T_0',T_0, 'parcel started in res, finished downstream'
+! print *, 'res_num', res_num(nr,segment_cell(nr,nseg)),'T_0', T_0
+! print *, 'temp_out', temp_out_i(:)
+  ! if(ns .gt. 7) print *,'parcel started in reservoir',  '
+  ! nseg',nseg,'T_0',T_0
    !if(ns .eq. 3) print *,'ns',ns,'nseg',nseg, 'T_0', T_0
+
           ! -----------  if parcel is in reservoir (didn't finish downstream) -----------
           !              BUT not first cell in reservoir - since upstream flow is read in
-          else if (reservoir.and.any(res_pres(nr,segment_cell(nr,ns):segment_cell(nr,nseg))) .and. &
-               any(segment_cell(nr,ns) .ne. res_start_node(:)) ) then
+          else if (reservoir.and.any(res_pres(nr,segment_cell(nr,nseg):segment_cell(nr,ns))) &
+                .and.  res_pres(nr,segment_cell(nr,ns-1)) ) then
 
             !-- these two lines gets reservoir number in reach ---
             resx(segment_cell(nr,nseg): segment_cell(nr,ns)) = res_num(nr,segment_cell(nr,nseg):segment_cell(nr,ns))
             resx2 = maxval(resx(segment_cell(nr,nseg):segment_cell(nr,ns)),1)
-            T_0 = temp_out(resx2)  ! temperature of reservoir parcel crossed
+            T_0 = temp_out_i(resx2)  ! temperature of reservoir parcel crossed
             res_upstreamx = .true.
 
+! print *, 'nseg', nseg, 'ns',ns,'T_0',T_0, 'parcel in reservoir and not first seg'
   ! if(ns .gt. 7) print *,'if parcel is in reservoir', '  nseg',nseg,'T_0',T_0
 
-          ! ----------- if parcel started in river and ended in river  -----------
+           ! ----------- if parcel started in river and ended in river  -----------
           !            (i.e. did not start in headw, did not start in reservoir)
           !            OR if start node in the reservoir
           else
-            res_upstreamx = .false.
             resx2 = 0
+            res_upstreamx = .false.
 
-
+! print *,'res_pres', res_pres(nr,1:5),'any-res pres', any(res_pres(nr,segment_cell(nr,ns):segment_cell(nr,nseg)) )
             !
             !  third order interpolation at the downstream boundary
             !  to get starting temperature values at each parcel
@@ -73,6 +94,7 @@ integer, dimension(3):: nterp=(/3,4,3/)
 
             tntrp_x = tntrp(xa,ta,x,nterp(npndx))  ! non-essential - just to print output
 
+!  print *, 'nseg', nseg, 'ns',ns,'T_0',T_0, 'parcel in river, no res, or last res cell'
    !     print *,'---------------', ' ns', ns
    !     print *, 'nterp',nterp(npndx),'ta', ta
    !     print *, 'xa',xa, 'x',x

@@ -1,4 +1,4 @@
-SUBROUTINE reservoir_subroutine(nresx, nd, q_surf,time, nd_year)
+SUBROUTINE reservoir_subroutine(nresx, nd, q_surf,time, nd_year, nyear)
 ! SUBROUTINE reservoir_subroutine(T_epil,T_hypo, volume_e_x,volume_h_x)
    use Block_Reservoir
    use Block_Flow
@@ -14,7 +14,14 @@ SUBROUTINE reservoir_subroutine(nresx, nd, q_surf,time, nd_year)
 
  ! ---------------- turnover loop driven only by T_epil and T_hyp ----------
         dayx = nd  ! day of year
+        if(dayx == 1) flag_turnover = .false.
         if ( ( T_epil(nresx) - T_hypo(nresx)) .lt. (2) .and. dayx .gt. 245) then !245 is September 1st
+
+                if(flag_turnover(nresx) .eqv. .false.) then
+                      write(67, *) nyear,dayx,nresx, T_epil(nresx), T_hypo(nresx)
+                      flag_turnover(nresx) = .true.
+                end if 
+
                 if( (T_epil(nresx) - T_hypo(nresx)) .lt. (0) ) then
                          K_z(nresx) = 1 ! set high K_z when moderately unstable
                 else
@@ -44,19 +51,20 @@ SUBROUTINE reservoir_subroutine(nresx, nd, q_surf,time, nd_year)
            ! ------------ calculate total energy ----------
 
    ! ################ This is specially for energy test###########!                
-       !   q_surf = 0  ! ONLY for RBM test
-       !   dif_hyp_x = 0  ! ONLY for RBM test
-       !   dif_epi_x = 0  ! ONLY for RBM test
+   !       q_surf = 0  ! ONLY for RBM test
+   !       dif_hyp_x = 0  ! ONLY for RBM test
+   !       dif_epi_x = 0  ! ONLY for RBM test
 
          energy_x  = (q_surf * dt_comp ) / (depth_e(nresx) * density * heat_c_kcal ) ! kcal/sec*m2 to C/day
 
    ! ################ This is specially for energy test###########!                
-   !      energy_x = (15.0 - 14.89) * sin(2*3.14159/nd_year * nd)
+     !    energy_x = (15.0 - 14.89) * sin(2*3.14159/nd_year * nd)
+     !    energy_x = 0
 
          temp_change_ep(nresx) = advec_in_epix + dif_epi_x + energy_x
 
-!  print *, 'temp_change_ep', temp_change_ep(nresx), 'advec_in', advec_in_epix &
-!         , 'energyx', energy_x, 'diffusion', dif_epi_x
+ ! print *, 'temp_change_ep', temp_change_ep(nresx), 'advec_in', advec_in_epix &
+ !        , 'energyx', energy_x, 'diffusion', dif_epi_x
 
          !----- update epilimnion volume for next time step -------
           T_epil(nresx) = T_epil(nresx) + temp_change_ep(nresx)
@@ -73,6 +81,8 @@ SUBROUTINE reservoir_subroutine(nresx, nd, q_surf,time, nd_year)
       epix = T_epil(nresx)*(flow_out_epi_x/outflow_x)  ! portion of temperature from epilim. 
       hypox= T_hypo(nresx)*(flow_out_hyp_x/outflow_x)  ! portion of temperature from hypol.
       temp_out(nresx) = epix + hypox   ! average outflow temperature
+    ! print *,'temp_out res_sub', temp_out(nresx), 'epix', epix, 'hypox',hypox,'T_epil'! &
+    !     , T_epil(nresx), 'flow_out_epi', flow_out_epi_x 
       volume_tot = volume_e_x(nresx)  + volume_h_x(nresx)
       T_res(nresx) = (T_epil(nresx) * (volume_e_x(nresx)/volume_tot)) + &
          (T_hypo(nresx)*(volume_h_x(nresx)/volume_tot) ) ! weighted averge temp

@@ -7,7 +7,7 @@
 # ------------------------------------------------------------------------------------
 
 # path new _Network file will be saved
-save_path = '/raid3/rniemeyr/RBM/two_layer_model/RBM_Yixin/RIPS/model_run/source/VIC_RBM/RBM_processing/Holston_8th.Mohseni_v1/'
+save_path = '/raid3/rniemeyr/RBM/two_layer_model/RBM_Yixin/RIPS/model_run/source/VIC_RBM/RBM_processing/Tennessee_8th.Mohseni_v1/'
 # RUN file by typing: python_code network_file reservoir_file 
 
 import sys

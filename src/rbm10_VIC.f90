@@ -75,7 +75,9 @@ call getarg ( 2, outPrefix )
 !
 ! Identify input/output files
 !
-net_file      = TRIM(inPrefix)//'_Network_2'
+
+!net_file      = TRIM(inPrefix)//'_Network_2' ! for regular Network file
+net_file      = TRIM(inPrefix)//'_Network_2_plant' ! for new file with power plant information
 spatial_file  = TRIM(outPrefix)//'.Spat'
 temp_file     = TRIM(outPrefix)//'.Temp'
 !

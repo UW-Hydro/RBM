@@ -64,6 +64,7 @@ res_inflow = .false.
 !
 ! Allocate the arrays
 !
+allocate (flag_turnover(nres))
 allocate (temp(nreach,-2:ns_max,2))
 allocate (T_head(nreach))
 allocate (T_smth(nreach))
@@ -85,6 +86,11 @@ allocate (wind(heat_cells))
 allocate (dt_res(2*heat_cells))
 allocate (resx(2*heat_cells))
 
+!
+!   point source allocatable
+!
+allocate (flow_source(nsource))
+
 ! 
 !   reservoir allocatable
 !
@@ -92,11 +98,11 @@ allocate (depth_e(nres))
 allocate (depth_h(nres))
 allocate (surface_area(nres))
 allocate (T_epil(nres))
-T_epil = 15
+T_epil = 10
 allocate (T_hypo(heat_cells))
-T_hypo = 15
+T_hypo = 10
 allocate (stream_T_in(nres))
-stream_T_in = 15
+stream_T_in = 10
 allocate (density_epil(nres))
 density_epil = 0
 allocate (density_hypo(nres))
@@ -118,14 +124,16 @@ res_run = .false.
 allocate (res_start(nres))
 res_start = .false.
 allocate (T_res(nres))
-T_res = 15
+T_res = 10
 allocate (T_res_in(nres))
-T_res_in = 15
+T_res_in = 10
 allocate (Q_trib_tot(heat_cells))
 allocate (T_trib_tot(heat_cells))
 allocate (Q_res_in(nres))
-! allocate(temp_out(4))
-temp_out = 15
+allocate(temp_out(nres))
+temp_out = 10
+allocate(temp_out_i(nres))
+temp_out_i = 10
 allocate (trib_res(heat_cells))
 ![CONSIDER ADDING A SUBROUTINE THAT INTIALIZES VARIABLES LIKE:T_epil, T_hyp, K_z, etc - JRY]
 !
@@ -135,15 +143,15 @@ dt_part=0.
 x_part=0.
 no_dt=0
 nstrt_elm=0
-temp=15
+temp=10
 ! Initialize headwaters temperatures
 !
-T_head=15
+T_head=10
 !!
 !
 ! Initialize smoothed air temperatures for estimating headwaters temperatures
 !
-T_smth=15
+T_smth=10
 
 
 !
@@ -248,7 +256,8 @@ do nyear=start_year,end_year
         ! -----------------------------------------------------------------------
  
           ! if segment in river research, or the first segment of reservoir
-          if(res_pres(nr,segment_cell(nr,ns)) .eqv. .false. .or. any(segment_cell(nr,ns) == res_start_node(:))) then 
+         if((res_pres(nr,segment_cell(nr,ns)) .eqv. .false.)  .or. &
+            (any(segment_cell(nr,ns) == res_start_node(:)) .and. res_pres(nr,segment_cell(nr,ns-1)) .eqv. .false.) ) then
 
             !     Establish particle tracks
             call Particle_Track(nr,x_head,x_bndry) ! added 'nd' just for testing purposes
@@ -305,6 +314,7 @@ do nyear=start_year,end_year
 
           ! -------------  if cell is in reservoir ----------------
           if(reservoir .and. res_pres(nr,segment_cell(nr,ns))) then
+! print *, 'ns', ns, 'segment in reservoir'
 
             ncellx = segment_cell(nr,ns) ! cell (node) reservoir
 
@@ -326,10 +336,12 @@ do nyear=start_year,end_year
                 Q_trib_tot_x = 0   ! initialize trib flow in this reser. as 0
                 T_trib_in_x = 0   ! initialize trib temp in this reser. as 0
                 res_start(i) = .true.    ! logical so it won't add another T_res_in
+            !    print *, 'nd',nd,'ns',ns, 'T_res_in', T_res_in(nresx)
               end if
 
               ! ------------ end of reservoir - calculate the reservoir temperature -----------  
-              if (reservoir .and. res_end_node(i) .eq. segment_cell(nr,ns)   .and. .not. res_run(i) ) then
+              if (reservoir .and. res_end_node(i) .eq. segment_cell(nr,ns) .and. .not. res_pres(nr,segment_cell(nr,ns+1)) &
+                 .and. .not. res_run(i) ) then
                 nresx = i 
                 
                 ! ----- add tributary flow to reach inflow to reservoir ---
@@ -340,6 +352,7 @@ do nyear=start_year,end_year
                   Q_res_in(nresx) = Q_res_in(nresx) + Q_trib_tot(j)
 
                 end do
+          !  print *, 'nd',nd,'ns',ns, 'T_res_in', T_res_in(nresx)
 
    !         T_res_f = T_res_in(nresx)
 
@@ -352,7 +365,7 @@ do nyear=start_year,end_year
                   , nresx, dt_comp)
 
                 call energy(T_epil(nresx), q_surf, res_end_node(nresx))
-                call reservoir_subroutine (nresx, nd,q_surf, time, nd_year)
+                call reservoir_subroutine (nresx, nd,q_surf, time, nd_year,nyear)
 
                 T_0 = T_res(nresx) !T_res is weighted average temperature
 
@@ -374,6 +387,7 @@ do nyear=start_year,end_year
           temp(nr,ns,n2)=T_0    ! temperature will be used next simulation
           T_trib(nr)=T_0        ! temp of this reach, to calc trib inflow
 
+
           call WRITE(time,nd,nr,ncell,ns,T_0,T_head(nr),dbt(ncell),Q_out(ncell))
           !
           !     End of computational element loop
@@ -391,8 +405,8 @@ do nyear=start_year,end_year
       !     End of weather period loop (NDD=1,NWPD)
       !
     end do   ! end day loop
- 
-    temp_out(:) = T_res(:) !set reservoir temperature for next time step
+  !  print *, 'temp_out Systmm', temp_out(:)
+    temp_out_i(:) = temp_out(:) !set reservoir temperature for next time step
     write(32,*),time, T_epil(1:nres), T_hypo(1:nres) ! , flow_in_epi_x, flow_out_epi_x,
     !
     !     End of main loop (ND=1,365/366)

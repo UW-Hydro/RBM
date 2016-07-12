@@ -7,7 +7,7 @@ use Block_Flow
 
 implicit none
 
-real ::Q1, T_0, Q2, T_dist, dt_calc,dt_total
+real ::Q1, T_0, Q2, T_dist, dt_calc,dt_total, temp_source
 integer :: ntribs, nncell,nr_trib, nr, ns, nseg, n2, ncell0
 logical :: DONE
 
@@ -56,6 +56,18 @@ logical :: DONE
               T_dist=T_head(nr)
               T_0=(Q1*T_0+Q_diff(nncell)*T_dist)/Q2
               Q1=Q2
+            end if
+
+
+          ! ------------- add point source thermal flow if present -----------
+
+            if(source) then
+              if(source_cell_tf(nncell)) then
+                temp_source = T_0 + 5  ! just adding 5 deg C to flow
+                sourcex = source_num_cell(nncell)
+                T_0=(Q1*T_0 + flow_source(sourcex)  * temp_source) / (Q1 + flow_source(sourcex) )
+               ! print *, 'nncell', nncell, 'ncell0', ncell0
+              end if
             end if
 
           nseg=nseg+1  ! so nseg will be next segment down stream

@@ -7,15 +7,16 @@ module Block_Reservoir
         !----------------------------------------------------------------------
 
         !------------------------read in reservoir info--------------------------
-        real, dimension (:), allocatable:: dam_lat, dam_lon, res_grid_lat, res_grid_lon, res_top_vol
+        real, dimension (:), allocatable:: dam_lat, dam_lon, res_grid_lat, res_grid_lon
         real, dimension (:), allocatable:: res_depth_feet, res_width_feet, res_length_feet
         integer, dimension (:), allocatable:: dam_number, start_operating_year
-        integer, dimension (:), allocatable:: res_bot_vol, res_max_flow, res_min_flow
+        real, dimension (:), allocatable:: res_top_vol, res_bot_vol, res_max_flow, res_min_flow
         integer, dimension (:), allocatable:: res_start_node, res_end_node
        !  integer, dimension (:,:), allocatable:: nodes_x   !for each reach, what are all the nodes
         real , dimension(:), allocatable  :: rmile_node
         integer, dimension(:,:), allocatable  :: res_num, nodes_x, x_dist_res
         logical, dimension(:,:), allocatable  :: res_pres, res_upstream
+        logical, dimension(:), allocatable :: flag_turnover 
         logical :: reservoir, res_upstreamx ! the first is TRUE or FALSE in fifth line of _Network file whether reserovirs are present 
         integer, dimension (:), allocatable :: xres, resx
         integer :: xres2, nres, nm_start
@@ -34,7 +35,7 @@ module Block_Reservoir
         real, dimension (:), allocatable :: K_z    !diffusion coefficient (m^2/sec)
 
         ! -------------------- temperature and meterological variables ------
-        real, dimension (:), allocatable :: temp_change_ep, temp_change_hyp, temp_out ! energy
+        real, dimension (:), allocatable :: temp_change_ep, temp_change_hyp, temp_out, temp_out_i ! energy
         real, dimension (:), allocatable :: T_epil,T_hypo, stream_T_in
         real, dimension (:), allocatable :: density_epil, density_hypo, density_in
 
