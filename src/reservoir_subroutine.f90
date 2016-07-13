@@ -23,7 +23,7 @@ SUBROUTINE reservoir_subroutine(nresx, nd, q_surf,time, nd_year, nyear)
                 end if 
 
                 if( (T_epil(nresx) - T_hypo(nresx)) .lt. (0) ) then
-                         K_z(nresx) = 1 ! set high K_z when moderately unstable
+                         K_z(nresx) = 5 ! set high K_z when moderately unstable
                 else
                          K_z(nresx) = 0.1 ! set moderate K_z when system is unstable
                 end if
