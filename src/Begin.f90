@@ -146,6 +146,9 @@ if (source) then
    open(40,file=TRIM(source_file),access='sequential',form='formatted',status='old')
 
 !
+else
+   read(90,*)
+   read(90,*)
 end if
 
 
