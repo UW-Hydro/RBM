@@ -4,3 +4,5 @@
 *~
 # Compiled modules
 *.mod
+# RBM executable
+rbm10_VIC
