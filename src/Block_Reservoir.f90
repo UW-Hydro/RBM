@@ -28,7 +28,7 @@ module Block_Reservoir
         !----------------------------------------------------------------------
 
         ! ----------------------- constants --------------------------
-        real, parameter ::  prcnt_flow_epil = 1, prcnt_flow_hypo = 0
+        real, parameter ::  prcnt_flow_epil = 1, prcnt_flow_hypo = 0, gravity = 9.8
         real, parameter :: density = 1000, heat_c = 4180, ftsec_to_msec = 0.0283168
         real, parameter :: J_to_kcal = 0.00023885, kPa_to_mb = 10, ft_to_m = 0.3048
         real, parameter :: heat_c_kcal = 1  ! heat capacity in kcal/kg*C
