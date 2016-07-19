@@ -80,7 +80,7 @@ read(90,*) nreach,flow_cells,heat_cells,source
  no_cells=0
  allocate(no_tribs(heat_cells))
  no_tribs=0
- allocate(trib(heat_cells,10))
+ allocate(trib(heat_cells,ns_max))
  trib=0
  allocate(head_cell(nreach))
  allocate(segment_cell(nreach,ns_max))
@@ -106,6 +106,7 @@ ns_max_test=-1
 !     Card Group IIb. Reach characteristics
 !
 do nr=1,nreach
+<<<<<<< HEAD
 !
 !     Initialize NSEG, the total number of segments in this reach
 !
@@ -118,6 +119,32 @@ do nr=1,nreach
 !     the river mile of the headwaters.
 !
   read(90,'(i5,11x,i4,10x,i5,15x,i5,15x,f10.0,i5)') no_cells(nr) &
+=======
+!
+!     Initialize NSEG, the total number of segments in this reach
+!
+  nseg=0
+  write(*,*) ' Starting to read reach ',nr
+!**************************************************************************
+!
+!                 NOTES FOR TWO-LAYER MODEL
+!
+!**************************************************************************
+!
+! It is in the following section, where the NETWORK file is read that the
+! logic for identifying riverine and reservoir cells should happen.It will
+! probably also be necessary to update BLOCK_NETWORK.f90 to manage this.
+! Other possibilities exist, of course.  
+! JRY 1/14/2016
+!
+!
+!     Read the number of cells in this reach, the headwater #,
+!     the number of the cell where it enters the next higher order stream,
+!     the headwater number of the next higher order stream it enters, and
+!     the river mile of the headwaters.
+!
+  read(90,'(i5,11x,i4,10x,i5,15x,i5,15x,f10.0,i5)') no_cells(nr) &
+>>>>>>> 569f815d0feb1dc472275fbe36b0b77d6271321f
       ,head_name,trib_cell,main_stem,rmile0
 !
 !     If this is reach that is tributary to cell TRIB_CELL, give it the
@@ -157,7 +184,7 @@ do nr=1,nreach
 !     is entered manually into the network file (UW_JRY_2011/03/15)
 !
     read(90,'(5x,i5,5x,i5,8x,i5,6x,a8,6x,a10,7x,f10.0,i5)')  &
-              node,nrow,ncol,lat,long,rmile1,ndelta(ncell)
+              node,nrow,ncol,lat,long,rmile1,ndelta(ncell)
 !
 !    Set the number of segments of the default, if not specified
 !

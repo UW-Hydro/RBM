@@ -24,7 +24,6 @@ do nr=1,nreach
            ,rec=nrec_flow) nnd,ncell &
            ,Q_in(no_heat),Q_out(no_heat),Q_diff(no_heat) &  
            ,depth(no_heat),width(no_heat),u(no_heat)
-
 !
     if(u(no_heat).lt.0.01) u(no_heat)=0.01
     if(ncell.ne.no_heat) write(*,*) 'Flow file error',ncell,no_heat 
@@ -38,9 +37,7 @@ do nr=1,nreach
 !  if(ncell.ne.no_heat) write(*,*) 'Heat file error',ncell,no_heat 
 !
 !  Added variable ndelta (UW_JRY_2011/03/15
-
 !
-
     delta_n=ndelta(ncell)
 ! 
     Q_avg=0.5*(Q_in(no_heat)+Q_out(no_heat))
@@ -63,18 +60,18 @@ do nr=1,nreach
 !
 !       Read the meteorology for the last cell, but not the flow
 !
-  no_heat=no_heat+1 
+  no_heat=no_heat+1
   Q_in(no_heat)=Q_out(no_heat-1)
   Q_out(no_heat)=Q_in(no_heat)
   Q_trib(nr)=Q_out(no_heat)    
   nrec_heat=heat_cells*(ndays-1)+no_heat
   read(36,'(i5,2f6.1,2f7.4,f6.3,f7.1,f5.1)' &
          ,rec=nrec_heat) ncell &
-         ,dbt(no_heat),ea(no_heat) &   
+         ,dbt(no_heat),ea(no_heat) & 
          ,Q_ns(no_heat),Q_na(no_heat),rho &
          ,press(no_heat),wind(no_heat)
 !
-!  The flow and hydraulics for the last cell has to be 
+!  The flow and hydraulics for the last cell has to be
 !  modified so they do not
 !  take the values of the segment to which it is tributary
 !
