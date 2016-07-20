@@ -66,7 +66,7 @@ nyear2=end_year
 !
 jul_start = Julian(start_year,start_month,start_day)
 !
-read(90,*) nreach,flow_cells,heat_cells,source,nsource,  nres, reservoir  !read in number of reservoir(nres)
+read(90,*) nreach,flow_cells,heat_cells,source,nsource,  reservoir, nres  !read in number of reservoir(nres)
 !
 ! Allocate dynamic arrays
 !
@@ -145,10 +145,6 @@ if (source) then
    ! open file with the thermal plant flow data
    open(40,file=TRIM(source_file),access='sequential',form='formatted',status='old')
 
-!
-else
-   read(90,*)
-   read(90,*)
 end if
 
 
