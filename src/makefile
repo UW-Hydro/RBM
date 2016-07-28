@@ -6,7 +6,7 @@
 # Defining variables
 #
 objects = rbm10_VIC.o Begin.o Systmm.o Particle_Track.o \
-          Energy.o Julian.o tntrp.o Read_Forcing.o \
+          Energy.o Julian.o Leap_Year.o tntrp.o Read_Forcing.o \
           Block_Energy.o Block_Hydro.o Block_Network.o Block_WQ.o\
 	  Write.o	  
 f90comp = gfortran
@@ -47,12 +47,12 @@ Write.o: Write.f90
 	$(f90comp) -c Write.f90
 Julian.o: Julian.f90
 	$(f90comp) -c Julian.f90
+Leap_Year.o: Leap_Year.f90
+	$(f90comp) -c Leap_Year.f90
 tntrp.o: tntrp.f90
 	$(f90comp) -c tntrp.f90
-
 rbm10_VIC.o: bgin.mod systm.mod rbm10_VIC.f90
 	$(f90comp) -c rbm10_VIC.f90
-
 # Cleaning everything
 clean:
 	rm bgin.mod block_energy.mod block_hydro.mod block_network.mod\
