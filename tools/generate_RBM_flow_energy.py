@@ -175,7 +175,8 @@ df_flow = df_flow.sortlevel(0)
 
 #=== Writing data to file ===#
 print 'Writing flow data to file...'
-np.savetxt(cfg['OUTPUT']['rbm_flow_file'], df_flow.values, fmt='%d %d %.1f %.1f %.1f %.1f %.1f %.2f')
+np.savetxt(cfg['OUTPUT']['rbm_flow_file'], df_flow.values, fmt='%d %d %.1f %.1f %.1f %.1f %.1f %.5f')
+# last value (velocity) originally %.2f, but with lower min flow for reservoirs, set to %.5f
 
 #=== Delete dataframes ===#
 del da_depth, da_width, da_velocity

@@ -39,6 +39,10 @@ do nr=1,nreach
         if(u(no_heat).lt.0.01) u(no_heat)=0.01
         if(ncell.ne.no_heat) write(*,*) 'Flow file error',ncell,no_heat 
         !
+
+
+  if(ncell .eq. 902) print *,'nnd',nnd, 'ncell', ncell
+
         read(36,*) ncell &  !  heat file
             ,dbt(no_heat),ea(no_heat) &
             ,Q_ns(no_heat),Q_na(no_heat),rho &
@@ -110,6 +114,7 @@ do nr=1,nreach
   ! dt(no_heat)=dx(ncell)/u(no_heat)
 
 ! print *,'nd',nnd,'no_heat',no_heat, 'ncell', ncell, 'dx(ncell)', dx(ncell), 'u(no_heat)', u(no_heat), 'dt',dt(no_heat)
+
 
 !if(nnd.gt.300) stop !13505
 end do
