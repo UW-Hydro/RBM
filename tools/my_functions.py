@@ -77,7 +77,7 @@ def config_type(value):
 #============================================================#
 #============================================================#
 
-def modify_hydraulics_at_reservoir(lat, lon, depth, width, year_operated, da_depth, da_width, da_velocity, da_flow, min_velocity):
+def modify_hydraulics_at_reservoir(lat, lon, depth, width, year_operated, da_depth, da_width, da_velocity, da_flow, min_velocity, min_depth):
     ''' This function modifies flow hydraulics at a reservoir grid cell
     Input:
         lat, lon: lat and lon of the grid cell of the reservoir [float]
@@ -109,7 +109,9 @@ def modify_hydraulics_at_reservoir(lat, lon, depth, width, year_operated, da_dep
         #=== Modify depth ===#
         s_depth = da_depth.loc[:,lat,lon].to_series()  # original depth
         dates_to_modify = s_depth.truncate(before=dt.datetime(year_operated,1,1)).index
-                            # dates after reservoir operation began
+                            # dates after reservoir operation begani
+        s_depth[s_depth<min_depth] = min_depth
+
         s_depth.loc[dates_to_modify] = depth  # modify depth
         #=== Modify width ===#
         s_width = da_width.loc[:,lat,lon].to_series()  # originalwidth 

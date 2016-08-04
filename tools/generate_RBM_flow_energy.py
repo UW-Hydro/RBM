@@ -117,6 +117,10 @@ da_velocity = da_flow / da_depth / da_width  # flow velocoty [ft/s]
 da_velocity.values[da_velocity.values<cfg['RBM_OPTIONS']['min_velocity']] = \
                                                 cfg['RBM_OPTIONS']['min_velocity']
 
+#=== Set minimum velocity ===#
+da_depth.values[da_depth.values<cfg['RBM_OPTIONS']['min_depth']] = \
+                                                cfg['RBM_OPTIONS']['min_depth']
+
 #=== Close dataset ===#
 ds_flow.close()
 del ds_flow
@@ -142,7 +146,8 @@ if cfg['RESERVOIR']['if_reservoir']:  # If consider reservoir in RBM model
                                                     lat, lon, depth, width, \
                                                     year_operated, da_depth, \
                                                     da_width, da_velocity, da_flow, \
-                                                    cfg['RBM_OPTIONS']['min_velocity'])
+                                                    cfg['RBM_OPTIONS']['min_velocity'], \
+                                                    cfg['RBM_OPTIONS']['min_depth'])
 
 #====================================================#
 # Rearrange data - flow
