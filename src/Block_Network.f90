@@ -12,7 +12,7 @@ Module Block_Network
 !
     integer:: flow_cells,heat_cells
     integer:: ndays,nreach,ntrb,nwpd
-    integer,parameter::ns_max=200
+    integer,parameter::ns_max=1000
     integer:: start_year,end_year
     integer:: n_default=2
 

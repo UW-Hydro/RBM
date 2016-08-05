@@ -26,6 +26,10 @@ integer, dimension(3):: nterp=(/3,4,3/)
                  T_0 = temp_out_i(res_num(nr,segment_cell(nr,i)))  !  
                  res_upstreamx = .true.
                  resx2 = res_num(nr,segment_cell(nr,nseg))
+
+!   if(nr .eq. 299) write(*,*) 'start up of res, finish down of res', 'nr',nr,'nseg',nseg,  'segment_cell' &
+!        ,segment_cell(nr,nseg),'resx2',resx2
+
                 end if
                end do
 ! print *, 'nseg', nseg, 'ns',ns,'T_0',T_0, 'parcel started upstream of res, finished downstream of res'
@@ -36,6 +40,7 @@ integer, dimension(3):: nterp=(/3,4,3/)
             T_0 = T_head(nr)
             res_upstreamx = .false.
             resx2 = 0
+         !   if(nr .eq. 299) write(*,*) 'parcel started at headw'
             !  print *,'ncell',ncell, 'T_0', T_0
 !            if(ns .eq. 3) print *,'headw',  'T_head',   T_head(nr)
 ! print *, 'nseg', nseg, 'ns',ns,'T_0',T_0, 'parcel started at headw'
@@ -73,6 +78,7 @@ integer, dimension(3):: nterp=(/3,4,3/)
           else
             resx2 = 0
             res_upstreamx = .false.
+  !          if(nr .eq. 299) write(*,*) 'parcel started and ended in river'
 
 ! print *,'res_pres', res_pres(nr,1:5),'any-res pres', any(res_pres(nr,segment_cell(nr,ns):segment_cell(nr,nseg)) )
             !

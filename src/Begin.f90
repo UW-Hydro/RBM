@@ -210,8 +210,8 @@ do nr=1,nreach !loop through all the reaches from first to last reach
       no_tribs(trib_cell)=no_tribs(trib_cell)+1
       trib(trib_cell,no_tribs(trib_cell))=nr
       ! if(no_cells(nr) == heat_cells) no_tribs(trib_cell) = 0
-      print *, 'trib_cell', trib_cell
-      print *,'trib cell present:    ' , 'no_cells(nr)', no_cells(nr), 'no_tribs', no_tribs(trib_cell)
+   !   print *, 'trib_cell', trib_cell
+   !   print *,'trib cell present:    ' , 'no_cells(nr)', no_cells(nr), 'no_tribs', no_tribs(trib_cell)
     end if
 
 
@@ -320,7 +320,7 @@ do nr=1,nreach !loop through all the reaches from first to last reach
          no_celm(nr)=nseg
          segment_cell(nr,nseg)=ncell
          cell_segment(nr,ncell) = nseg
-          print *, 'nseg', nseg
+      !    print *, 'nseg', nseg
          x_dist(nr,nseg)=5280.*rmile1
     !     if(reservoir) x_dist_res(nr,nseg) = 5280.*rmile1
 !    print *,'nndlta',  nndlta, 'nr',nr,'nseg',nseg, 'x_dist', x_dist(nr,(nseg-1):nseg)
@@ -331,9 +331,9 @@ do nr=1,nreach !loop through all the reaches from first to last reach
     if(ns_max_test.lt.nseg) ns_max_test=nseg
 
         if(any(res_pres(nr,:))) then
-                print *, 'nr',nr,'print res'
+       !         print *, 'nr',nr,'print res'
         else 
-                print *,'nr',nr, 'no res'
+        !        print *,'nr',nr, 'no res'
         end if
 
 !   print *, 'nodes_x for reach  ', nr, nodes_x(nr,1:15)
@@ -343,7 +343,6 @@ do nr=1,nreach !loop through all the reaches from first to last reach
 !
 end do
 
-! print *, no_celm
 
 if(ns_max_test.gt.ns_max) then
   write(*,*) 'RBM is terminating because'

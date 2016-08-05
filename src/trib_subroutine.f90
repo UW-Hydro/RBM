@@ -71,9 +71,10 @@ logical :: DONE
               end if
             end if
 
+   ! write(*,*) 'trib subroutine: post thermal inflow nd ', nd
           nseg=nseg+1  ! so nseg will be next segment down stream
           nncell=segment_cell(nr,nseg)  ! node for next node downstream
-
+! if(nr.eq.299 .and. nseg .gt. 150)  write(*,*) 'nr',nr,'nseg',nseg,'segment_cell(nr,nseg)', segment_cell(nr,nseg)
           !
           !     Reset tributary flag if this is a new celln_write
           !
@@ -82,8 +83,14 @@ logical :: DONE
             DONE=.FALSE.
           end if
 
+  !  write(*,*) 'trib subroutine: pre dt_calc '
+  !  write(*,*) 'dt_calc', dt_calc,  'nncell',nncell
+
           ! ------ add time to pass between segments to total time ------
           dt_calc=dt(nncell)
+
+  !  write(*,*) 'trib subroutine: post dt_calc'
+
           dt_total=dt_total+dt_calc
 !    print *, 'segment in end of trib subroutine', ns, 'nr_trib', nr_trib
 

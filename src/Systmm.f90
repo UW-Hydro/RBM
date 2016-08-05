@@ -267,7 +267,6 @@ do nyear=start_year,end_year
             ncell=segment_cell(nr,ns) !cell of parcel for this time step
             nseg=nstrt_elm(ns) !segment water was at previous time step
             npndx=2
-            
             !
             !      subroutine to establish where parcel started
             !
@@ -283,9 +282,16 @@ do nyear=start_year,end_year
 
             if(reservoir .and. res_upstreamx .and. .not. res_pres(nr,ncell)) then
               nm_start = ns - cell_segment(nr,res_end_node(resx2))
+
+!  write(*,*) 'parcel up res  ', 'nr:',nr,'ns:',ns,'res_upstreamx',res_upstreamx,'cell_segment'  & 
+!      , cell_segment(nr,res_end_node(resx2)),'resx2',resx2 &
+!        ,'res_end',res_end_node(resx2), 'ncell',ncell,'nncell',nncell
+
             else
               nm_start = no_dt(ns)
             end if
+ !if(nr.eq.299 .and. res_pres(nr,ncell))  write(*,*) 'nr',nr,'nm_start',nm_start, 'ns',ns,'no_dt(ns)',no_dt(ns)
+
 
             do nm=nm_start,1,-1  ! cycle through each segment parcel passed through
               z=depth(nncell)
@@ -299,10 +305,10 @@ do nyear=start_year,end_year
               T_0=T_0+q_dot*dt_calc !adds heat added only during time parcel passed this segment
 
               if(T_0.lt.0.0) T_0=0.0
+  !  write(*,*) 'pre trib subroutine      nd:  ', nd
 
              call trib_subroutine(nncell,ncell0, T_0,nr_trib, nr & 
                           ,ns, nseg, n2, DONE, dt_calc, dt_total)
-
             end do ! end loop cycling through all segments parcel passed through
 
           end if   ! end river if loop
@@ -311,6 +317,7 @@ do nyear=start_year,end_year
         !                     Reservoir Subroutine 
         !
         ! -----------------------------------------------------------------------
+ !   write(*,*) 'pre reservoir subroutine'
 
           ! -------------  if cell is in reservoir ----------------
           if(reservoir .and. res_pres(nr,segment_cell(nr,ns))) then
