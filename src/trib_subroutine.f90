@@ -63,10 +63,10 @@ logical :: DONE
 
             if(source) then
               if(source_cell_tf(nncell)) then
-                temp_source = T_0 + 6  ! just adding 5 deg C to flow
+                temp_source = T_0 + 5  ! just adding 5 deg C to flow
                 sourcex = source_num_cell(nncell)
-               ! T_0=(Q1*T_0 + flow_source(sourcex)  * temp_source) / (Q1 + flow_source(sourcex) )
-                T_0=(Q1*T_0 + 1000  * temp_source) / (Q1 + 1000 ) ! John Sevier has flow of 1000 cfs
+                T_0=(Q1*T_0 + flow_source(sourcex)  * temp_source) / (Q1 + flow_source(sourcex) )
+               ! T_0=(Q1*T_0 + 1000  * temp_source) / (Q1 + 1000 ) ! John Sevier has flow of 1000 cfs
                ! print *, 'nncell', nncell, 'ncell0', ncell0
               end if
             end if
