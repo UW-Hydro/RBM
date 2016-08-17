@@ -25,7 +25,7 @@ integer, dimension(3):: nterp=(/3,4,3/)
                 if(res_pres(nr,segment_cell(nr,i))) then
                  T_0 = temp_out_i(res_num(nr,segment_cell(nr,i)))  !  
                  res_upstreamx = .true.
-                 resx2 = res_num(nr,segment_cell(nr,nseg))
+                 resx2 = res_num(nr,segment_cell(nr,i))
 
 !   if(nr .eq. 299) write(*,*) 'start up of res, finish down of res', 'nr',nr,'nseg',nseg,  'segment_cell' &
 !        ,segment_cell(nr,nseg),'resx2',resx2
