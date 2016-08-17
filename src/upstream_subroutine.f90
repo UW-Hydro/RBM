@@ -27,8 +27,8 @@ integer, dimension(3):: nterp=(/3,4,3/)
                  res_upstreamx = .true.
                  resx2 = res_num(nr,segment_cell(nr,i))
 
-!   if(nr .eq. 299) write(*,*) 'start up of res, finish down of res', 'nr',nr,'nseg',nseg,  'segment_cell' &
-!        ,segment_cell(nr,nseg),'resx2',resx2
+  !  if(ncell .eq. 174) write(*,*) 'start up of res, finish down of res', 'nr',nr,'nseg',nseg,  'segment_cell' &
+  !      ,segment_cell(nr,nseg),'resx2',resx2
 
                 end if
                end do

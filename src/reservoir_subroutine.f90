@@ -84,6 +84,7 @@ SUBROUTINE reservoir_subroutine(nresx, nd, q_surf,time, nd_year, nyear)
 
          !----- update epilimnion volume for next time step -------
           T_epil(nresx) = T_epil(nresx) + temp_change_ep(nresx)
+          if(T_epil(nresx) .lt. 0) T_epil(nresx) =  0.5 
 
       ! ------------------ hypolimnion ----------------
 
@@ -92,7 +93,7 @@ SUBROUTINE reservoir_subroutine(nresx, nd, q_surf,time, nd_year, nyear)
 
          !----- update epilimnion volume for next time step -------
           T_hypo(nresx) = T_hypo(nresx) +  temp_change_hyp(nresx)
- 
+          if(T_hypo(nresx) .lt. 0) T_hypo(nresx) = 0.5 
     !---------- calculate combined (hypo. and epil.) temperature of outflow -----
       epix = T_epil(nresx)*(flow_out_epi_x/outflow_x)  ! portion of temperature from epilim. 
       hypox= T_hypo(nresx)*(flow_out_hyp_x/outflow_x)  ! portion of temperature from hypol.
@@ -107,7 +108,7 @@ SUBROUTINE reservoir_subroutine(nresx, nd, q_surf,time, nd_year, nyear)
    !   T_res(nresx) = T_epil(nresx)
 
  ! non-essential - only to print out specific calculated variables
- if(nresx.eq.4) then
+ if(nresx.eq.17) then
  
   write(48,*),time,advec_in_epix, flow_in_epi_x, T_res_in(nresx),  T_epil(nresx), volume_e_x(nresx) &
         , advec_in_hypx, flow_in_hyp_x, T_hypo(nresx), volume_h_x(nresx), flow_epi_hyp_x, temp_out(nresx)&

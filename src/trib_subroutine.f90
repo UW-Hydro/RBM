@@ -1,5 +1,5 @@
 subroutine trib_subroutine(nncell,ncell0, T_0,nr_trib & 
-      , nr, ns, nseg, n2, DONE, dt_calc, dt_total)
+      , nr, ns, nseg, n2, DONE, dt_calc, dt_total, ncell)
 use Block_Reservoir
 use Block_Hydro
 use Block_Network
@@ -8,7 +8,7 @@ use Block_Flow
 implicit none
 
 real ::Q1, T_0, Q2, T_dist, dt_calc,dt_total, temp_source
-integer :: ntribs, nncell,nr_trib, nr, ns, nseg, n2, ncell0
+integer :: ntribs, nncell,nr_trib, nr, ns, nseg, n2, ncell0, ncell
 logical :: DONE
 
             !
@@ -37,7 +37,8 @@ logical :: DONE
                   T_0=(Q1*T_0+Q_trib(nr_trib)*T_trib(nr_trib))/Q2 !adjust temp based on trib temp/flow
 
 
-             !   if(ns == 9) print *, 'T_0 after a trib flow', T_0
+      ! if(ncell == 941) print *,'T_0',T_0,'Q1',Q1,'Q_trib',Q_trib(nr_trib),'T_trib' &
+      !    ,T_trib(nr_trib),'Q_2',Q2
 
                 end if
                 !

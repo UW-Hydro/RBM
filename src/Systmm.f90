@@ -298,7 +298,6 @@ do nyear=start_year,end_year
               nd2 = nd  ! cut out later, just to print day in energy module
               call energy(T_0,q_surf,nncell, ns, nyear, nd2)
               q_dot=(q_surf/(z*rfac))
- 
         ! ################ This is specially for simple energy test###########!                
         !     q_dot = 0  ! ONLY for the simple test
 
@@ -308,7 +307,7 @@ do nyear=start_year,end_year
   !  write(*,*) 'pre trib subroutine      nd:  ', nd
 
              call trib_subroutine(nncell,ncell0, T_0,nr_trib, nr & 
-                          ,ns, nseg, n2, DONE, dt_calc, dt_total)
+                          ,ns, nseg, n2, DONE, dt_calc, dt_total, ncell)
             end do ! end loop cycling through all segments parcel passed through
 
           end if   ! end river if loop
