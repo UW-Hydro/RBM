@@ -3,10 +3,15 @@ language: fortran
 notifications:
     email: false
 
-compiler: gfortran
+compiler: gfortran-6
 os: linux
 env: TESTID='rbm_linux'
-
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - gfortran-6
 before_install:
   - source ci/rbm_install_utils
 script:
