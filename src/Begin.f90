@@ -1,38 +1,3 @@
-module BGIN
-!
-implicit none
-!
-! Integer variables 
-!
-    integer:: nwpd
-!
-! Character variables
-!
-    character (len=8) :: end_date,start_date     
-    character (len=8) :: lat
-    character (len=10):: long
-!
-! Integer variables
-!
-integer:: start_year,start_month,start_day
-integer:: end_year,end_month,end_day
-integer:: head_name,trib_cell
-integer:: jul_start,main_stem,nyear1,nyear2,nc,ncell,nseg
-integer:: ns_max_test,nndlta,node,ncol,nrow,nr,cum_sgmnt
-!
-! Logical variables
-!
-logical:: first_cell,source
-!
-! Real variables
-!
-  real :: rmile0,rmile1,xwpd
-!
-
-!
-contains
-!
-!
 Subroutine BEGIN(param_file,spatial_file)
 !
 use Block_Energy
@@ -40,10 +5,22 @@ use Block_Hydro
 use Block_Network
 !
 implicit none
-!
+!    
+    character (len=8) :: end_date,start_date     
+    character (len=8) :: lat
+    character (len=10):: long
     character (len=200):: param_file,source_file,spatial_file
-    integer:: Julian
 !
+    integer:: Julian
+    integer:: head_name,trib_cell
+    integer:: jul_start,main_stem,nyear1,nyear2,nc,ncell,nseg
+    integer:: ns_max_test,nndlta,node,ncol,nrow,nr,cum_sgmnt
+!
+    logical:: first_cell,source
+!
+    real :: rmile0,rmile1,xwpd
+!
+    real,parameter   :: miles_to_ft=5280.
 !
 !   Mohseni parameters, if used
 !
@@ -82,7 +59,10 @@ read(90,*) nreach,flow_cells,heat_cells,source
  no_tribs=0
  allocate(trib(heat_cells,ns_max))
  trib=0
+ allocate (conflnce(heat_cells,10))
+ conflnce=0
  allocate(head_cell(nreach))
+ allocate(reach_cell(nreach,10))
  allocate(segment_cell(nreach,ns_max))
  allocate(x_dist(nreach,0:ns_max))
 !
@@ -106,7 +86,6 @@ ns_max_test=-1
 !     Card Group IIb. Reach characteristics
 !
 do nr=1,nreach
-<<<<<<< HEAD
 !
 !     Initialize NSEG, the total number of segments in this reach
 !
@@ -119,41 +98,19 @@ do nr=1,nreach
 !     the river mile of the headwaters.
 !
   read(90,'(i5,11x,i4,10x,i5,15x,i5,15x,f10.0,i5)') no_cells(nr) &
-=======
-!
-!     Initialize NSEG, the total number of segments in this reach
-!
-  nseg=0
-  write(*,*) ' Starting to read reach ',nr
-!**************************************************************************
-!
-!                 NOTES FOR TWO-LAYER MODEL
-!
-!**************************************************************************
-!
-! It is in the following section, where the NETWORK file is read that the
-! logic for identifying riverine and reservoir cells should happen.It will
-! probably also be necessary to update BLOCK_NETWORK.f90 to manage this.
-! Other possibilities exist, of course.  
-! JRY 1/14/2016
-!
-!
-!     Read the number of cells in this reach, the headwater #,
-!     the number of the cell where it enters the next higher order stream,
-!     the headwater number of the next higher order stream it enters, and
-!     the river mile of the headwaters.
-!
-  read(90,'(i5,11x,i4,10x,i5,15x,i5,15x,f10.0,i5)') no_cells(nr) &
->>>>>>> 569f815d0feb1dc472275fbe36b0b77d6271321f
       ,head_name,trib_cell,main_stem,rmile0
+!
+! Set boundary distance
+!
+      x_dist(nr,0)=miles_to_ft*rmile0
 !
 !     If this is reach that is tributary to cell TRIB_CELL, give it the
 !     pointer TRIB(TRIB_CELL) the index of this reach for further use.
 !     Also keep track of the total number of tributaries for this cell
 !
   if (trib_cell.gt.0) then
-    no_tribs(trib_cell)=no_tribs(trib_cell)+1
-    trib(trib_cell,no_tribs(trib_cell))=nr
+    no_tribs(trib_cell) = no_tribs(trib_cell)+1
+    trib(trib_cell,no_tribs(trib_cell)) = nr
   end if
 !
 !     Reading Mohseni parameters for each headwaters (UW_JRY_2011/06/18)
@@ -166,6 +123,10 @@ do nr=1,nreach
   first_cell=.true.
   do nc=1,no_cells(nr)
     ncell=ncell+1
+!
+!   Relate the cell number from the linear list to the local cell number
+!
+    reach_cell(nr,nc)=ncell
 !
 !   Read the data for point sources
 !
@@ -220,9 +181,19 @@ do nr=1,nreach
     segment_cell(nr,nseg)=ncell
     x_dist(nr,nseg)=5280.*rmile1
 !
-! End of segment loop
+! End of cell and segment loop
 !
   end do
+!
+! If this is a reach that is tributary to another, set the confluence cell to the previous 
+! cell. This is necessary because the last cell in the reach has the same cell number
+! as that of the cell it enters. This is to account for the half portion of the cell the
+! the parcel traverses to the center of the grid.
+!
+if (trib_cell .gt. 0) then
+    conflnce(trib_cell,no_tribs(trib_cell)) = ncell-1
+end if
+
 if(ns_max_test.lt.nseg) ns_max_test=nseg
 !
 ! End of reach loop
@@ -246,5 +217,3 @@ dt_comp=86400./xwpd
 !
 !
 end subroutine BEGIN
-!
-   END Module BGIN
