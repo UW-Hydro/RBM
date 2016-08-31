@@ -8,13 +8,13 @@ os: linux
 env: TESTID='rbm_linux'
 
 before_install:
-  - source ci/summa_install_utils
-  - summa_before_install
+  - source ci/rbm_install_util
+  - rbm_before_install
 install:
-   - summa_install
+   - rbm_install
 script:
-  - summa_script
+  - rbm_script
 after_success:
-  - summa_after_success
+  - rbm_after_success
 after_failure:
-  - summa_after_failure
+  - rbm_after_failure
