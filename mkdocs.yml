@@ -24,6 +24,8 @@ pages:
     - 'Links': 'links.md'
 - Documentation:
     - 'User Guide': 'Documentation/UserGuide.md'
+    - 'Tutorial':   'Documentation/tutorial.md'
+    - 'Steps to run RBM': 'Documentation/run_RBM.md'
 - Development:
     - 'Development': 'Development/ModelDevelopment.md'
     - 'Release Notes': 'Development/ReleaseNotes.md'

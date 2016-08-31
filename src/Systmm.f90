@@ -1,31 +1,3 @@
-Module SYSTM
-!
-integer:: ncell,nncell,ncell0,nc_head,no_flow,no_heat
-integer:: nc,nd,ndd,nm,nr,ns
-integer:: nr_trib,ntrb,ntribs
-integer:: nrec_flow,nrec_heat
-integer:: n1,n2,nnd,nobs,ndays,nyear,nd_year,ntmp
-integer:: npart,nseg,nwpd 
-real::    dt_comp,dt_calc,dt_total,hpd,Q1,Q2,q_dot,q_surf,z
-real   :: rminsmooth
-real   :: T_0,T_dist
-real(8):: time
-real   :: x,x_bndry,xd,xdd,xd_year,x_head,xwpd,year
-real,dimension(:),allocatable:: T_head,T_smth,T_trib
-real,dimension(:,:,:),allocatable:: temp
-!
-! Indices for lagrangian interpolation
-!
-integer:: npndx,ntrp
-integer, dimension(3):: ndltp=(/-2,-3,-3/)
-integer, dimension(3):: nterp=(/3,4,3/)
-
-!
-real, parameter:: pi=3.14159,rfac=304.8
-!
-!
-contains
-!
 SUBROUTINE SYSTMM(temp_file,param_file)
 !
 use Block_Energy
@@ -33,16 +5,39 @@ use Block_Hydro
 use Block_Network
 !
 Implicit None
+! 
 !
 character (len=200):: temp_file
 character (len=200):: param_file
+! 
+integer          :: ncell,nncell,ncell0,nc_head,no_flow,no_heat
+integer          :: nc,nd,ndd,nm,nr,ns
+integer          :: nr_trib,ntribs
+integer          :: nrec_flow,nrec_heat
+integer          :: n1,n2,nnd,nobs,nyear,nd_year,ntmp
+integer          :: npart,nseg,nx_s,nx_part,nx_head
 !
-integer::njb
+! Indices for lagrangian interpolation
 !
-logical:: DONE,LEAP_YEAR
+integer              :: njb,npndx,ntrp
+integer, dimension(3):: ndltp=(/-2,-3,-3/)
+integer, dimension(3):: nterp=(/3,4,3/)
+
 !
+real             :: dt_calc,dt_total,hpd,Q1,Q2,q_dot,q_surf,z
+real             :: rminsmooth
+real             :: T_0,T_dist
+real(8)          :: time
+real             :: x,xd,xdd,xd_year,xwpd,year
 real             :: tntrp
+real             :: dt_ttotal
 real,dimension(4):: ta,xa
+!
+real,dimension(:),allocatable     :: T_head,T_smth,T_trib
+logical:: LEAP_YEAR
+
+logical:: DONE
+!
 !
 ! Allocate the arrays
 !
@@ -75,7 +70,7 @@ temp=0.5
 ! Initialize headwaters temperatures
 !
 T_head=4.0
-!!
+!
 !
 ! Initialize smoothed air temperatures for estimating headwaters temperatures
 !
@@ -135,7 +130,6 @@ do nyear=start_year,end_year
 !     Begin cycling through the reaches
 !
       do nr=1,nreach
-
 !
         nc_head=segment_cell(nr,1)
 !
@@ -146,22 +140,6 @@ do nyear=start_year,end_year
 !     
 !     Variable Mohseni parameters (UW_JRY_2011/06/16)
 ! 
-!******************************************************************************
-!                            TWO-LAYER MODEL NOTE
-!******************************************************************************
-!
-! It it at this point that the upstream (headwaters in the original, but either
-! headwaters or reservoirs no) are initialized
-
-! There should be a fork here, based on location of either headwaters or reservoir
-! outlets, to use either the Mohseni relations for headwaters or the simulated
-! temperature from the reservoir. Remember also that the outflow from the reservoir
-! must also be accounted for, although it need not be done here.
-! It might be a good idea, though it could also be done elsewhere to consider
-! inserting the two-layer model at this point JRY 1/14/2016
-! 
-!******************************************************************************
-!
         T_head(nr)=mu(nr)+(alphaMu(nr) &
                   /(1.+exp(gmma(nr)*(beta(nr)-T_smth(nr)))))  
 !
@@ -169,27 +147,20 @@ do nyear=start_year,end_year
       temp(nr,-1,n1)=T_head(nr)
       temp(nr,-2,n1)=T_head(nr)
       temp(nr,no_celm(nr)+1,n1)=temp(nr,no_celm(nr),n1)
-      x_head=x_dist(nr,0)
-      x_bndry=x_head-50.0
+!
+! Begin cell computational loop
+!
+        do ns=1,no_celm(nr)
+! 
+        DONE=.FALSE.
+  
+! Testing new code 8/8/2016
 !
 !     Establish particle tracks
 !
-!******************************************************************************
-!                            TWO-LAYER MODEL NOTE
-!******************************************************************************
+      call Particle_Track(nr,ns,nx_s,nx_head)
+
 !
-! It it at this point that the particle tracking is performed and the argument
-! in the subroutine call must now reflect what the next upstream endpoint is, 
-! be it a headwaters or a reservoir outlet. It may also be necessary to create
-! an argument that specifies the starting point. JRY 1/14/2016
-!******************************************************************************
-! 
-!
-      call Particle_Track(nr,x_head,x_bndry)
-!
-!
-        DONE=.FALSE.
-        do ns=1,no_celm(nr)
           ncell=segment_cell(nr,ns)
 !
 !     Now do the third-order interpolation to
@@ -203,42 +174,29 @@ do nyear=start_year,end_year
 !
 !     Interpolation inside the domain
 !
-          npndx=2
+          npndx=3
 !
-!******************************************************************************
-!                            TWO-LAYER MODEL NOTE
-!******************************************************************************
+!     Interpolation at the upstream boundary if the
+!     parcel has reached that boundary
 !
-!   Something should probably happen here to accommodate both kinds of boundaries,
-!   riverine and reservoir.  JRY 1/14/2016
-!
-!
-!     Interpolation at the upstream boundary
-!
-!
-          if(nseg.eq.1) then
+          if(nx_head.eq.0) then
             T_0 = T_head(nr)
           else 
-!
+
 !
 !     Interpolation at the downstream boundary
 !
-!******************************************************************************
-!                            TWO-LAYER MODEL NOTE
-!******************************************************************************
-!
-!       no_celm(nr) might now contain information about the type of cell, depending
-!       on how the logic is managed. JRY 1/14/2016
-!
-!
-          if(nseg.eq.no_celm(nr)) npndx=3
+          if(nseg.eq.no_celm(nr)) npndx=2
 !
           do ntrp=1,nterp(npndx)
             npart=nseg+ntrp+ndltp(npndx)
             xa(ntrp)=x_dist(nr,npart)
             ta(ntrp)=temp(nr,npart,n1)
           end do
-          x=x_part(ns)
+!
+! Start the cell counter for nx_s
+!
+          x=x_part(nx_s)
 !
 !     Call the interpolation function
 !
@@ -247,25 +205,41 @@ do nyear=start_year,end_year
 !
 300 continue
 350 continue
-!          dt_calc=dt_part(ns)
+! 
           nncell=segment_cell(nr,nstrt_elm(ns))
 !
 !    Set NCELL0 for purposes of tributary input
 !
           ncell0=nncell
-          dt_total=dt_calc
+          dt_total=0.0
           do nm=no_dt(ns),1,-1
+            dt_calc=dt_part(nm)
             z=depth(nncell)
             call energy(T_0,q_surf,nncell)
             q_dot=(q_surf/(z*rfac))
             T_0=T_0+q_dot*dt_calc
             if(T_0.lt.0.0) T_0=0.0
 !
-!     Look for a tributary.
+! Inflow
 !
             Q1=Q_in(nncell)
+!
+! Account for distributed flows
+!
+!
+            if(Q_diff(nncell).gt.0) then
+              Q2=Q1+Q_diff(nncell)
+              T_dist=T_head(nr)
+              T_0=(Q1*T_0+Q_diff(nncell)*T_dist)/Q2
+if(nr.eq.7) write(26,*) 'Dist ',Q1,Q2,T_0,T_dist
+              Q1=Q2
+            end if
+!
+!     Look for a tributary.
+!
             ntribs=no_tribs(nncell)
             if(ntribs.gt.0.and..not.DONE) then
+!
               do ntrb=1,ntribs
                 nr_trib=trib(nncell,ntrb)
                 if(Q_trib(nr_trib).gt.0.0) then
@@ -278,13 +252,8 @@ do nyear=start_year,end_year
               end do
               DONE=.TRUE.
             end if
-            if(ntribs.eq.0.and.Q_diff(nncell).gt.0) then
-! 
-              Q2=Q1+Q_diff(nncell)
-              T_dist=T_head(nr)
-              T_0=(Q1*T_0+Q_diff(nncell)*T_dist)/Q2
-              Q1=Q2
-            end if
+!
+
 500 continue
             nseg=nseg+1
             nncell=segment_cell(nr,nseg)
@@ -295,7 +264,7 @@ do nyear=start_year,end_year
               ncell0=nncell
               DONE=.FALSE.
             end if
-            dt_calc=dt(nncell)
+            dt_calc=dt_part(nm)
             dt_total=dt_total+dt_calc
           end do
           if (T_0.lt.0.5) T_0=0.5
@@ -342,4 +311,3 @@ do nyear=start_year,end_year
 !
 950 return
 end SUBROUTINE SYSTMM
-end module SYSTM

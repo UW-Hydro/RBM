@@ -7,7 +7,7 @@ USE Block_Network
 IMPLICIT NONE
 !
 integer:: nc,ncell,nnd,no_flow,no_heat,nr,nrec_flow,nrec_heat
-real:: Q_avg
+real:: Q_avg,Q_dmmy
 
 
 no_flow=0
@@ -76,11 +76,16 @@ do nr=1,nreach
 !  take the values of the segment to which it is tributary
 !
   Q_in(ncell)=Q_out(ncell-1)
-!  Q_out(ncell)=Q_in(ncell-1)
+  Q_out(ncell)=Q_in(ncell-1)
   Q_diff(no_heat)=0.0
   u(no_heat)=u(no_heat-1)
   depth(no_heat)=depth(no_heat-1)
   width(no_heat)=width(no_heat-1)
   dt(no_heat)=0.5*dx(ncell)/u(no_heat)
 end do
+!
+! Call the water balance subroutine
+!
+  call Water_Balance
+!
 END SUBROUTINE Read_Forcing

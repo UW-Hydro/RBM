@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+
+set -e
+
+function rbm_script {
+    echo rbm_script
+    cd ${TRAVIS_BUILD_DIR}/src
+    make
+}
+
+function rbm_after_success {
+  echo rbm_after_success
+  echo "rbm build succeeded"
+}
+
+function rbm_after_failure {
+  echo rbm_after_failure
+  echo "rbm build failed"
+}

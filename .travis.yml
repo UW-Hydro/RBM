@@ -1,0 +1,20 @@
+sudo: false # use container-based build
+language: fortran
+notifications:
+    email: false
+
+compiler: gfortran
+os: linux
+env: TESTID='rbm_linux'
+addons:
+  apt:
+    packages:
+      - gfortran
+before_install:
+  - source ci/rbm_install_utils
+script:
+  - rbm_script
+after_success:
+  - rbm_after_success
+after_failure:
+  - rbm_after_failure
