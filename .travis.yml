@@ -8,10 +8,7 @@ os: linux
 env: TESTID='rbm_linux'
 
 before_install:
-  - source ci/rbm_install_util
-  - rbm_before_install
-install:
-   - rbm_install
+  - source ci/rbm_install_utils
 script:
   - rbm_script
 after_success:
