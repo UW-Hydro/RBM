@@ -1,0 +1,20 @@
+sudo: false # use container-based build
+language: fortran
+notifications:
+    email: false
+
+compiler: gfortran
+os: linux
+env: TESTID='rbm_linux'
+
+before_install:
+  - source ci/summa_install_utils
+  - summa_before_install
+install:
+   - summa_install
+script:
+  - summa_script
+after_success:
+  - summa_after_success
+after_failure:
+  - summa_after_failure
