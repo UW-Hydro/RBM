@@ -3,7 +3,8 @@
 function rbm_script {
     echo rbm_script
     cd ${TRAVIS_BUILD_DIR}/src
-    make
+    which gfortran
+    make &> make.log
 }
 
 function rbm_after_success {
