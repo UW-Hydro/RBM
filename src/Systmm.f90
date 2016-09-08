@@ -299,8 +299,8 @@ do nyear=start_year,end_year
               call energy(T_0,q_surf,nncell, ns, nyear, nd2)
               q_dot=(q_surf/(z*rfac))
 
--        ! ################ This is specially for simple energy test###########!                
--        !     q_dot = 0  ! ONLY for the simple test
+        ! ################ This is specially for simple energy test###########!                
+        !     q_dot = 0  ! ONLY for the simple test
 
               T_0=T_0+q_dot*dt_calc !adds heat added only during time parcel passed this segment
 
