@@ -26,7 +26,7 @@ integer, dimension(3):: nterp=(/3,4,3/)
                  T_0 = temp_out_i(res_num(nr,segment_cell(nr,i)))  !  
                  res_upstreamx = .true.
                  resx2 = res_num(nr,segment_cell(nr,i))
-
+                 ncell0res = res_end_node(resx2)
   !  if(ncell .eq. 174) write(*,*) 'start up of res, finish down of res', 'nr',nr,'nseg',nseg,  'segment_cell' &
   !      ,segment_cell(nr,nseg),'resx2',resx2
 
@@ -51,6 +51,7 @@ integer, dimension(3):: nterp=(/3,4,3/)
             T_0 = temp_out_i(res_num(nr,segment_cell(nr,nseg)))  !  
             res_upstreamx = .true.
             resx2 = res_num(nr,segment_cell(nr,nseg))
+            ncell0res = res_end_node(resx2)
  ! print *, 'nseg', nseg, 'ns',ns,'T_0',T_0, 'parcel started in res, finished downstream'
 ! print *, 'res_num', res_num(nr,segment_cell(nr,nseg)),'T_0', T_0
 ! print *, 'temp_out', temp_out_i(:)
