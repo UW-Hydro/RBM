@@ -50,7 +50,7 @@ character (len=200 ):: heat_file
 character (len=200 ):: net_file
 character (len=200 ):: reservoir_file
 character (len=200 ):: temp_file
-character (len=200 ):: spatial_file
+character (len=200 ):: spatial_file, reservoir_output_file
 character (len=8)   :: start_data,end_data     
 integer iargc
 integer numarg
@@ -81,10 +81,12 @@ net_file      = TRIM(inPrefix)//'_Network_2' ! for regular Network file
 !net_file      = TRIM(inPrefix)//'_Network_2_noplant' ! for new file with no power plant information
 spatial_file  = TRIM(outPrefix)//'.Spat'
 temp_file     = TRIM(outPrefix)//'.Temp'
+reservoir_output_file     = TRIM(outPrefix)//'.Reservoir'
 !
         write(*,*) 'Spatial file: ',spatial_file         
         write(*,*) 'Network file    : ',net_file
         write(*,*) 'Temperature file: ',temp_file
+        write(*,*) 'Reservoir Output file: ',reservoir_output_file
         !
         OPEN(UNIT=90,FILE=TRIM(net_file),STATUS='OLD')
         !
@@ -127,7 +129,7 @@ CALL BEGIN(spatial_file)
 !
 !     SUBROUTINE SYSTMM performs the simulations
 !
-CALL SYSTMM(temp_file) ! (WUR_WF_MvV_2011/01/05)
+CALL SYSTMM(temp_file, reservoir_output_file) ! (WUR_WF_MvV_2011/01/05)
 !
 !     Close files after simulation is complete
 !

@@ -35,7 +35,7 @@ real, parameter:: pi=3.14159,rfac=304.8
 !
 contains
 !
-SUBROUTINE SYSTMM(temp_file)
+SUBROUTINE SYSTMM(temp_file, reservoir_output_file)
 !
 use Block_Energy
 use Block_Hydro
@@ -45,7 +45,7 @@ use Block_Flow
 !
 Implicit None
 !
-character (len=200):: temp_file
+character (len=200):: temp_file, reservoir_output_file
 !
 integer :: njb, resx2, i, j
 !
@@ -416,6 +416,12 @@ do nyear=start_year,end_year
   !  print *, 'temp_out Systmm', temp_out(:)
     temp_out_i(:) = temp_out(:) !set reservoir temperature for next time step
     write(32,*),time, T_epil(1:nres), T_hypo(1:nres) ! , flow_in_epi_x, flow_out_epi_x,
+
+         open(19,file=TRIM(reservoir_output_file),status='unknown')
+         write(19,'(2i6,2x,25f6.2,2x,25f6.2,2x,25f7.3,2x,25f7.3,2x,25f7.3,2x,25f7.3)') nyear,nd &
+          , T_epil(1:nres),T_hypo(1:nres),diffusion_tot(1:nres),advec_hyp_tot(1:nres),advec_epi_tot(1:nres), qsurf_tot(1:nres)
+
+
     !
     !     End of main loop (ND=1,365/366)
     !
