@@ -278,28 +278,23 @@ do nyear=start_year,end_year
             !      subroutine to establish where parcel started
             !
             call upstream_subroutine(nseg,nr,ns,T_0, npndx, npart, n1, ncell, resx2)        
-            nncell=segment_cell(nr,nstrt_elm(ns)) ! cell of previous time step
 
             T_0i = T_0  ! initial temperature, for writing energy_file
 
-            !    set ncell0 for purposes of tributary input
-            ncell0=nncell
-            dt_total=dt_calc  ! set total time to time parcel took to pass through first segment
 
             !    loop to set number of segments to cycle through based on if
             !   A) started in reservoir and B) finished downstream of reservoir
 
             if(reservoir .and. res_upstreamx .and. .not. res_pres(nr,ncell)) then
               nm_start = ns - cell_segment(nr,res_end_node(resx2))
-
-!  write(*,*) 'parcel up res  ', 'nr:',nr,'ns:',ns,'res_upstreamx',res_upstreamx,'cell_segment'  & 
-!      , cell_segment(nr,res_end_node(resx2)),'resx2',resx2 &
-!        ,'res_end',res_end_node(resx2), 'ncell',ncell,'nncell',nncell
-
+              nncell= ncell0res ! cell of previous time step
             else
               nm_start = no_dt(ns)
+              nncell=segment_cell(nr,nstrt_elm(ns)) ! cell of previous time step
             end if
- !if(nr.eq.299 .and. res_pres(nr,ncell))  write(*,*) 'nr',nr,'nm_start',nm_start, 'ns',ns,'no_dt(ns)',no_dt(ns)
+
+            ncell0=nncell  !    set ncell0 for purposes of tributary input
+            dt_total=dt_calc  ! set total time to time parcel took to pass through first segment
 
 
             do nm=nm_start,1,-1  ! cycle through each segment parcel passed through

@@ -19,7 +19,7 @@ module Block_Reservoir
         logical, dimension(:), allocatable :: flag_turnover 
         logical :: reservoir, res_upstreamx ! the first is TRUE or FALSE in fifth line of _Network file whether reserovirs are present 
         integer, dimension (:), allocatable :: xres, resx
-        integer :: xres2, nres, nm_start
+        integer :: xres2, nres, nm_start, ncell0res
         real, dimension(:), allocatable :: dx_res, dt_res
         real ::  advec_tot,q_surf_tot
         real, dimension (:), allocatable::diffusion_tot,advec_hyp_tot,advec_epi_tot, qsurf_tot
