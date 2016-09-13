@@ -99,7 +99,7 @@ allocate (depth_h(nres))
 allocate (surface_area(nres))
 allocate (T_epil(nres))
 T_epil = 10
-allocate (T_hypo(heat_cells))
+allocate (T_hypo(nres))
 T_hypo = 10
 allocate (stream_T_in(nres))
 stream_T_in = 10
