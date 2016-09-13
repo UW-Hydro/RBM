@@ -107,6 +107,13 @@ SUBROUTINE reservoir_subroutine(nresx, nd, q_surf,time, nd_year, nyear)
    ! ################ This is specially for energy test ###########!                
    !   T_res(nresx) = T_epil(nresx)
 
+
+   ! ---------------- write data for reservoir_file ----------
+      diffusion_tot(nresx) = dif_hyp_x
+      advec_hyp_tot(nresx) = advec_in_hypx
+      advec_epi_tot(nresx) = advec_in_epix
+      qsurf_tot(nresx) = energy_x
+
  ! non-essential - only to print out specific calculated variables
  if(nresx.eq.17) then
  

@@ -21,6 +21,8 @@ module Block_Reservoir
         integer, dimension (:), allocatable :: xres, resx
         integer :: xres2, nres, nm_start
         real, dimension(:), allocatable :: dx_res, dt_res
+        real ::  advec_tot,q_surf_tot
+        real, dimension (:), allocatable::diffusion_tot,advec_hyp_tot,advec_epi_tot, qsurf_tot
         ! real :: Q_res_in_1, T_res_in_1
 
         !----------------------------------------------------------------------

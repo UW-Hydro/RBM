@@ -35,7 +35,7 @@ real, parameter:: pi=3.14159,rfac=304.8
 !
 contains
 !
-SUBROUTINE SYSTMM(temp_file, reservoir_output_file)
+SUBROUTINE SYSTMM(temp_file, reservoir_output_file, energy_file)
 !
 use Block_Energy
 use Block_Hydro
@@ -45,11 +45,11 @@ use Block_Flow
 !
 Implicit None
 !
-character (len=200):: temp_file, reservoir_output_file
+character (len=200):: temp_file, reservoir_output_file, energy_file
 !
 integer :: njb, resx2, i, j
 !
-real :: tntrp, T_res_f
+real :: tntrp, T_res_f, T_0i
 !real,dimension(4):: ta,xa
 ! array for each reservoir for if inflow from that parcel
 ! to reservoir has been calculated
@@ -135,6 +135,12 @@ temp_out = 10
 allocate(temp_out_i(nres))
 temp_out_i = 10
 allocate (trib_res(heat_cells))
+allocate(diffusion_tot(nres))
+allocate(advec_hyp_tot(nres))
+allocate(advec_epi_tot(nres))
+allocate(qsurf_tot(nres))
+
+
 ![CONSIDER ADDING A SUBROUTINE THAT INTIALIZES VARIABLES LIKE:T_epil, T_hyp, K_z, etc - JRY]
 !
 ! Initialize some arrays
@@ -274,6 +280,8 @@ do nyear=start_year,end_year
             call upstream_subroutine(nseg,nr,ns,T_0, npndx, npart, n1, ncell, resx2)        
             nncell=segment_cell(nr,nstrt_elm(ns)) ! cell of previous time step
 
+            T_0i = T_0  ! initial temperature, for writing energy_file
+
             !    set ncell0 for purposes of tributary input
             ncell0=nncell
             dt_total=dt_calc  ! set total time to time parcel took to pass through first segment
@@ -397,6 +405,13 @@ do nyear=start_year,end_year
 
 
           call WRITE(time,nd,nr,ncell,ns,T_0,T_head(nr),dbt(ncell),Q_out(ncell))
+
+
+         open(18,file=TRIM(energy_file),status='unknown')
+         write(18, '(5i6,2x,f5.2,2x,f5.2,2x,f5.2,2x,f5.2)') nyear,nd,nr,ns,ncell,T_0i,T_0, q_surf_tot,advec_tot
+
+          advec_tot = 0
+          q_surf_tot = 0
           !
           !     End of computational element loop
           !
