@@ -257,7 +257,8 @@ do nyear=start_year,end_year
  
           ! if segment in river research, or the first segment of reservoir
          if((res_pres(nr,segment_cell(nr,ns)) .eqv. .false.)  .or. &
-            (any(segment_cell(nr,ns) == res_start_node(:)) .and. res_pres(nr,segment_cell(nr,ns-1)) .eqv. .false.) ) then
+            (any(segment_cell(nr,ns) == res_start_node(:)) .eqv. .false. .and. &
+             res_pres(nr,segment_cell(nr,ns-1)) .eqv. .false.) ) then
 
             !     Establish particle tracks
             call Particle_Track(nr,x_head,x_bndry) ! added 'nd' just for testing purposes
