@@ -48,7 +48,7 @@ character (len=200 ):: outPrefix
 character (len=200 ):: flow_file
 character (len=200 ):: heat_file
 character (len=200 ):: net_file
-character (len=200 ):: reservoir_file
+character (len=200 ):: reservoir_file, reservoir_storage_file
 character (len=200 ):: temp_file
 character (len=200 ):: spatial_file, reservoir_output_file, energy_file
 character (len=8)   :: start_data,end_data     
@@ -116,6 +116,13 @@ energy_file     = TRIM(outPrefix)//'.Energy'
         open(unit=37,FILE=TRIM(reservoir_file), ACCESS='SEQUENTIAL',FORM='FORMATTED', STATUS='old')
         !
         !
+        read(90,'(A)') reservoir_storage_file
+        !
+        !
+        open(unit=38,FILE=TRIM(reservoir_storage_file),ACCESS='SEQUENTIAL',FORM='FORMATTED', STATUS='old')
+        !
+        !
+
         !     Call systems programs to get started
         !
         !     SUBROUTINE BEGIN reads control file, sets up topology and
@@ -140,6 +147,7 @@ write(*,*) ' Closing files after simulation'
 CLOSE(35)
 CLOSE(36)
 CLOSE(37)
+CLOSE(38)
 CLOSE(90)
 STOP
 END PROGRAM RBM10_VIC

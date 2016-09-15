@@ -139,7 +139,8 @@ allocate(diffusion_tot(nres))
 allocate(advec_hyp_tot(nres))
 allocate(advec_epi_tot(nres))
 allocate(qsurf_tot(nres))
-
+allocate(reservoir_storage(nres))
+allocate(reservoir_storage_prev(nres))
 
 ![CONSIDER ADDING A SUBROUTINE THAT INTIALIZES VARIABLES LIKE:T_epil, T_hyp, K_z, etc - JRY]
 !
@@ -424,6 +425,9 @@ do nyear=start_year,end_year
       !
     end do   ! end day loop
   !  print *, 'temp_out Systmm', temp_out(:)
+
+    reservoir_storage_prev = reservoir_storage
+
     temp_out_i(:) = temp_out(:) !set reservoir temperature for next time step
     write(32,*),time, T_epil(1:nres), T_hypo(1:nres) ! , flow_in_epi_x, flow_out_epi_x,
 

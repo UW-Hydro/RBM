@@ -23,6 +23,12 @@ module Block_Hydro
     real, dimension(:), allocatable :: Q_trib_tot
     real, dimension(:), allocatable :: T_trib, T_head
     real, dimension(:), allocatable :: flow_source, source_num_cell
+
+! Leopold coefficients (constant throughout basin)
+! <a_d> and <b_d>: a and b coefficients in flow depth estimation: z=aQ^b, where Q is flow discharge [cfs], z is flow depth [ft]
+! <a_w> and <b_w>: a and b coefficients in channel width estimation: w=aQ^b, where Q is flow discharge [cfs], w is channel width [ft]
+    real, parameter :: a_d  =  0.408, b_d= 0.392, a_w = 4.346, b_w = 0.520
+
     integer, dimension(:), allocatable :: source_cell
     logical, dimension(:), allocatable :: source_cell_tf
     logical :: source
