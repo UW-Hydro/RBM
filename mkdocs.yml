@@ -1,0 +1,59 @@
+site_name: RBM
+site_description: River Basin Model
+site_author: UW Hydro | Computational Hydrology
+repo_url: https://github.com/UW-Hydro/RBM
+# Not sure about the site_url,theme_dir or site_favicon
+site_url: http://vic.readthedocs.org/
+theme: readthedocs
+theme_dir: 'docs/custom_rtd_theme'
+#site_favicon: vic_favicon.jpg
+copyright: 2015
+docs_dir: docs
+site_dir: site
+use_directory_urls: true
+
+pages:
+# Main pages
+- Home: 'index.md'
+- About:
+    - 'Model Overview': 'Overview/ModelOverview.md'
+    - 'References': 'Documentation/References.md'
+    - 'FAQ': 'FAQ/FAQ.md'
+    - 'Contact': 'contact.md'
+    - 'Links': 'links.md'
+- Documentation:
+    - 'User Guide': 'Documentation/UserGuide.md'
+- Development:
+    - 'Development': 'Development/ModelDevelopment.md'
+    - 'Release Notes': 'Development/ReleaseNotes.md'
+    - 'Contributing': 'Development/Contributing.md'
+    - 'Testing': 'Development/Testing.md'
+- Downloads:
+    - Datasets: 'Datasets/Datasets.md'
+    - Code: 'SourceCode/Code.md'
+# hidden pages
+- hidden:
+# Leaving a few of the VIC page samples for examples on the RBM Web page
+    # Classic Driver
+    - 'DefaultOutputs': 'Documentation/Drivers/Classic/DefaultOutputs.md'
+    - 'Inputs': 'Documentation/Drivers/Image/Inputs.md'
+    - 'Outputs': 'Documentation/Drivers/Image/Outputs.md'
+    - 'LakeOutputFile': 'Documentation/Drivers/Image/LakeOutputFile.md'
+    # CESM Driver
+    - 'Inputs': 'Documentation/Drivers/CESM/Inputs.md'
+
+    # Other
+    - 'Constants': 'Documentation/Constants.md'
+    - 'Definitions': 'Documentation/Definitions.md'
+    - 'Open Source': 'Development/open-source-philosophy.md'
+    - 'Best Practices': 'Documentation/best_practices.md'
+
+markdown_extensions:
+    - toc:
+        permalink: True
+    - admonition:
+    - fenced_code:
+
+copyright: 'Copyright &copy; 2015, <a href="http://uw-hydro.github.io/">University of Washington Computational Hydrology Group</a>.'
+
+google_analytics: ['UA-65965729-1', 'vic.readthedocs.org']
