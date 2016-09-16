@@ -8,6 +8,7 @@ USE Block_Reservoir
 IMPLICIT NONE
 !
 integer:: nc,ncell,nnd,no_flow,no_heat,nr,nrec_flow,nrec_heat, ndx
+integer:: cell_min, cell_max, i
 real:: Q_avg
 character(len=20) :: datetime
 
@@ -21,7 +22,12 @@ end if
 
 no_flow=0
 no_heat=0
+cell_max = 0
 do nr=1,nreach
+
+    ! ----- for knowing which cells are on reach with reservoir ----
+    cell_min = cell_max + 1
+    cell_max = cell_max + no_cells(nr)
 
     do nc=1,no_cells(nr)-1 
         no_flow=no_flow+1
@@ -39,7 +45,6 @@ do nr=1,nreach
         ! regulated flow in some places is negative, so setting flow downstream
         ! of reservoirs to minimum flow of reservoir, IF that flow is less than
         ! the minimum flow
-
         do i = 1, nres
 
               ! if cells are between end of one reservoir and start of another
@@ -49,15 +54,16 @@ do nr=1,nreach
                 ! reservoir is on this reach (not another reach)
                 if( res_end_node(i) .ge. cell_min .or. res_end_node(i) .le. cell_max) then 
 
+  if(no_heat .eq. 21)   print *,'nd',nnd,'i = nres',i,'no_heat',no_heat,'Q_in',Q_in(no_heat) &
+      , 'res_min_flow',res_min_flow(i)
 
                   ! -----if flow immediately downstream of reservoir is less
                   ! than minimum reservoir flow
                   if(Q_in(no_heat) .lt. res_min_flow(i)  ) then
        
-!  if(no_heat .eq. 21)   print *,'nd',nnd,
-!  'no_heat',no_heat,'Q_in',Q_in(no_heat) &
-!    , 'reservoir',i, 'depth',depth(no_heat)
-!
+  if(no_heat .eq. 21)   print *,'nd',nnd,  'no_heat',no_heat,'Q_in',Q_in(no_heat) &
+     , 'reservoir',i, 'depth',depth(no_heat)
+
                     Q_in(no_heat) = res_min_flow(i)
                     Q_out(no_heat) = res_min_flow(i)
                     depth(no_heat) = a_d *(Q_in(no_heat)**b_d) !flow depth [ft]
@@ -158,10 +164,9 @@ do nr=1,nreach
   ! dt(no_heat)=dx(ncell)/u(no_heat)
 ! print *,'nd',nnd,'no_heat',no_heat, 'ncell', ncell, 'dx(ncell)', dx(ncell), 'u(no_heat)', u(no_heat), 'dt',dt(no_heat)
 
-!if(nnd.gt.10) stop !13505
+if(nnd.gt.10) stop !13505
 end do
  
-print * , nnd
 ! --------------- read in storage data for reservoirs --------------
 if(reservoir) then
     read(38,*) datetime,reservoir_storage(:)
