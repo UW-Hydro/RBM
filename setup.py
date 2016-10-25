@@ -21,7 +21,7 @@ AUTHOR_EMAIL = 'yifanc6@uw.edu'
 URL = 'https://github.com/UW-Hydro/RBM'
 
 
-INSTALL_REQUIRES = ['Fortran 90']
+INSTALL_REQUIRES = ['numpy >= 1.7', 'pandas >= 0.15.0']
 TESTS_REQUIRE = ['pytest >= 2.7.1']
 
 DESCRIPTION = "River Basin Model"
@@ -52,4 +52,4 @@ setup(name=DISTNAME,
       install_requires=INSTALL_REQUIRES,
       tests_require=TESTS_REQUIRE,
       url=URL,
-      packages=find_packages()})
+      packages=find_packages())
