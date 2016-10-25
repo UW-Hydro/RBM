@@ -6,7 +6,7 @@ function f2py_leap {
   echo f2py leap year
   cd ${TRAVIS_BUILD_DIR}/src
   f2py -c -m leapyear Leap_Year.f90
-  cp leapyear.so ${TRAVIS_BUILD_DIR}/rbm
+  cp leapyear* ${TRAVIS_BUILD_DIR}/rbm
 }
 
 function rbm_script {
