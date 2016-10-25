@@ -2,11 +2,13 @@
 
 set -e
 
+mkdir ${TRAVIS_BUILD_DIR}/rbm/test_function
+
 function f2py_leap {
-  echo f2py leap year
+  echo f2py_leap_year
   cd ${TRAVIS_BUILD_DIR}/src
   f2py -c -m leapyear Leap_Year.f90
-  cp leapyear* ${TRAVIS_BUILD_DIR}/rbm
+  mv leapyear* ${TRAVIS_BUILD_DIR}/rbm/test_function
 }
 
 function rbm_script {

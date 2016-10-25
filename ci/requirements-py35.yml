@@ -1,17 +1,8 @@
 name: test_env
 dependencies:
   - python=3.5
-  - cython
-  - dask
-  - h5py
-  - matplotlib
-  - netcdf4
   - pytest
   - numpy
-  - pandas
-  - seaborn
   - scipy
   - pip:
-    - coveralls
     - pytest-cov
-    - h5netcdf
