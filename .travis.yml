@@ -1,20 +1,21 @@
 sudo: false # use container-based build
-language: fortran
+language: python
 notifications:
     email: false
 
-compiler: gfortran
-os: linux
-env: TESTID='rbm_linux'
-addons:
-  apt:
-    packages:
-      - gfortran
+matrix:
+  fast_finish: true
+  include:
+  - python: 3.5
+    env: CONDA_ENV=py35
+
+
 before_install:
+  install:
+  - conda env create --file ci/requirements-$CONDA_ENV.yml
+  - source activate test_env
   - source ci/rbm_install_utils
-script:
-  - rbm_script
-after_success:
-  - rbm_after_success
-after_failure:
-  - rbm_after_failure
+  - f2py_leap
+  # scipy should not have been installed, but it's included in older versions of
+  # the conda pandas package
+  - python setup.py install
