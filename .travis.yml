@@ -8,7 +8,7 @@ matrix:
   include:
   - compiler: gfortran
     os: linux
-    env: TESTID='rbm_linux'
+#    env: TESTID='rbm_linux'
     addons:
       apt:
         packages:
@@ -28,7 +28,7 @@ before_install:
 #  - conda update -q conda
 #  - conda info -a
   - source ci/rbm_install_utils
-  - install miniconda
+  - install_miniconda
 
 #install:
 #  - conda env create --file ci/requirements-$CONDA_ENV.yml
