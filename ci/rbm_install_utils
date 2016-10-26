@@ -32,6 +32,7 @@ function f2py_leap {
   cd ${TRAVIS_BUILD_DIR}/src
   f2py -c -m leapyear Leap_Year.f90
   mv leapyear* ${TRAVIS_BUILD_DIR}/rbm/test_function
+  cd ${TRAVIS_BUILD_DIR}
 }
 
 function rbm_script {
