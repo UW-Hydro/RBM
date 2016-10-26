@@ -6,6 +6,13 @@ notifications:
 matrix:
   fast_finish: true
   include:
+  - compiler: gfortran
+    os: linux
+    env: TESTID='rbm_linux'
+    addons:
+      apt:
+        packages:
+          - gfortran
   - python: 3.5
     env: CONDA_ENV=py35
 
