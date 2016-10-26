@@ -22,7 +22,6 @@ function install_miniconda {
 
     conda env create --file ${TRAVIS_BUILD_DIR}/ci/requirements-py35.yml
     source activate test_env
-    source ${TRAVIS_BUILD_DIR}/ci/rbm_install_utils
     # scipy should not have been installed, but it's included in older versions of
     # the conda pandas package
     python ${TRAVIS_BUILD_DIR}/setup.py install
