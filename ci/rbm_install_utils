@@ -5,20 +5,27 @@ set -e
 mkdir ${TRAVIS_BUILD_DIR}/rbm/test_function
 
 function install_miniconda {
-  wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh
-  bash miniconda.sh -b -p $HOME/miniconda
-  export PATH="$HOME/miniconda/bin:$PATH"
-  hash -r
-  conda config --set always_yes yes --set changeps1 no --set show_channel_urls true
-  conda update -q conda
-  conda info -a
+  if [ "$TRAVIS_OS_NAME" = "osx" ]; then
+        # miniconda for python3
+    echo "installing miniconda for osx"
+    wget https://repo.continuum.io/miniconda/Miniconda3-latest-MacOSX-x86_64.sh -O miniconda.sh
+  else
+    echo "installing miniconda for linux"
+    wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh
+  fi
+    bash miniconda.sh -b -p $HOME/miniconda
+    export PATH="$HOME/miniconda/bin:$PATH"
+    hash -r
+    conda config --set always_yes yes --set changeps1 no
+    conda update -q conda
+    conda info -a
 
-  conda env create --file $HOME/ci/requirements-py35.yml
-  source activate test_env
-  source $HOME/ci/rbm_install_utils
-  # scipy should not have been installed, but it's included in older versions of
-  # the conda pandas package
-  python $HOME/setup.py install
+    conda env create --file $HOME/ci/requirements-py35.yml
+    source activate test_env
+    source $HOME/ci/rbm_install_utils
+    # scipy should not have been installed, but it's included in older versions of
+    # the conda pandas package
+    python $HOME/setup.py install
 }
 
 function f2py_leap {
