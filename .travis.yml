@@ -1,5 +1,5 @@
 sudo: false # use container-based build
-language: python
+language: fortran
 notifications:
     email: false
 
@@ -13,31 +13,36 @@ matrix:
       apt:
         packages:
           - gfortran
-  - python: 3.5
-    env: CONDA_ENV=py35
 
 
 before_install:
-  - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
-      wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh -O miniconda.sh;
-    else
-      wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
-    fi
-  - bash miniconda.sh -b -p $HOME/miniconda
-  - export PATH="$HOME/miniconda/bin:$PATH"
-  - hash -r
-  - conda config --set always_yes yes --set changeps1 no --set show_channel_urls true
-  - conda update -q conda
-  - conda info -a
-
-install:
-  - conda env create --file ci/requirements-$CONDA_ENV.yml
-  - source activate test_env
+#  - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
+#      wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh -O miniconda.sh;
+#    else
+#      wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
+#    fi
+#  - bash miniconda.sh -b -p $HOME/miniconda
+#  - export PATH="$HOME/miniconda/bin:$PATH"
+#  - hash -r
+#  - conda config --set always_yes yes --set changeps1 no --set show_channel_urls true
+#  - conda update -q conda
+#  - conda info -a
   - source ci/rbm_install_utils
+  - install miniconda
+
+#install:
+#  - conda env create --file ci/requirements-$CONDA_ENV.yml
+#  - source activate test_env
+
   # scipy should not have been installed, but it's included in older versions of
   # the conda pandas package
-  - python setup.py install
+  #- python setup.py install
 
 script:
   - f2py_leap
   - py.test
+  - rbm_script
+after_success:
+  - rbm_after_success
+after_failure:
+  - rbm_after_failure
