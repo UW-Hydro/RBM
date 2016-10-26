@@ -11,6 +11,7 @@ dependencies:
   - pandas
   - seaborn
   - scipy
+  - yaml
   - pip:
     - coveralls
     - pytest-cov
