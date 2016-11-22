@@ -141,6 +141,7 @@ allocate(advec_epi_tot(nres))
 allocate(qsurf_tot(nres))
 allocate(reservoir_storage(nres))
 allocate(reservoir_storage_prev(nres))
+allocate(q_evap_output(nres)) ! to print evaporation
 
 ![CONSIDER ADDING A SUBROUTINE THAT INTIALIZES VARIABLES LIKE:T_epil, T_hyp, K_z, etc - JRY]
 !
@@ -383,7 +384,7 @@ do nyear=start_year,end_year
 
                 res_run(i) = .true.  !set reservoir run to "true"
 
-
+                q_evap_output(nresx) = q_evap_tot
               !------ if segment on reservoir cell but reservoir already been simulated -------
               else if(reservoir .and. res_end_node(i) .eq. segment_cell(nr,ns) .and. res_run(i)) then
                 nresx = i
@@ -404,7 +405,7 @@ do nyear=start_year,end_year
 
 
          open(18,file=TRIM(energy_file),status='unknown')
-         write(18, '(5i6,2x,f5.2,2x,f5.2,2x,f5.2,2x,f5.2)') nyear,nd,nr,ns,ncell,T_0i,T_0, q_surf_tot,advec_tot
+         write(18, '(5i6,6x,f10.2,6x,f10.2,6x,f10.2,6x,f10.2)') nyear,nd,nr,ns,ncell,T_0i,T_0, q_surf_tot,advec_tot
 
           advec_tot = 0
           q_surf_tot = 0
@@ -432,9 +433,10 @@ do nyear=start_year,end_year
     write(32,*),time, T_epil(1:nres), T_hypo(1:nres) ! , flow_in_epi_x, flow_out_epi_x,
 
          open(19,file=TRIM(reservoir_output_file),status='unknown')
-         write(19,'(2i6,2x,25f6.2,2x,25f6.2,2x,25f7.3,2x,25f7.3,2x,25f7.3,2x,25f7.3)') nyear,nd &
+         write(19,'(2i6,6x,25f10.2,6x,25f10.2,6x,25f10.3,6x,25f10.3,6x,25f10.3,6x,25f10.3)') nyear,nd &
           , T_epil(1:nres),T_hypo(1:nres),diffusion_tot(1:nres),advec_hyp_tot(1:nres),advec_epi_tot(1:nres), qsurf_tot(1:nres)
 
+    write(75, *), time, q_evap_output(1:nres)
 
     !
     !     End of main loop (ND=1,365/366)

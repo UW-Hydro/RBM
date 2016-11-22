@@ -3,7 +3,7 @@ SUBROUTINE Energy(T_surf,q_surf,ncell, ns, nyear, nd2)
    implicit none
    integer::i,ncell,nd, ns, nyear, nd2
    real::A,B,e0,q_surf,q_conv,q_evap,q_ws,td,T_surf
-   real, dimension(2):: q_fit, T_fit
+   real, dimension(2):: q_fit, T_fit, q_evap_x
 !
    td=nd
    T_fit(1)=T_surf-1.0
@@ -18,9 +18,11 @@ SUBROUTINE Energy(T_surf,q_surf,ncell, ns, nyear, nd2)
       q_evap=q_evap*(e0-ea(ncell))
       q_ws=6.693E-2+1.471E-3*T_fit(i)
       q_fit(i)=q_ns(ncell)+q_na(ncell)-q_ws-q_evap+q_conv
+      q_evap_x(i) = q_evap ! to print q_evap to calc evaporation
+
    end do
 
- 
+   q_evap_tot = (q_evap_x(1) + q_evap_x(2))/2
   ! if(ncell .eq. 82 .and. ns .eq. 34  )  write(82, *) nyear,nd,nseg, T_0, q_dot, dt_calc,z,rfac
 !
 !     q=AT+B

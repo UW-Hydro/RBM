@@ -1,5 +1,5 @@
-dam_number,dam_name,dam_lat,dam_lon,grid_lat,grid_lon,year_operated_start_of_Calendar_year,top_vol_acre_feet,bot_vol_acre_feet,max_flow_cfs,min_flow_cfs,depth_feet,width_feet,length_feet,start_node,end_node
-1,Watauga,	36.3233,-82.1219,36.3125,-82.0625,1949,677000,0,,107,105.1,3260,86063, 18,  19
-2,South Holston,36.5233,-82.0889,36.5625,-82.0625,1951,764000,0,,90,100.5,2646, 125136, 49, 51 
-3,Boone,	36.4400,-82.4378,36.4375,-82.4375,1953,193400,0,,400,46.8,1042, 172656, 53,  55
-5,Cherokee,	36.1661,-83.4983,36.1875,-83.4375,1942,1541000,0,,325,52.1,39118, 285119, 74, 81
+dam_number,grid_lat,grid_lon,top_vol_acre_feet,bot_vol_acre_feet,depth_feet,width_feet,length_feet,start_node,end_node
+1,          36.3125,-82.0625,           677000,                0,     105.1,      3260,      86063,        18,  19
+2,          36.5625,-82.0625,           764000,                0,     100.5,      2646,     125136,        49,  51 
+3,          36.4375,-82.4375,           193400,                0,      46.8,      1042,     172656,        53,  55
+4,          36.1875,-83.4375,          1541000,                0,      52.1,      4516,     285119,        74,  81

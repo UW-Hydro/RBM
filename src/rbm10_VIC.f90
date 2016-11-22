@@ -37,6 +37,8 @@
 !     Seattle, Washington
 !     98195-2700
 !
+! to run Tennessee Basin Run: ./rbm10_VIC ../RBM_processing/Tennessee_8th.Mohseni_v1/Tennessee_8th ../RBM_processing/output/Tennessee
+!
 use BGIN
 use SYSTM
 !

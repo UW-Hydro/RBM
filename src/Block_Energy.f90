@@ -33,4 +33,7 @@ module Block_Energy
 !
       real   :: lvp,rb,rho,evap_coeff=1.5e-9,pf=0.640,pi=3.14159       
 !
+      real :: q_evap_tot ! to save evaporation from reservoirs
+      real, dimension(:), allocatable:: q_evap_output ! to save evaporation
+
 end module Block_Energy  

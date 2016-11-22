@@ -11,7 +11,6 @@ SUBROUTINE reservoir_subroutine(nresx, nd, q_surf,time, nd_year, nyear)
  integer :: nd,  nresx, nyear, nd_year
 !  real, dimension (:), allocatable :: T_epil,T_hypo,volume_e_x,volume_h_x,stream_T_in
 
-
  ! ---------------- turnover loop driven only by T_epil and T_hyp ----------
         density_dif = density_epil(nresx) - density_hypo(nresx)
         if(density_dif .gt. -0.00001 .and. density_dif .lt. 0.00001) density_dif= 0.00001
