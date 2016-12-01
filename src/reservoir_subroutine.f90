@@ -55,10 +55,24 @@ SUBROUTINE reservoir_subroutine(nresx, nd, q_surf,time, nd_year, nyear)
       dif_hyp_x  = K_z(nresx) * surface_area(nresx) *  (T_epil(nresx) - T_hypo(nresx)) / volume_h_x(nresx)
 
       ! --------------------- calculate advection terms --------------------------- 
-      advec_in_epix  = flow_in_epi_x * (T_res_in(nresx) - T_epil(nresx)) /volume_e_x(nresx)
-      advec_epi_hyp = flow_epi_hyp_x *  (T_epil(nresx) - T_hypo(nresx)) / volume_h_x(nresx)
-      advec_in_hypx = flow_in_hyp_x * (T_res_in(nresx) - T_hypo(nresx)) /volume_h_x(nresx)
+      if(flow_in_epi_x .lt. volume_e_x(nresx)) then
+          advec_in_epix  = flow_in_epi_x * (T_res_in(nresx) - T_epil(nresx)) /volume_e_x(nresx)
+      else
+          advec_in_epix  =  volume_e_x(nresx) * (T_res_in(nresx) - T_epil(nresx))/volume_e_x(nresx)
+      end if
 
+      if(flow_in_hyp_x .lt. volume_h_x(nresx)) then
+        advec_in_hypx = flow_in_hyp_x * (T_res_in(nresx) - T_hypo(nresx)) /volume_h_x(nresx)
+      else
+        advec_in_hypx = volume_h_x(nresx) * (T_res_in(nresx) - T_hypo(nresx))/volume_h_x(nresx)
+      end if
+
+      advec_epi_hyp = flow_epi_hyp_x *  (T_epil(nresx) - T_hypo(nresx)) /volume_h_x(nresx)
+
+!  if(nresx .eq. 8) then
+! print *,time,'advec_in_epi',advec_in_epix, 'flow_in_epi',flow_in_epi_x, 'T_res_in', T_res_in(nresx),'T_epil)', T_epil(nresx) &
+!           ,  'vol',volume_e_x(nresx)
+!   end if
       ! ------------------- calculate change in temperature  ---------------------
 
         ! ---------------- epilimnion -----------
@@ -114,10 +128,21 @@ SUBROUTINE reservoir_subroutine(nresx, nd, q_surf,time, nd_year, nyear)
       qsurf_tot(nresx) = energy_x
 
  ! non-essential - only to print out specific calculated variables
- if(nresx.eq.17) then
+ if(nresx.eq.8) then
  
-  write(48,*),time,advec_in_epix, flow_in_epi_x, T_res_in(nresx),  T_epil(nresx), volume_e_x(nresx) &
-        , advec_in_hypx, flow_in_hyp_x, T_hypo(nresx), volume_h_x(nresx), flow_epi_hyp_x, temp_out(nresx)&
-        , T_res(nresx), advec_epi_hyp, dif_hyp_x, energy_x 
+  write(48,*),time,T_res_in(nresx),T_epil(nresx), advec_in_epix, energy_x, dif_epi_x, flow_in_epi_x, volume_e_x(nresx) &
+                                  ,T_hypo(nresx), advec_in_hypx, advec_epi_hyp, dif_hyp_x, flow_in_hyp_x,  volume_h_x(nresx) &
+                 ,  flow_epi_hyp_x,  temp_out(nresx)
  end if
+
+ if(nresx.eq.1) then
+
+  write(89,*),time,T_res_in(nresx),T_epil(nresx), advec_in_epix, energy_x,dif_epi_x, flow_in_epi_x, volume_e_x(nresx) &
+                                  ,T_hypo(nresx), advec_in_hypx, advec_epi_hyp,dif_hyp_x, flow_in_hyp_x,  volume_h_x(nresx) &
+                 ,  flow_epi_hyp_x,  temp_out(nresx)
+
+
+ end if
+
+
 end subroutine reservoir_subroutine
