@@ -3,16 +3,24 @@ language: fortran
 notifications:
     email: false
 
-compiler: gfortran
-os: linux
-env: TESTID='rbm_linux'
-addons:
-  apt:
-    packages:
-      - gfortran
+matrix:
+  fast_finish: true
+  include:
+  - compiler: gfortran
+    os: linux
+    addons:
+      apt:
+        packages:
+          - gfortran
+
+
 before_install:
   - source ci/rbm_install_utils
+  - install_miniconda
+
 script:
+  - f2py_leap
+  - py.test
   - rbm_script
 after_success:
   - rbm_after_success
