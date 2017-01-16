@@ -1,36 +1,32 @@
 # Steps to run RBM
 Following describes the steps for simulating water temperature with the grid-based semi-Lagrangian model, RBM, assuming one has downloaded [**VIC** 4.2.d](https://github.com/UW-Hydro/VIC/releases/tag/VIC.4.2.d) and prepared all the necessary input files. <br />
 
-## 1. Download and Uncompress the Files
+## 1. Download Source Code & Example Datasets
 
-Download VIC_RBM2.2 [HERE](http://www.hydro.washington.edu/Lettenmaier/Models/RBM/download.shtml) <br />
+Download the source code for VIC_RBM2.2, please refer to  [Downloads/Code](../SourceCode/Code.md) <br />
 
-Unpack the compressed file “***VIC_RBM2.2.tar.gz***” and at the Unix prompt, type:
-<center>**tar –xzvf VIC_RBM2.2.tar.gz**</center>
-
-After unpacking the file, the source code and supporting files will be in the following directory:
-
-<center>**VIC_RBM2.2**</center>
+Download the example data sets, please refer to [Downloads/Datasets](../Datasets/Datasets.md) <br />
 
 The file:
-<center>**README** - a text file describing the contents of each sub-directory.</center>
+<center>**DESCRIPTION** - a text file describing the contents of each sub-directory.</center>
+
+**PS:** File **DESCRIPTION** is located in example data folder **Salmon_River_data**
 
 The sub-directories within this directory are:
 
 Sub-directories | Description
 --- | ---
-*../Perl_Scripts*  | contains pre- and post-processing scripts written in Perl
-*../RBM* | - contains the Fortran 90 source and **Makefile** that builds the executable. **RBM** and places it in the directory, **../Test_Case**. Users may wish to change this by editing the makefile.
-*../rout_DA*  | - contains the source code and **Makefile** for the modified routing model, rout_RBM.
-*../Test_Case* | - contains the input files and executable for running the example problem, using input data for the Salmon River basin at a gridded resolution of 1/2° lat/long.
-*../Tutorial* | - contains this tutorial.
-*../UH_Test* | - contains the sample output from executing the routing model, **rout_RBM**, and the input data for the sample problem.
-*../VIC_Forcing* | - contains the daily precipitation (mm), max/min air temperatures (°C), and wind speed (m/sec) that provides forcings for each **VIC** grid cell.
-*../VIC_Input* | - contains the snowbands, soil, veg-param files and the world_veg_lib files
-*../VIC_Output* | - contains the meteorologic output files, full_data_lat_long, and the hydrologic output - files, flux_lat_long, from the VIC simulations.
+*RBM/Perl_Scripts*  | contains pre- and post-processing scripts written in Perl
+*RBM/src* | - contains the Fortran 90 source and **Makefile** that builds the executable. **RBM** and places it in the directory, **../Test_Case**. Users may wish to change this by editing the makefile.
+*RBM/rout_DA*  | - contains the source code and **Makefile** for the modified routing model, rout_RBM.
+*Salmon_River_data/Test_Case* | - contains the input files and executable for running the example problem, using input data for the Salmon River basin at a gridded resolution of 1/2° lat/long.
+*Salmon_River_data/UH_Output* | - contains the sample output from executing the routing model, **rout_RBM**, and the input data for the sample problem.
+*Salmon_River_data/VIC_Forcing* | - contains the daily precipitation (mm), max/min air temperatures (°C), and wind speed (m/sec) that provides forcings for each **VIC** grid cell.
+*Salmon_River_data/VIC_Input* | - contains the snowbands, soil, veg-param files and the world_veg_lib files
+*Salmon_River_data/VIC_Output* | - contains the meteorologic output files, full_data_lat_long, and the hydrologic output - files, flux_lat_long, from the VIC simulations.
 
 ## 2. Create the RBM Executable
-Navigate to the folder, **../RBM**, and type:
+Navigate to the folder, **../src**, and type:
 <center>**make**</center>
 
 This will create the executable, RBM, and copy a version to the folder, **../Test_Case**, where the example problem is found.
@@ -39,12 +35,15 @@ This will create the executable, RBM, and copy a version to the folder, **../Tes
 ## 3. Run the Model
 ### Step 1 Build the forcing function files (flow and meteorology)
 In the example problem, I used **VIC4.2.d** with the two global parameter files in the directory, **run_VIC**. To create the necessary files (executable file to run VIC), you need to download [VIC4.2.d](https://github.com/UW-Hydro/VIC/releases/tag/VIC.4.2.d). The instructions to generate the executable file **vicNl** and run VIC can be found [here](http://vic.readthedocs.io/en/vic.4.2.d/). Copy the executable file **vicNl** to the folder **run_VIC**. The example global files to generate baseflow, runoff and heat budgets are also directly included in the folder **run_VIC**, which you can use directly. The two were implemented as follows:
-<center>**./vicNl –g global_param_Salmon_0.5_flux - generates base flow and runoff**</center>
+<center>**./vicNl –g global_param_Salmon_0.5_flux**</center>
+which generates base flow and runoff
 
 and
-<center>**./vicNl –g global_param_Salmon_0.5_full_data - generates heats budget** </center>
+<center>**./vicNl –g global_param_Salmon_0.5_full_data** </center>
+which generates heats budget
 
-In the example, the outputs from this process are copied to the folder, ***../VIC_Output***.
+PS: The output directories need to be specified in each global parameter files, **global_param_Salmon_0.5_flux** and **global_param_Salmon_0.5_full_data** in this case.
+
 ### Step 2 Generate topology file
 In the folder, ***../Test_Case***, run the perl script, **build_network_beta.pl**, (copied from ***../Perl_Scripts***) using the direction file that was created as described in the VIC model development (see [VIC model](https://uw-hydro.github.io/code/)). All the grid cells surrounding the basin of interest must contain a negative one (-1) for purposes of determining the headwaters segments. The number of basins and sub-basins in a river system is limited only by the amount of computer memory, but there must be only a single outlet. For example, the Columbia River system could be modeled in its entirety. Modeling the Columbia River system and another river system, for example, the Fraser River, would require two separate simulations. Also, simulated river system cannot contain braided networks. The following example is from the Salmon River in Idaho:
 <center>**perl build_network_beta.pl Salmon_flowd_0.5.dir Salmon_0.5.Topology**</center>
@@ -71,6 +70,9 @@ Ndelta:         |       Usually "2", but can be larger, particularly in the case
 
 The control file must have the suffix, **.Control**, and the colon (:) after the descriptive characters in each line is required. <br />
 An example control file is also included in the folder **Test_case**.
+
+PS: The input/output directories need to be specified in this control file.
+
 ### Step 4 Generate network file
 Run the Perl script, **build_input.pl**, using the control file,(**Salmon_0.5.Control**) creating the stream temperature network file (**Salmon_0.5_Network** in this example) and the ordered input file names for the routing scheme. (**Rout.Cells.init** and **Rout.Cells**). See Appendix A for a description of elements in the network file. Here again, the project name (**Salmon_0.5**) is required on the command line. The suffix, **.Control**, is appended by the Perl script:
 
@@ -98,7 +100,9 @@ creating the direct access files for flow and heat budget,
 
 ### Step 7 Run RBM
 All necessary files have been created at this point (see Appendix A for a description of the output). Simply run the temperature model with command line files as follows:
-<center>**./RBM_VIC Salmon_0.5 Salmon_0.5.Temp**</center>
+<center>**./rbm10_VIC Salmon_0.5 Salmon_0.5**</center>
 
-where **Salmon_0.5** refers to **Salmon_0.5_Network** ("**\_Network**" is appended by the model software) and "**Salmon_0.5.Temp**" is the output file. "**Salmon_0.5.Spat**" is also created and is a file that cross-references element numbers in the output file "**Salmon_0.5.Temp**" to lat/long for
+<center>**[RBM_executable_file] [path/to/network_file] [path/to/output_file]**</center>
+
+where first **Salmon_0.5** refers to **Salmon_0.5_Network** ("**\_Network**" is appended by the model software) and second"**Salmon_0.5**" is the output file name (This refers to ***full_path/output_name*** . In this case, if no directory is addressed, the output file will be directly located in the current directory). "**Salmon_0.5.Spat**" is also created and is a file that cross-references element numbers in the output file "**Salmon_0.5.Temp**" to lat/long for
 post-processing.
