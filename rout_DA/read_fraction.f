@@ -1,0 +1,28 @@
+
+      SUBROUTINE READ_FRACTION(FRACTION,NCOL,NROW,FILENAME,
+     $        IROW,ICOL)
+
+      INTEGER NCOL,NROW,ICOL,IROW,I,J
+      REAL FRACTION(NCOL,NROW)
+      CHARACTER*72 FILENAME
+
+c      PRINT*, 'HARDCODED FRACTION FILE'
+      OPEN(22, FILE = FILENAME,
+     &     FORM = 'FORMATTED',STATUS='OLD',ERR=9001)
+
+      DO I = 1,6                  !skip over header
+         READ(22,*)
+      END DO
+
+      DO J = IROW,1,-1
+         READ(22,*) (FRACTION(I,J), I=ICOL,1,-1) 
+      END DO      
+
+      CLOSE(22)
+
+      RETURN
+ 9001 WRITE(*,*) 'CANNOT OPEN INPUT FILE IN READ_FRACTION',
+     $     FILENAME
+      STOP
+      END
+
