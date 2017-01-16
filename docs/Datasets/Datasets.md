@@ -4,7 +4,7 @@
 
 # RBM Input and Output Data Sets
 
-*    See Land Surface Hydrology site: RBM Version 1.2 *.tar.gz
+*    See [Documentation/Tutorial](../Documentation/tutorial.md) for details
 
 # VIC Input and Output Data Sets
 

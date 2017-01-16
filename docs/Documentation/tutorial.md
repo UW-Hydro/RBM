@@ -42,8 +42,10 @@ VIC model), such as:
      * Net downward longwave radiation
      * Net upward sensible heat
      * ... ...
-*  ***Routed streamflow at specified stream locations*** (can be any locations within the stream network, and the resolution is the same as grid cell, i.e., stream locations are specified by indicating the grid cell in which it falls), calculated by the routing model. Daily or subdaily time step.
-*  ***Stream temperature at specified stream locations*** (calculated by the RBM model, at daily time steps.
+*  ***Routed streamflow at specified stream locations***
+     * (can be any locations within the stream network, and the resolution is the same as grid cell, i.e., stream locations are specified by indicating the grid cell in which it falls) calculated by the routing model, daily or subdaily time step.
+*  ***Stream temperature at specified stream locations***
+     * calculated by the RBM model, at daily or subdaily time steps.
 
 
 ## APPENDIX A: RBM I/O instruction

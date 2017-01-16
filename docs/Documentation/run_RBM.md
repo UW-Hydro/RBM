@@ -1,12 +1,16 @@
 # Steps to run RBM
-Following describes the steps for simulating water temperature with the grid-based semi-Lagrangian model, RBM, assuming one has downloaded version 4.2.b of **VIC** and prepared all the necessary input files.
+Following describes the steps for simulating water temperature with the grid-based semi-Lagrangian model, RBM, assuming one has downloaded [**VIC** 4.2.d](https://github.com/UW-Hydro/VIC/releases/tag/VIC.4.2.d) and prepared all the necessary input files. <br />
+
 ## 1. Download and Uncompress the Files
-Unpack the compressed file “***VIC_RBM1.2.tar.gz***” and at the Unix prompt, type:
-<center>**tar –xzvf VIC_RBM1.2.tar.gz**</center>
+
+Download VIC_RBM2.2 [HERE](http://www.hydro.washington.edu/Lettenmaier/Models/RBM/download.shtml) <br />
+
+Unpack the compressed file “***VIC_RBM2.2.tar.gz***” and at the Unix prompt, type:
+<center>**tar –xzvf VIC_RBM2.2.tar.gz**</center>
 
 After unpacking the file, the source code and supporting files will be in the following directory:
 
-<center>**VIC_RBM1.2**</center>
+<center>**VIC_RBM2.2**</center>
 
 The file:
 <center>**README** - a text file describing the contents of each sub-directory.</center>
@@ -34,11 +38,11 @@ This will create the executable, RBM, and copy a version to the folder, **../Tes
 
 ## 3. Run the Model
 ### Step 1 Build the forcing function files (flow and meteorology)
-In the example problem, I used **VIC4.1.2** with the two (2) global parameter files in the directory, **run_VIC**. To create the necessary files, I copied **vicNl**, the executable for **VIC4.1.2** to the folder, **run_VIC**, renamed it as **vicNl_flux** for generating base flow and runoff and **vicNl_full_data** to generage the heat budget forcing. The two were implemented as follows:
-<center>**./vicNl_flux –g global_param_Salmon_0.5_flux - generates base flow and runoff**</center>
+In the example problem, I used **VIC4.2.d** with the two global parameter files in the directory, **run_VIC**. To create the necessary files (executable file to run VIC), you need to download [VIC4.2.d](https://github.com/UW-Hydro/VIC/releases/tag/VIC.4.2.d). The instructions to generate the executable file **vicNl** and run VIC can be found [here](http://vic.readthedocs.io/en/vic.4.2.d/). Copy the executable file **vicNl** to the folder **run_VIC**. The example global files to generate baseflow, runoff and heat budgets are also directly included in the folder **run_VIC**, which you can use directly. The two were implemented as follows:
+<center>**./vicNl –g global_param_Salmon_0.5_flux - generates base flow and runoff**</center>
 
 and
-<center>**./vicNl_full_data –g global_param_Salmon_0.5_full_data - generates heats budget** </center>
+<center>**./vicNl –g global_param_Salmon_0.5_full_data - generates heats budget** </center>
 
 In the example, the outputs from this process are copied to the folder, ***../VIC_Output***.
 ### Step 2 Generate topology file
@@ -65,7 +69,8 @@ Mohseni Parameters:  |  When the characters, " grid" (note the space) are missin
 Heat Dump:      |       FALSE if there is no advective heat source (Power Plants, for example)
 Ndelta:         |       Usually "2", but can be larger, particularly in the case of slower streams
 
-The control file must have the suffix, **.Control**, and the colon (:) after the descriptive characters in each line is required.
+The control file must have the suffix, **.Control**, and the colon (:) after the descriptive characters in each line is required. <br />
+An example control file is also included in the folder **Test_case**.
 ### Step 4 Generate network file
 Run the Perl script, **build_input.pl**, using the control file,(**Salmon_0.5.Control**) creating the stream temperature network file (**Salmon_0.5_Network** in this example) and the ordered input file names for the routing scheme. (**Rout.Cells.init** and **Rout.Cells**). See Appendix A for a description of elements in the network file. Here again, the project name (**Salmon_0.5**) is required on the command line. The suffix, **.Control**, is appended by the Perl script:
 
@@ -80,7 +85,7 @@ Navigate to the folder, **rout_DA**, and run:
 This will create the executable,
 <center>**rout**</center>
 
-For this example, copy **out** to the folder **Test_Case**
+For this example, copy **rout** to the folder **Test_Case**
 
 Create control file, **salmon.inp_DA**, to run the modified Lohmann routing model using the file, **Rout.Cells.init**, the first time and the file, **Rout.Cells**, if the routing model, **rout** is run again for the same set of unit hydrographs. The input file (in this example, **salmon.inp_DA**) is similar to that described on the VIC model Web site with the exception of the addition the Leopold parameters. The routing model requires a file with unit hydrographs for each cell, or, in this case, a file, **UH_ALL**, with a single unit hydrograph that is applied to all grid cells.
 
