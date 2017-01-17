@@ -1,0 +1,36 @@
+# INPUT FILE FOR PROGRAM CREATING FLOW AND ENERGY BUDGET FILES-RBM10
+# NAME OF FLOW DIRECTION FILE
+.//Salmon_flowd_0.5.dir
+# NAME OF VELOCITY FILE
+.false.
+2.0
+# NAME OF DIFF FILE
+.false.
+800
+# NAME OF XMASK FILE
+.false.
+12500
+# NAME OF FRACTION FILE
+.false.
+1.0
+#Leopold coefficients
+F
+0.34 0.341 1.22 0.557
+# NAME OF STATION FILE
+Rout.Cells
+.true.   If true, read the path for flow and weather data
+# PATH OF INPUT FILES AND PRECISION 
+../VIC_output/fluxes_
+../VIC_output/full_data_
+2  1  8  DPREC, Number of Flux and Full_Data values per day
+# PATH OF OUTPUT FILES
+Salmon.DA_flow
+Salmon.DA_heat
+# YEAR AND MONTH OF VIC OUTPUT TO ROUTE & ROUTED OUTPUT TO WRITE
+2000 01 01 2001 12 31
+2000 01 01 2001 12 31
+2000 01 01 2001 12 31
+# NAME OF UNIT HYDROGRAPH FILE
+UH_ALL
+# Name of directory where *uh_s files are stored
+../UH_Output/
