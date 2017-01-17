@@ -1,10 +1,8 @@
 # River Basin Stream Temperature Model (RBM)
 
-# Variable Infiltration Capacity (VIC) Model
-
-| VIC Links & Badges              |                                                                             |
+| RBM Links & Badges              |                                                                             |
 |------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| VIC Documentation      | [![Documentation Status](https://readthedocs.org/projects/rbm/badge/?version=latest)](http://rbm.readthedocs.org/en/latest/)                                                                             |
+| RBM Documentation      | [![Documentation Status](https://readthedocs.org/projects/rbm/badge/?version=latest)](http://rbm.readthedocs.org/en/latest/)                                                                             |
 | Travis Build           | [![Build Status](https://travis-ci.org/YifanCheng/RBM.png)](https://travis-ci.org/YifanCheng/RBM)   |
 
 ----------
