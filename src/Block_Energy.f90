@@ -31,6 +31,7 @@ module Block_Energy
 
 !   Some important constants
 !
-      real   :: lvp,rb,rho,evap_coeff=1.5e-9,pf=0.640,pi=3.14159       
+      real             :: lvp,rb,rho
+      real,parameter   :: evap_coeff=1.5e-9,pf=0.640,pi=3.14159,rfac=304.8       
 !
 end module Block_Energy  
