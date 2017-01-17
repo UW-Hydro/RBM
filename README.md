@@ -3,7 +3,7 @@
 | RBM Links & Badges              |                                                                             |
 |------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | RBM Documentation      | [![Documentation Status](https://readthedocs.org/projects/rbm/badge/?version=latest)](http://rbm.readthedocs.org/en/latest/)                                                                             |
-| Travis Build           | [![Build Status](https://travis-ci.org/YifanCheng/RBM.png)](https://travis-ci.org/YifanCheng/RBM)   |
+| Travis Build           | [![Build Status](https://travis-ci.org/UW-Hydro/RBM.png)](https://travis-ci.org/UW-Hydro/RBM)   |
 
 ----------
 
