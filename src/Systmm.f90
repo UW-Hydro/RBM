@@ -20,11 +20,13 @@ integer          :: npart,nseg,nx_s,nx_part,nx_head
 ! Indices for lagrangian interpolation
 !
 integer              :: njb,npndx,ntrp
-integer, dimension(3):: ndltp=(/-2,-3,-3/)
-integer, dimension(3):: nterp=(/3,4,3/)
+integer, dimension(2):: ndltp=(/-1,-2/)
+integer, dimension(2):: nterp=(/2,3/)
 
 !
-real             :: dt_calc,dt_total,hpd,Q1,Q2,q_dot,q_surf,z
+real             :: dt_calc,dt_total,hpd,q_dot,q_surf,z
+real             :: Q_dstrb,Q_inflow,Q_outflow,Q_ratio,Q_trb,Q_trb_sum
+real             :: T_dstrb,T_dstrb_load,T_trb_load
 real             :: rminsmooth
 real             :: T_0,T_dist
 real(8)          :: time
@@ -34,14 +36,13 @@ real             :: dt_ttotal
 real,dimension(4):: ta,xa
 !
 real,dimension(:),allocatable     :: T_head,T_smth,T_trib
-logical:: LEAP_YEAR
 
 logical:: DONE
 !
 !
 ! Allocate the arrays
 !
-allocate (temp(nreach,-2:ns_max,2))
+allocate (temp(nreach,0:ns_max,2))
 allocate (T_head(nreach))
 allocate (T_smth(nreach))
 allocate (T_trib(nreach))
@@ -97,10 +98,7 @@ hpd=1./xwpd
 do nyear=start_year,end_year
   write(*,*) ' Simulation Year - ',nyear,start_year,end_year
   nd_year=365
-!
-! Check to see if it is a leap year
-!
-  if (LEAP_YEAR(nyear)) nd_year=366
+  if (mod(nyear,4).eq.0) nd_year=366
 !
 !     Day loop starts
 !
@@ -122,7 +120,6 @@ do nyear=start_year,end_year
 ! Read the hydrologic and meteorologic forcings
 !
         call READ_FORCING
-
 !
 !     Begin reach computations
 !
@@ -141,12 +138,10 @@ do nyear=start_year,end_year
 !     Variable Mohseni parameters (UW_JRY_2011/06/16)
 ! 
         T_head(nr)=mu(nr)+(alphaMu(nr) &
-                  /(1.+exp(gmma(nr)*(beta(nr)-T_smth(nr)))))  
+                  /(1.+exp(gmma(nr)*(beta(nr)-T_smth(nr))))) 
 !
       temp(nr,0,n1)=T_head(nr)
-      temp(nr,-1,n1)=T_head(nr)
-      temp(nr,-2,n1)=T_head(nr)
-      temp(nr,no_celm(nr)+1,n1)=temp(nr,no_celm(nr),n1)
+      temp(nr,1,n1)=T_head(nr)
 !
 ! Begin cell computational loop
 !
@@ -159,7 +154,6 @@ do nyear=start_year,end_year
 !     Establish particle tracks
 !
       call Particle_Track(nr,ns,nx_s,nx_head)
-
 !
           ncell=segment_cell(nr,ns)
 !
@@ -169,12 +163,12 @@ do nyear=start_year,end_year
 !
           nseg=nstrt_elm(ns)
 !
-!     Perform polynomial interpolationnr_trib
+!     Perform polynomial interpolation
 !
 !
 !     Interpolation inside the domain
 !
-          npndx=3
+          npndx=2
 !
 !     Interpolation at the upstream boundary if the
 !     parcel has reached that boundary
@@ -182,31 +176,34 @@ do nyear=start_year,end_year
           if(nx_head.eq.0) then
             T_0 = T_head(nr)
           else 
-
 !
-!     Interpolation at the downstream boundary
 !
-          if(nseg.eq.no_celm(nr)) npndx=2
+!     Interpolation at the upstream or downstream boundary
 !
-          do ntrp=1,nterp(npndx)
-            npart=nseg+ntrp+ndltp(npndx)
-            xa(ntrp)=x_dist(nr,npart)
-            ta(ntrp)=temp(nr,npart,n1)
-          end do
+            if(nseg .eq. 1 .or. nseg .eq. no_celm(nr)) npndx=1
+!
+            do ntrp=nterp(npndx),1,-1
+              npart=nseg+ntrp+ndltp(npndx)
+              xa(ntrp)=x_dist(nr,npart)
+              ta(ntrp)=temp(nr,npart,n1)
+            end do
 !
 ! Start the cell counter for nx_s
 !
-          x=x_part(nx_s)
+            x=x_part(nx_s)
 !
 !     Call the interpolation function
 !
-          T_0=tntrp(xa,ta,x,nterp(npndx))
+            T_0=tntrp(xa,ta,x,nterp(npndx))
           end if
 !
-300 continue
-350 continue
-! 
+!
           nncell=segment_cell(nr,nstrt_elm(ns))
+!
+!    Initialize inflow
+!
+          Q_inflow = Q_in(nncell)
+          Q_outflow = Q_out(nncell)
 !
 !    Set NCELL0 for purposes of tributary input
 !
@@ -216,55 +213,74 @@ do nyear=start_year,end_year
             dt_calc=dt_part(nm)
             z=depth(nncell)
             call energy(T_0,q_surf,nncell)
+!
             q_dot=(q_surf/(z*rfac))
             T_0=T_0+q_dot*dt_calc
             if(T_0.lt.0.0) T_0=0.0
 !
-! Inflow
+!    Add distributed flows
+!    
+            T_dstrb_load  = 0.0
 !
-            Q1=Q_in(nncell)
+            Q_dstrb = Q_diff(nncell)
 !
-! Account for distributed flows
+! Temperature of distributed inflow assumed = 10.0 deg C
 !
-!
-            if(Q_diff(nncell).gt.0) then
-              Q2=Q1+Q_diff(nncell)
-              T_dist=T_head(nr)
-              T_0=(Q1*T_0+Q_diff(nncell)*T_dist)/Q2
-if(nr.eq.7) write(26,*) 'Dist ',Q1,Q2,T_0,T_dist
-              Q1=Q2
+            if(Q_dstrb.gt.0.001) then
+              T_dstrb  = 10.0
+            else
+              T_dstrb  = 10.0
             end if
+              T_dstrb_load  = Q_dstrb*T_dstrb
+
 !
 !     Look for a tributary.
 !
             ntribs=no_tribs(nncell)
+            Q_trb_sum   = 0.0
+            T_trb_load  = 0.0
             if(ntribs.gt.0.and..not.DONE) then
 !
               do ntrb=1,ntribs
                 nr_trib=trib(nncell,ntrb)
                 if(Q_trib(nr_trib).gt.0.0) then
-                  Q2=Q1+Q_trib(nr_trib)
-                  T_0=(Q1*T_0+Q_trib(nr_trib)*T_trib(nr_trib))/Q2
+                  Q_trb        = Q_trib(nr_trib)
+                  Q_trb_sum    = Q_trb_sum + Q_trb
+!
+!  Update water temperature with tributary input
+!
+                  T_trb_load   = (Q_trb*T_trib(nr_trib))       &
+                               +  T_trb_load
                 end if
-!
-                Q1=Q_out(nncell)
-!
               end do
+!
               DONE=.TRUE.
             end if
 !
-
-500 continue
+!  Update inflow and outflow
+!
+            Q_outflow = Q_inflow + Q_dstrb + Q_trb_sum
+            Q_ratio = Q_inflow/Q_outflow       
+!
+! Do the mass/energy balance
+!
+            T_0  = T_0*Q_ratio                              &
+                 + (T_dstrb_load + T_trb_load)/Q_outflow    &
+                 + q_dot*dt_calc              
+!
+            if (T_0.lt.0.5) T_0 =0.5
+            Q_inflow = Q_outflow
+!
             nseg=nseg+1
             nncell=segment_cell(nr,nseg)
 !
-!     Reset tributary flag if this is a new celln_write
+!     Reset tributary flag if this is a new cell
 !
             if(ncell0.ne.nncell) then
               ncell0=nncell
-              DONE=.FALSE.
+              Q_inflow = Q_in(nncell)
+               DONE=.FALSE.
             end if
-            dt_calc=dt_part(nm)
             dt_total=dt_total+dt_calc
           end do
           if (T_0.lt.0.5) T_0=0.5
@@ -277,7 +293,7 @@ if(nr.eq.7) write(26,*) 'Dist ',Q1,Q2,T_0,T_dist
 !   other points by some additional code that keys on the
 !   value of ndelta (now a vector)(UW_JRY_11/08/2013)
 !
-            call WRITE(time,nd,nr,ncell,ns,T_0,T_head(nr),dbt(ncell))
+            call WRITE(time,nd,nr,ncell,ns,T_0,T_head(nr),dbt(ncell),Q_inflow,Q_outflow)
 !
 !     End of computational element loop
 !

@@ -6,17 +6,13 @@
 # Defining variables
 #
 objects = rbm10_VIC.o Begin.o Systmm.o Particle_Track.o \
-          Energy.o Julian.o Leap_Year.o tntrp.o Read_Forcing.o \
-          Block_Energy.o Block_Hydro.o Block_Network.o Block_WQ.o\
+          Energy.o Julian.o tntrp.o Read_Forcing.o \
+          Block_Energy.o Block_Hydro.o Block_Network.o\
 	  Water_Balance.o Write.o	  
 f90comp = gfortran
 # Makefile
 rbm10_VIC: $(objects)
 	$(f90comp) -o rbm10_VIC $(objects)
-Block_WQ.o: Block_WQ.f90
-	$(f90comp) -c Block_WQ.f90
-block_wq.mod: Block_WQ.o Block_WQ.f90
-	$(f90comp) -c Block_WQ.f90
 Block_Energy.o: Block_Energy.f90
 	$(f90comp) -c Block_Energy.f90
 block_energy.mod: Block_Energy.f90
@@ -43,8 +39,6 @@ Write.o: Write.f90
 	$(f90comp) -c Write.f90
 Julian.o: Julian.f90
 	$(f90comp) -c Julian.f90
-Leap_Year.o: Leap_Year.f90
-	$(f90comp) -c Leap_Year.f90
 tntrp.o: tntrp.f90
 	$(f90comp) -c tntrp.f90
 Water_Balance.o: block_hydro.mod block_network.mod Water_Balance.f90
