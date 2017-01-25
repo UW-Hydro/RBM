@@ -24,7 +24,7 @@ pages:
     - 'Links': 'links.md'
 - Documentation:
     - 'Tutorial':   'Documentation/tutorial.md'
-    - 'Steps to run RBM': 'Documentation/run_RBM.md'
+    - 'How to run RBM (Salmon River example)': 'Documentation/run_RBM.md'
 - Development:
     - 'Development': 'Development/ModelDevelopment.md'
     - 'Release Notes': 'Development/ReleaseNotes.md'
