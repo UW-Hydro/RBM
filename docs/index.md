@@ -5,6 +5,6 @@ On this website you will find documentation both about the model and how to run 
 # Documentation:
 
 ### 1.  [About](Overview/ModelOverview.md)
-### 2.  [Documentation](Documentation/UserGuide.md)
+### 2.  [Documentation](Documentation/tutorial.md)
 ### 3.  [Development](Development/ModelDevelopment.md)
 ### 4.  [Downloads](Datasets/Datasets.md)

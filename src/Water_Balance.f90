@@ -5,19 +5,26 @@ USE Block_Network
 !
 IMPLICIT NONE
 !
-integer:: nc,ncnf,nr,nrc,ntrib,nntrib,tot_trib_in,trib_seg_in
-real   :: Q_start,Q_sum_trib
+integer     :: nc,ncnf,nr,nrc,ntrib,nntrib
+integer     :: tot_trib_in,trib_seg_in
+real        :: Q_start,Q_sum_trib
+!
 !
 do nr = 1,nreach
-  nrc=reach_cell(nr,1)
-  Q_in(nrc) = Q_out(nrc)
-  Q_diff(nrc)=0.0
-  nc=1
-  write(27,*) 'Water Balance - ',nr,nc,nrc,Q_diff(nrc),Q_out(nrc),Q_in(nrc)  &
-                                  ,Q_sum_trib
-  do nc = 2,no_cells(nr)-1
+  do nc = 1,no_cells(nr)
     nrc = reach_cell(nr,nc)
-    Q_in(nrc) = Q_out(nrc-1)
+    if (nc .eq. 1) then
+!
+!  Flow into the headwaters cell is the same as the flow out
+!
+      Q_in(nrc) = Q_out(nrc)
+    else
+!
+!  Flow into downstream cells is equal to the flow out of the most upstream cell
+!
+      Q_in(nrc) = Q_out(nrc-1)
+    end if
+!
     ntrib=no_tribs(nrc)
     Q_sum_trib = 0.0
     if (ntrib .gt. 0) then
@@ -26,9 +33,21 @@ do nr = 1,nreach
         Q_sum_trib = Q_sum_trib + Q_out(ncnf)
       end do
     end if
-    Q_diff(nrc) = Q_out(nrc) - Q_in(nrc) - Q_sum_trib
-    write(27,*) 'Water Balance - ',nr,nc,nrc,Q_diff(nrc),Q_out(nrc),Q_in(nrc)  &
-                                  ,Q_sum_trib
+!
+!  Nonpoint flow is distributed evenly among all segments in the grid cell
+!
+    Q_diff(nrc) = (Q_out(nrc) - Q_in(nrc) - Q_sum_trib)/ndelta(nrc)
+!
+! Only half the cell at the confluence contributes flow and we'll assume that the 
+! contribution from that cell is similar to that of the previous cell (nrc-1)
+!
+    if (nc .eq. no_cells(nr)) then
+      Q_out(nrc) = Q_out(nrc) + Q_diff(nrc-1)
+      Q_diff(nrc) = Q_diff(nrc-1)
+      Q_trib(nr) = Q_out(nrc)
+    end if
+!
   end do
+!  
 end do
 end SUBROUTINE Water_Balance
