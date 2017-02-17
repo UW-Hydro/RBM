@@ -1,0 +1,52 @@
+#!/usr/bin/env bash
+
+set -e
+
+mkdir ${TRAVIS_BUILD_DIR}/rbm/test_function
+
+function install_miniconda {
+  if [ "$TRAVIS_OS_NAME" = "osx" ]; then
+        # miniconda for python3
+    echo "installing miniconda for osx"
+    wget https://repo.continuum.io/miniconda/Miniconda3-latest-MacOSX-x86_64.sh -O miniconda.sh
+  else
+    echo "installing miniconda for linux"
+    wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh
+  fi
+    bash miniconda.sh -b -p $HOME/miniconda
+    export PATH="$HOME/miniconda/bin:$PATH"
+    hash -r
+    conda config --set always_yes yes --set changeps1 no
+    conda update -q conda
+    conda info -a
+
+    conda env create --file ${TRAVIS_BUILD_DIR}/ci/requirements-py35.yml
+    source activate test_env
+    # scipy should not have been installed, but it's included in older versions of
+    # the conda pandas package
+    python ${TRAVIS_BUILD_DIR}/setup.py install
+}
+
+function f2py_leap {
+  echo f2py_leap_year
+  cd ${TRAVIS_BUILD_DIR}/src
+  f2py -c -m leapyear Leap_Year.f90
+  mv leapyear* ${TRAVIS_BUILD_DIR}/rbm/test_function
+  cd ${TRAVIS_BUILD_DIR}
+}
+
+function rbm_script {
+    echo rbm_script
+    cd ${TRAVIS_BUILD_DIR}/src
+    make
+}
+
+function rbm_after_success {
+  echo rbm_after_success
+  echo "rbm build succeeded"
+}
+
+function rbm_after_failure {
+  echo rbm_after_failure
+  echo "rbm build failed"
+}

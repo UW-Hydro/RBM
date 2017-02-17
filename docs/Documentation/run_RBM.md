@@ -47,7 +47,7 @@ Note:
   * How to use command line to run a model?
 
     * The command line above is an abbreviate for ***full/path/to/executable/file -g full/path/to/global/parameter/file***. If the global parameter files are located in the current directory, you can use the command line above. If not, you need to add the full path before each file.
-    * This rule is also applied in the following steps. If the script/executable/control/parameter files are not in the current directory, you need to add the full paths to them.
+    * This rule is also applied in the following steps. If the script/executable/control/parameter files are not in the current directory, you need to add the full paths to them. 
 
 ### Step 2 Generate topology file
 In the folder, ***../Test_Case***, run the perl script, **build_network_beta.pl** (copied from ***../Perl_Scripts***) using the direction file. Example direction file **Salmon_flowd_0.5.dir** can be found in ***../Test_Case***. In the flow direction file, all the grid cells surrounding the basin of interest must contain a negative one (-1). Also, we cannot simulate a river system containing braided networks. The following is the command for generating the topology file for the Salman example:
