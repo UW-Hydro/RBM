@@ -1,10 +1,10 @@
 # Sample Data Sets
 
-*   Salmon River example of meteorological forcings, VIC parameters, routing model parameters, for learning to use VIC and the routing model.
+*   Salmon River ([example_dataset_download](ftp://hydro.washington.edu/pub/yifan/VIC_RBM2.2/Salmon_River_data.zip)): example of meteorological forcings, VIC parameters, routing model parameters, for learning to use VIC and the routing model.
 
 # RBM Input and Output Data Sets
 
-*    See Land Surface Hydrology site: RBM Version 1.2 *.tar.gz
+*    See [Documentation/Tutorial](../Documentation/tutorial.md) for details
 
 # VIC Input and Output Data Sets
 

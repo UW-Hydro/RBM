@@ -36,6 +36,7 @@ real             :: dt_ttotal
 real,dimension(4):: ta,xa
 !
 real,dimension(:),allocatable     :: T_head,T_smth,T_trib
+logical:: LEAP_YEAR
 
 logical:: DONE
 !
@@ -99,7 +100,10 @@ end_year=2000
 do nyear=start_year,end_year
   write(*,*) ' Simulation Year - ',nyear,start_year,end_year
   nd_year=365
-  if (mod(nyear,4).eq.0) nd_year=366
+!
+! Check to see if it is a leap year
+!
+  if (LEAP_YEAR(nyear)) nd_year=366
 !
 !     Day loop starts
 !

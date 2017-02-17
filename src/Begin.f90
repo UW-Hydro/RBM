@@ -58,7 +58,7 @@ read(90,*) nreach,flow_cells,heat_cells,source
  no_cells=0
  allocate(no_tribs(heat_cells))
  no_tribs=0
- allocate(trib(heat_cells,10))
+ allocate(trib(heat_cells,ns_max))
  trib=0
  allocate (conflnce(heat_cells,10))
  conflnce=0
@@ -66,6 +66,16 @@ read(90,*) nreach,flow_cells,heat_cells,source
  allocate(head_cell(nreach))
  allocate(segment_cell(nreach,ns_max))
  allocate(x_dist(nreach,0:ns_max))
+!
+! Check to see if there are point source inputs
+! 
+if (source) then
+!
+   read(90,'(A)') source_file ! (WUR_WF_MvV_2011/05/23)
+   print *,'source file: ', source_file ! (WUR_WF_MvV_2011/05/23)
+   open(40,file=TRIM(source_file),status='old')
+!
+end if
 !
 !     Start reading the reach date and initialize the reach index, NR
 !     and the cell index, NCELL
@@ -135,8 +145,8 @@ do nr=1,nreach
 !     Variable ndelta read in here.  At present, number of elements
 !     is entered manually into the network file (UW_JRY_2011/03/15)
 !
-    read(90,'(5x,i5,5x,i5,8x,i5,6x,a8,6x,a10,7x,f10.0,f5.0)')  &
-              node,nrow,ncol,lat,long,rmile1,ndelta(ncell)
+    read(90,'(5x,i5,5x,i5,8x,i5,6x,a8,6x,a10,7x,f10.0,i5)')  &
+              node,nrow,ncol,lat,long,rmile1,ndelta(ncell)
 !
 !    Set the number of segments of the default, if not specified
 !
@@ -144,25 +154,24 @@ do nr=1,nreach
     if(first_cell) then
       first_cell=.false.
       head_cell(nr)=ncell
-      x_dist(nr,0)=miles_to_ft*rmile0
+      x_dist(nr,0)=5280.*rmile0
     end if
 !
 ! Added variable ndelta (UW_JRY_2011/03/15)
 !
-    dx(ncell)=miles_to_ft*(rmile0-rmile1)/ndelta(ncell)
+    dx(ncell)=5280.*(rmile0-rmile1)/ndelta(ncell)
     rmile0=rmile1
     nndlta=0
 200 continue
     nndlta=nndlta+1
     nseg=nseg+1
     segment_cell(nr,nseg)=ncell
-    write(*,*) 'nndlta -- ',nr,nndlta,nseg,ncell,segment_cell(nr,nseg)
     x_dist(nr,nseg)=x_dist(nr,nseg-1)-dx(ncell)
 !
 !   Write Segment List for mapping to temperature output (UW_JRY_2008/11/19)
 !
     open(22,file=TRIM(spatial_file),status='unknown') ! (changed by WUR_WF_MvV_2011/01/05)
-    write(22,'(4i6,1x,a8,1x,a10,f5.0)') nr,ncell,nrow,ncol,lat,long,nndlta
+    write(22,'(4i6,1x,a8,1x,a10,i5)') nr,ncell,nrow,ncol,lat,long,nndlta
 !
 ! 
 !
@@ -171,7 +180,7 @@ do nr=1,nreach
     if(nndlta.lt.ndelta(ncell)) go to 200  
     no_celm(nr)=nseg
     segment_cell(nr,nseg)=ncell
-    x_dist(nr,nseg)=miles_to_ft*rmile1
+    x_dist(nr,nseg)=5280.*rmile1
 !
 ! End of cell and segment loop
 !
