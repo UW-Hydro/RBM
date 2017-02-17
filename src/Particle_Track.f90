@@ -1,4 +1,4 @@
-SUBROUTINE Particle_Track(nr,ns,nx_s,nx_head)
+SUBROUTINE Particle_Track(nr,x_head,x_bndry)
 USE Block_Hydro
 USE Block_Network
 IMPLICIT NONE
@@ -19,7 +19,7 @@ real:: dt_total,dt_xcess
     do while(dt_total.lt.dt_comp.and.nx_part.gt.0)
        nx_s=nx_s+1
        x_part(nx_s)=x_dist(nr,nx_part-1)
-       ncell=segment_cell(nr,nx_part)       
+       ncell=segment_cell(nr,nx_part)
        dt_part(nx_s)=dt(ncell)
        dt_total=dt_total+dt_part(nx_s)
 !
@@ -49,6 +49,6 @@ real:: dt_total,dt_xcess
     nx_head=nx_part
     nx_part=max(1,nx_part)
     nstrt_elm(ns)=nx_part
-    no_dt(ns)=nx_s 
+    no_dt(ns)=nx_s
 END SUBROUTINE Particle_Track
 !END MODULE P_Track

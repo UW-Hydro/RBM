@@ -3,7 +3,7 @@ SUBROUTINE Read_Forcing
 USE Block_Energy
 USE Block_Hydro
 USE Block_Network
-! 
+!
 IMPLICIT NONE
 !
 integer :: nc,ncell,nnd,no_flow,no_heat,nr,nrec_flow,nrec_heat
@@ -13,6 +13,7 @@ real    :: Q_avg,Q_dmmy
 no_flow=0
 no_heat=0
 do nr=1,nreach
+<<<<<<< HEAD
   do nc=1,no_cells(nr)-1
     no_flow=no_flow+1
     no_heat=no_heat+1
@@ -22,24 +23,24 @@ do nr=1,nreach
 !
     read(35,'(2i5,2f10.1,2f6.1,f7.1,f6.2)' &
            ,rec=nrec_flow) nnd,ncell &
-           ,Q_out(no_heat),Q_dmmy,Q_diff(no_heat) &  
+           ,Q_out(no_heat),Q_dmmy,Q_diff(no_heat) &
            ,depth(no_heat),width(no_heat),u(no_heat)
 !
     if(u(no_heat).lt.0.01) u(no_heat)=0.01
-    if(ncell.ne.no_heat) write(*,*) 'Flow file error',ncell,no_heat 
+    if(ncell.ne.no_heat) write(*,*) 'Flow file error',ncell,no_heat
 !
     read(36,'(i5,2f6.1,2f7.4,f6.3,f7.1,f5.1)' &
            ,rec=nrec_heat) ncell &
            ,dbt(no_heat),ea(no_heat) &
            ,Q_ns(no_heat),Q_na(no_heat),rho &
            ,press(no_heat),wind(no_heat)
-!   
+!
   if(ncell.ne.no_heat) write(*,*) 'Heat file error',ncell,no_heat
 !
 !  Added variable ndelta (UW_JRY_2011/03/15
 !
     delta_n=ndelta(ncell)
-! 
+!
     Q_avg=0.5*(Q_in(no_heat)+Q_out(no_heat))
     dt(no_heat)=dx(no_heat)/u(no_heat)
 
@@ -61,17 +62,17 @@ do nr=1,nreach
 !
 !       Read the meteorology for the last cell, but not the flow
 !
-  no_heat=no_heat+1 
+  no_heat=no_heat+1
   Q_out(no_heat)=Q_out(no_heat-1)
-!  Q_trib(nr)=Q_out(no_heat)    
+!  Q_trib(nr)=Q_out(no_heat)
   nrec_heat=heat_cells*(ndays-1)+no_heat
   read(36,'(i5,2f6.1,2f7.4,f6.3,f7.1,f5.1)' &
          ,rec=nrec_heat) ncell &
-         ,dbt(no_heat),ea(no_heat) &   
+         ,dbt(no_heat),ea(no_heat) &
          ,Q_ns(no_heat),Q_na(no_heat),rho &
          ,press(no_heat),wind(no_heat)
 !
-!  The flow and hydraulics for the last cell has to be 
+!  The flow and hydraulics for the last cell has to be
 !  modified so they do not
 !  take the values of the segment to which it is tributary
 !
