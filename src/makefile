@@ -7,18 +7,12 @@
 #
 objects = rbm10_VIC.o Begin.o Systmm.o Particle_Track.o \
           Energy.o Julian.o tntrp.o Read_Forcing.o \
-          Block_Energy.o Block_Hydro.o Block_Network.o Block_WQ.o\
-	  Write.o	  
+          Block_Energy.o Block_Hydro.o Block_Network.o\
+	  Water_Balance.o Write.o
 f90comp = gfortran
 # Makefile
 rbm10_VIC: $(objects)
 	$(f90comp) -o rbm10_VIC $(objects)
-bgin.mod: Begin.o Begin.f90
-	$(f90comp) -c Begin.f90
-Block_WQ.o: Block_WQ.f90
-	$(f90comp) -c Block_WQ.f90
-block_wq.mod: Block_WQ.o Block_WQ.f90
-	$(f90comp) -c Block_WQ.f90
 Block_Energy.o: Block_Energy.f90
 	$(f90comp) -c Block_Energy.f90
 block_energy.mod: Block_Energy.f90
@@ -34,7 +28,7 @@ block_network.mod: Block_Network.o Block_Network.f90
 Begin.o: block_energy.mod block_network.mod block_hydro.mod Begin.f90
 	$(f90comp) -c Begin.f90
 Read_Forcing.o: block_energy.mod block_hydro.mod block_network.mod Read_Forcing.f90
-	$(f90comp) -c Read_Forcing.f90 
+	$(f90comp) -c Read_Forcing.f90
 systm.mod: Systmm.o Systmm.f90
 	$(f90comp) -c Systmm.f90
 Systmm.o: block_network.mod block_energy.mod block_hydro.mod Systmm.f90
