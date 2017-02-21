@@ -1,34 +1,3 @@
-Module SYSTM
-!
-integer:: ncell,nncell,ncell0,nc_head,no_flow,no_heat
-integer:: nc,nd,ndd,nm,nr,ns
-integer:: nr_trib,ntrb,ntribs
-integer:: nrec_flow,nrec_heat
-integer:: n1,n2,nnd,nobs,ndays,nyear,nd_year,ntmp
-integer:: npart,nseg,nwpd
-real::    dt_comp,dt_calc,dt_total,hpd,Q1,Q2,q_dot,q_surf,z
-real   :: rminsmooth
-real   :: T_0,T_dist
-real(8):: time
-real   :: x,x_bndry,xd,xdd,xd_year,x_head,xwpd,year
-real,dimension(:),allocatable:: T_head,T_smth,T_trib
-real,dimension(:,:,:),allocatable:: temp
-!
-!
-logical:: DONE
-!
-! Indices for lagrangian interpolation
-!
-integer:: npndx,ntrp
-integer, dimension(3):: ndltp=(/-2,-3,-3/)
-integer, dimension(3):: nterp=(/3,4,3/)
-
-!
-real, parameter:: pi=3.14159,rfac=304.8
-!
-!
-contains
-!
 SUBROUTINE SYSTMM(temp_file,param_file)
 !
 use Block_Energy
@@ -36,11 +5,19 @@ use Block_Hydro
 use Block_Network
 !
 Implicit None
+! 
 !
 character (len=200):: temp_file
 character (len=200):: param_file
+! 
+integer          :: ncell,nncell,ncell0,nc_head,no_flow,no_heat
+integer          :: nc,nd,ndd,nm,nr,ns
+integer          :: nr_trib,ntribs
+integer          :: nrec_flow,nrec_heat
+integer          :: n1,n2,nnd,nobs,nyear,nd_year,ntmp
+integer          :: npart,nseg,nx_s,nx_part,nx_head
 !
-integer::njb
+! Indices for lagrangian interpolation
 !
 integer              :: njb,npndx,ntrp
 integer, dimension(2):: ndltp=(/-1,-2/)
@@ -55,6 +32,7 @@ real             :: T_0,T_dist
 real(8)          :: time
 real             :: x,xd,xdd,xd_year,xwpd,year
 real             :: tntrp
+real             :: dt_ttotal
 real,dimension(4):: ta,xa
 !
 real,dimension(:),allocatable     :: T_head,T_smth,T_trib
@@ -93,7 +71,7 @@ temp=0.5
 ! Initialize headwaters temperatures
 !
 T_head=4.0
-!!
+!
 !
 ! Initialize smoothed air temperatures for estimating headwaters temperatures
 !
@@ -136,7 +114,7 @@ do nyear=start_year,end_year
 !
       DO ndd=1,nwpd
       xdd = ndd
-      time=year+(xd+(xdd-0.5)*hpd)/xd_year
+      time=year+(xd+(xdd-0.5)*hpd)/xd_year 
 
 !
 ! Read the hydrologic and meteorologic forcings
@@ -149,7 +127,6 @@ do nyear=start_year,end_year
 !     Begin cycling through the reaches
 !
       do nr=1,nreach
-
 !
         nc_head=segment_cell(nr,1)
 !
@@ -157,11 +134,11 @@ do nyear=start_year,end_year
 !
         rminsmooth=1.0-smooth_param(nr)
         T_smth(nr)=rminsmooth*T_smth(nr)+smooth_param(nr)*dbt(nc_head)
-!
+!     
 !     Variable Mohseni parameters (UW_JRY_2011/06/16)
-!
+! 
         T_head(nr)=mu(nr)+(alphaMu(nr) &
-                  /(1.+exp(gmma(nr)*(beta(nr)-T_smth(nr)))))
+                  /(1.+exp(gmma(nr)*(beta(nr)-T_smth(nr))))) 
 !
       temp(nr,0,n1)=T_head(nr)
       temp(nr,1,n1)=T_head(nr)
@@ -169,9 +146,9 @@ do nyear=start_year,end_year
 ! Begin cell computational loop
 !
         do ns=1,no_celm(nr)
-!
+! 
         DONE=.FALSE.
-
+  
 ! Testing new code 8/8/2016
 !
 !     Establish particle tracks
@@ -193,11 +170,12 @@ do nyear=start_year,end_year
 !
           npndx=2
 !
-!     Interpolation at the upstream boundary
+!     Interpolation at the upstream boundary if the
+!     parcel has reached that boundary
 !
-          if(nseg.eq.1) then
+          if(nx_head.eq.0) then
             T_0 = T_head(nr)
-          else
+          else 
 !
 !
 !     Interpolation at the upstream or downstream boundary
@@ -241,7 +219,7 @@ do nyear=start_year,end_year
             if(T_0.lt.0.0) T_0=0.0
 !
 !    Add distributed flows
-!
+!    
             T_dstrb_load  = 0.0
 !
             Q_dstrb = Q_diff(nncell)
@@ -282,13 +260,13 @@ do nyear=start_year,end_year
 !  Update inflow and outflow
 !
             Q_outflow = Q_inflow + Q_dstrb + Q_trb_sum
-            Q_ratio = Q_inflow/Q_outflow
+            Q_ratio = Q_inflow/Q_outflow       
 !
 ! Do the mass/energy balance
 !
             T_0  = T_0*Q_ratio                              &
                  + (T_dstrb_load + T_trb_load)/Q_outflow    &
-                 + q_dot*dt_calc
+                 + q_dot*dt_calc              
 !
             if (T_0.lt.0.5) T_0 =0.5
             Q_inflow = Q_outflow
@@ -310,7 +288,7 @@ do nyear=start_year,end_year
 	    T_trib(nr)=T_0
 !
 !   Write all temperature output UW_JRY_11/08/2013
-!   The temperature is output at the beginning of the
+!   The temperature is output at the beginning of the 
 !   reach.  It is, of course, possible to get output at
 !   other points by some additional code that keys on the
 !   value of ndelta (now a vector)(UW_JRY_11/08/2013)
@@ -349,4 +327,3 @@ do nyear=start_year,end_year
 !
 950 return
 end SUBROUTINE SYSTMM
-end module SYSTM

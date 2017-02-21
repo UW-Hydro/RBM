@@ -1,36 +1,3 @@
-module BGIN
-!
-implicit none
-!
-! Integer variables
-!
-    integer:: nwpd
-!
-! Character variables
-!
-    character (len=8) :: end_date,start_date
-    character (len=8) :: lat
-    character (len=10):: long
-!
-    integer:: Julian
-    integer:: head_name,trib_cell
-    integer:: jul_start,main_stem,nyear1,nyear2,nc,ncell,nseg
-    integer:: ns_max_test,node,ncol,nrow,nr,cum_sgmnt
-!
-! Logical variables
-!
-    real :: nndlta
-    real :: rmile0,rmile1,xwpd
-!
-! Real variables
-!
-  real :: rmile0,rmile1,xwpd
-!
-
-!
-contains
-!
-!
 Subroutine BEGIN(param_file,spatial_file)
 !
 use Block_Energy
@@ -38,10 +5,23 @@ use Block_Hydro
 use Block_Network
 !
 implicit none
-!
+!    
+    character (len=8) :: end_date,start_date     
+    character (len=8) :: lat
+    character (len=10):: long
     character (len=200):: param_file,source_file,spatial_file
-    integer:: Julian
 !
+    integer:: Julian
+    integer:: head_name,trib_cell
+    integer:: jul_start,main_stem,nyear1,nyear2,nc,ncell,nseg
+    integer:: ns_max_test,node,ncol,nrow,nr,cum_sgmnt
+!
+    logical:: first_cell,source
+!
+    real :: nndlta
+    real :: rmile0,rmile1,xwpd
+!
+    real,parameter   :: miles_to_ft=5280.
 !
 !   Mohseni parameters, if used
 !
@@ -82,7 +62,7 @@ read(90,*) nreach,flow_cells,heat_cells,source
  trib=0
  allocate (conflnce(heat_cells,10))
  conflnce=0
- allocate(reach_cell(nreach,ns_max))
+ allocate(reach_cell(nreach,ns_max)) 
  allocate(head_cell(nreach))
  allocate(segment_cell(nreach,ns_max))
  allocate(x_dist(nreach,0:ns_max))
@@ -145,7 +125,7 @@ do nr=1,nreach
 !
 !  Place holder for point source input
 !
-    end if
+    end if 
 !
 !     The headwaters index for each cell in this reach is given
 !     in the order the cells are read
@@ -184,20 +164,20 @@ do nr=1,nreach
     open(22,file=TRIM(spatial_file),status='unknown') ! (changed by WUR_WF_MvV_2011/01/05)
     write(22,'(4i6,1x,a8,1x,a10,f5.0)') nr,ncell,nrow,ncol,lat,long,nndlta
 !
-!
+! 
 !
 !  Added variable ndelta  (UW_JRY_2011/03/15)
 !
-    if(nndlta.lt.ndelta(ncell)) go to 200
+    if(nndlta.lt.ndelta(ncell)) go to 200  
     no_celm(nr)=nseg
     segment_cell(nr,nseg)=ncell
     x_dist(nr,nseg)=miles_to_ft*rmile1
 !
-! End of segment loop
+! End of cell and segment loop
 !
   end do
 !
-! If this is a reach that is tributary to another, set the confluence cell to the previous
+! If this is a reach that is tributary to another, set the confluence cell to the previous 
 ! cell. This is necessary because the last cell in the reach has the same cell number
 ! as that of the cell it enters. This is to account for the half portion of the cell the
 ! the parcel traverses to the center of the grid.
@@ -229,5 +209,3 @@ dt_comp=86400./xwpd
 !
 !
 end subroutine BEGIN
-!
-   END Module BGIN
