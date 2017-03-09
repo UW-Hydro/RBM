@@ -36,7 +36,6 @@ real             :: dt_ttotal
 real,dimension(4):: ta,xa
 !
 real,dimension(:),allocatable     :: T_head,T_smth,T_trib
-logical:: LEAP_YEAR
 
 logical:: DONE
 !
@@ -96,14 +95,10 @@ hpd=1./xwpd
 !
 !     Year loop starts
 !
-end_year=2000
 do nyear=start_year,end_year
   write(*,*) ' Simulation Year - ',nyear,start_year,end_year
   nd_year=365
-!
-! Check to see if it is a leap year
-!
-  if (LEAP_YEAR(nyear)) nd_year=366
+  if (mod(nyear,4).eq.0) nd_year=366
 !
 !     Day loop starts
 !
@@ -143,7 +138,7 @@ do nyear=start_year,end_year
 !     Variable Mohseni parameters (UW_JRY_2011/06/16)
 ! 
         T_head(nr)=mu(nr)+(alphaMu(nr) &
-                  /(1.+exp(gmma(nr)*(beta(nr)-T_smth(nr)))))  
+                  /(1.+exp(gmma(nr)*(beta(nr)-T_smth(nr))))) 
 !
       temp(nr,0,n1)=T_head(nr)
       temp(nr,1,n1)=T_head(nr)
@@ -168,7 +163,7 @@ do nyear=start_year,end_year
 !
           nseg=nstrt_elm(ns)
 !
-!     Perform polynomial interpolationnr_trib
+!     Perform polynomial interpolation
 !
 !
 !     Interpolation inside the domain
@@ -188,26 +183,27 @@ do nyear=start_year,end_year
             if(nseg .eq. 1 .or. nseg .eq. no_celm(nr)) npndx=1
 !
             do ntrp=nterp(npndx),1,-1
-            npart=nseg+ntrp+ndltp(npndx)
-            xa(ntrp)=x_dist(nr,npart)
-            ta(ntrp)=temp(nr,npart,n1)
-          end do
+              npart=nseg+ntrp+ndltp(npndx)
+              xa(ntrp)=x_dist(nr,npart)
+              ta(ntrp)=temp(nr,npart,n1)
+            end do
 !
 ! Start the cell counter for nx_s
 !
-          x=x_part(nx_s)
+            x=x_part(nx_s)
 !
 !     Call the interpolation function
 !
-          T_0=tntrp(xa,ta,x,nterp(npndx))
+            T_0=tntrp(xa,ta,x,nterp(npndx))
           end if
 !
-! 
+!
           nncell=segment_cell(nr,nstrt_elm(ns))
 !
 !    Initialize inflow
 !
           Q_inflow = Q_in(nncell)
+          Q_outflow = Q_out(nncell)
 !
 !    Set NCELL0 for purposes of tributary input
 !
@@ -228,10 +224,12 @@ do nyear=start_year,end_year
 !
             Q_dstrb = Q_diff(nncell)
 !
+! Temperature of distributed inflow assumed = 10.0 deg C
+!
             if(Q_dstrb.gt.0.001) then
-              T_dstrb  = T_0
+              T_dstrb  = 10.0
             else
-              T_dstrb  = T_0
+              T_dstrb  = 10.0
             end if
               T_dstrb_load  = Q_dstrb*T_dstrb
 
@@ -239,25 +237,22 @@ do nyear=start_year,end_year
 !     Look for a tributary.
 !
             ntribs=no_tribs(nncell)
-            write(21,*) ntribs
+            Q_trb_sum   = 0.0
+            T_trb_load  = 0.0
             if(ntribs.gt.0.and..not.DONE) then
 !
-              Q_trb_sum   = 0.0
-              T_trb_load  = 0.0
               do ntrb=1,ntribs
                 nr_trib=trib(nncell,ntrb)
                 if(Q_trib(nr_trib).gt.0.0) then
                   Q_trb        = Q_trib(nr_trib)
                   Q_trb_sum    = Q_trb_sum + Q_trb
-! 
+!
 !  Update water temperature with tributary input
-!                 
+!
                   T_trb_load   = (Q_trb*T_trib(nr_trib))       &
                                +  T_trb_load
                 end if
-
               end do
-
 !
               DONE=.TRUE.
             end if
@@ -269,8 +264,8 @@ do nyear=start_year,end_year
 !
 ! Do the mass/energy balance
 !
-            T_0  = T_0*Q_ratio                                          &
-                 + (T_dstrb_load + T_trb_load)/Q_outflow                &
+            T_0  = T_0*Q_ratio                              &
+                 + (T_dstrb_load + T_trb_load)/Q_outflow    &
                  + q_dot*dt_calc              
 !
             if (T_0.lt.0.5) T_0 =0.5
@@ -284,7 +279,7 @@ do nyear=start_year,end_year
             if(ncell0.ne.nncell) then
               ncell0=nncell
               Q_inflow = Q_in(nncell)
-              DONE=.FALSE.
+               DONE=.FALSE.
             end if
             dt_total=dt_total+dt_calc
           end do

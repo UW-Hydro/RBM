@@ -5,15 +5,13 @@ USE Block_Network
 !
 IMPLICIT NONE
 !
-integer     :: nc,ncnf,nr,nrc,ntrib,nntrib,total_cells
+integer     :: nc,ncnf,nr,nrc,ntrib,nntrib
 integer     :: tot_trib_in,trib_seg_in
 real        :: Q_start,Q_sum_trib
 !
-total_cells = 0.0
 !
 do nr = 1,nreach
   do nc = 1,no_cells(nr)
-    total_cells=total_cells+1
     nrc = reach_cell(nr,nc)
     if (nc .eq. 1) then
 !
@@ -40,6 +38,16 @@ do nr = 1,nreach
 !
     Q_diff(nrc) = (Q_out(nrc) - Q_in(nrc) - Q_sum_trib)/ndelta(nrc)
 !
+! Only half the cell at the confluence contributes flow and we'll assume that the 
+! contribution from that cell is similar to that of the previous cell (nrc-1)
+!
+    if (nc .eq. no_cells(nr)) then
+      Q_out(nrc) = Q_out(nrc) + Q_diff(nrc-1)
+      Q_diff(nrc) = Q_diff(nrc-1)
+      Q_trib(nr) = Q_out(nrc)
+    end if
+!
   end do
+!  
 end do
 end SUBROUTINE Water_Balance
