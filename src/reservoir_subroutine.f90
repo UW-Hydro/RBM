@@ -128,14 +128,14 @@ SUBROUTINE reservoir_subroutine(nresx, nd, q_surf,time, nd_year, nyear)
       qsurf_tot(nresx) = energy_x
 
  ! non-essential - only to print out specific calculated variables
- if(nresx.eq.8) then
+ if(nresx.eq.3) then
  
   write(48,*),time,T_res_in(nresx),T_epil(nresx), advec_in_epix, energy_x, dif_epi_x, flow_in_epi_x, volume_e_x(nresx) &
                                   ,T_hypo(nresx), advec_in_hypx, advec_epi_hyp, dif_hyp_x, flow_in_hyp_x,  volume_h_x(nresx) &
                  ,  flow_epi_hyp_x,  temp_out(nresx)
  end if
 
- if(nresx.eq.1) then
+ if(nresx.eq.21) then
 
   write(89,*),time,T_res_in(nresx),T_epil(nresx), advec_in_epix, energy_x,dif_epi_x, flow_in_epi_x, volume_e_x(nresx) &
                                   ,T_hypo(nresx), advec_in_hypx, advec_epi_hyp,dif_hyp_x, flow_in_hyp_x,  volume_h_x(nresx) &

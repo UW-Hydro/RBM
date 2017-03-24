@@ -88,6 +88,8 @@ implicit none
                 vol_change_hyp_x = res_vol_delta_x  * acrefeet_to_m3
                 vol_change_epi_x = 0
            else
+              !vol_change_hyp_x = 0
+              !vol_change_epi_x = 0
               vol_change_hyp_x = flow_in_epi_x - flow_out_epi_x - flow_epi_hyp_x
               vol_change_epi_x = flow_in_hyp_x + flow_epi_hyp_x - flow_out_hyp_x
            end if
@@ -103,7 +105,7 @@ implicit none
         depth_e(nresx) = volume_e_x(nresx) / surface_area(nresx)
         depth_h(nresx) = volume_h_x(nresx) / surface_area(nresx)
 
-        if(nresx .eq. 6) write(77,*), volume_e_x(nresx), volume_h_x(nresx) &
+        if(nresx .eq. 8) write(77,*), volume_e_x(nresx), volume_h_x(nresx) &
                ,depth_e(nresx),depth_h(nresx)
   !      print *, 'depth_e', depth_e(nresx), 'depth_h', depth_h(nresx)
   !      print *,'nresx',nresx,'flow_cfs',Q1/(ftsec_to_msec * dt_comp),'vol',volume_e_x(nresx)+volume_h_x(nresx) &
