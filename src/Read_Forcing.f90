@@ -63,7 +63,10 @@ do nr=1,nreach
 !
   no_heat=no_heat+1 
   Q_out(no_heat)=Q_out(no_heat-1)
-!  Q_trib(nr)=Q_out(no_heat)    
+!
+! Tributary flow from this reach equals Q_out for this cell
+!
+  Q_trib(nr)=Q_out(no_heat)    
   nrec_heat=heat_cells*(ndays-1)+no_heat
   read(36,'(i5,2f6.1,2f7.4,f6.3,f7.1,f5.1)' &
          ,rec=nrec_heat) ncell &
