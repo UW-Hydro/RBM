@@ -17,35 +17,41 @@ SUBROUTINE reservoir_subroutine(nresx, nd, q_surf,time, nd_year, nyear)
         n_stability = (-1) * (gravity/density_epil(nresx)) * & 
                 ((density_dif)/((depth_e(nresx) + depth_h(nresx))/2))
         if(n_stability < 0.000001) n_stability = 0.000001
-        log_K_z = log10(n_stability) * (-1)  - 5.699 ! based on empirical equation in Quay et al. 1980, Fig 11
-        K_z(nresx) = 10**log_K_z  
+        !log_K_z = log10(n_stability) * (-1)  - 5.699 ! original relationship: based on empirical equation in Quay et al. 1980, Fig 11
+        !log_K_z = log10(n_stability) * (-0.74)  - 3.8 ! high scenario based on empirical equation in Quay et al. 1980, Fig 11
+        !log_K_z = log10(n_stability) * (-0.74)  - 4.6 ! moderate scenario based on empirical equation in Quay et al. 1980, Fig 11
+        !log_K_z = log10(n_stability) * (-0.74)  - 5.4 ! low scenario based on empirical equation in Quay et al. 1980, Fig 11
+        log_K_z = log10(n_stability) * (-0.65)  - 3.1 ! high scenario - 2  w/ adjusted intercept based on empirical equation in Quay et al. 1980, Fig 11
+        !log_K_z = log10(n_stability) * (-0.55)  - 2.3 ! high scenario - 3  w/ adjusted intercept based on empirical equation in Quay et al. 1980, Fig 11
+        K_z(nresx) = 10**log_K_z
+        ! ONLY for no stratification run: K_z(nresx) =  2 
         write(57, *) nresx,K_z(nresx)
 
         !print *, 'depth',((depth_e(nresx) + depth_h(nresx))/2), 'density_dif',density_dif, 'n_stability', n_stability
         !print *, 'nresx', nresx,'n_stability',n_stability,  'log_K_z',log_K_z,   'K_z', K_z(nresx)
-       ! dayx = nd  ! day of year
-       ! if(dayx == 1) flag_turnover = .false.
+      !  dayx = nd  ! day of year
+      !  if(dayx == 1) flag_turnover = .false.
 
 
         ! IF well mixed
-        !if ( ( T_epil(nresx) - T_hypo(nresx)) .lt. (2) .and. dayx .gt. 245) then !245 is September 1st
+      !  if ( ( T_epil(nresx) - T_hypo(nresx)) .lt. (2) .and. dayx .gt. 245) then !245 is September 1st
 
-         !       if(flag_turnover(nresx) .eqv. .false.) then
-         !             write(67, *) nyear,dayx,nresx, T_epil(nresx), T_hypo(nresx)
-         !             flag_turnover(nresx) = .true.
-         !       end if 
+      !          if(flag_turnover(nresx) .eqv. .false.) then
+          !            write(67, *) nyear,dayx,nresx, T_epil(nresx), T_hypo(nresx)
+      !                flag_turnover(nresx) = .true.
+      !          end if 
 
-         !       if( (T_epil(nresx) - T_hypo(nresx)) .lt. (0) ) then
-         !                K_z(nresx) = 5 ! set high K_z when moderately unstable
-         !       else
-         !                K_z(nresx) = 0.1 ! set moderate K_z when system is unstable
-         !       end if
+      !          if( (T_epil(nresx) - T_hypo(nresx)) .lt. (0) ) then
+      !                   K_z(nresx) = 5 ! set high K_z when moderately unstable
+      !          else
+      !                   K_z(nresx) = 0.1 ! set moderate K_z when system is unstable
+      !          end if
 
-        ! IF thermally stratified
-        !else ! if T_epil greater than T_hypo
-         !         K_z(nresx) = 0.001  ! set the diffusion coeff. in m^2/day
+         ! IF thermally stratified
+      !   else ! if T_epil greater than T_hypo
+      !            K_z(nresx) = 0.01  ! set the diffusion coeff. in m^2/day
          !         K_z(nresx) = K_z(nresx) / (depth_e(nresx)/2) ! divide by approx thickness of thermocl.
-       ! end if
+      !   end if
 
         ! ################ This is specially for energy test###########!                
         !    K_z(nresx) = 0
