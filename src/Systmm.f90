@@ -433,8 +433,14 @@ do nyear=start_year,end_year
     write(32,*),time, T_epil(1:nres), T_hypo(1:nres) ! , flow_in_epi_x, flow_out_epi_x,
 
          open(19,file=TRIM(reservoir_output_file),status='unknown')
-         write(19,'(2i6,6x,25f10.2,6x,25f10.2,6x,25f10.3,6x,25f10.3,6x,25f10.3,6x,25f10.3)') nyear,nd &
-          , T_epil(1:nres),T_hypo(1:nres),diffusion_tot(1:nres),advec_hyp_tot(1:nres),advec_epi_tot(1:nres), qsurf_tot(1:nres)
+!         write(19,'(2i6,6x,25f10.2,6x,25f10.2,6x,25f10.3,6x,25f10.3,6x,25f10.3,6x,25f10.3)') nyear,nd &
+!          , T_epil(1:nres),T_hypo(1:nres),diffusion_tot(1:nres),advec_hyp_tot(1:nres),advec_epi_tot(1:nres), qsurf_tot(1:nres)
+
+           write(19,'(2i6, 6x, 50f10.2, 6x, 50f10.3, 6x, 50f10.3, 6x, 50e14.6, 1x, 50f10.4)') &
+           nyear,nd,T_epil(1:nres),T_hypo(1:nres),diffusion_tot(1:nres),advec_hyp_tot(1:nres),advec_epi_tot(1:nres)&
+            , qsurf_tot(1:nres),  volume_e_x(1:nres), volume_h_x(1:nres), T_res_in(1:nres)  &
+            , temp_change_hyp(1:nres)
+
 
     write(75, *), time, q_evap_output(1:nres)
 
