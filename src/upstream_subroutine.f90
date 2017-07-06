@@ -40,11 +40,10 @@ integer, dimension(3):: nterp=(/3,4,3/)
             T_0 = T_head(nr)
             res_upstreamx = .false.
             resx2 = 0
-         !   if(nr .eq. 299) write(*,*) 'parcel started at headw'
-            !  print *,'ncell',ncell, 'T_0', T_0
+           ! if(nr .eq. 234) write(*,*) 'parcel started at headw'
+           !     print *,'ncell',ncell, 'T_0', T_0
 !            if(ns .eq. 3) print *,'headw',  'T_head',   T_head(nr)
 ! print *, 'nseg', nseg, 'ns',ns,'T_0',T_0, 'parcel started at headw'
-
 
           ! ------- if parcel started in reservoir and finished downstream  -----------
           else if (reservoir.and.res_pres(nr,segment_cell(nr,nseg))) then
@@ -58,6 +57,9 @@ integer, dimension(3):: nterp=(/3,4,3/)
   ! if(ns .gt. 7) print *,'parcel started in reservoir',  '
   ! nseg',nseg,'T_0',T_0
    !if(ns .eq. 3) print *,'ns',ns,'nseg',nseg, 'T_0', T_0
+
+
+ ! if(ncell .eq. 624) print *, 'cell 624  water started in reservoi', resx2, 'T_res_out',T_0
 
           ! -----------  if parcel is in reservoir (didn't finish downstream) -----------
           !              BUT not first cell in reservoir - since upstream flow is read in
@@ -109,6 +111,9 @@ integer, dimension(3):: nterp=(/3,4,3/)
    !    if(ns .gt. 7) print *,'if parcel started and ended in river', '  nseg',nseg,'T_0',T_0
           ! ------------------------- end of the large if loop ----------------
           end if
+
+
+
 
 
 end subroutine upstream_subroutine

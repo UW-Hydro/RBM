@@ -49,7 +49,7 @@ character (len=200):: temp_file, reservoir_output_file, energy_file
 !
 integer :: njb, resx2, i, j
 !
-real :: tntrp, T_res_f, T_0i
+real :: tntrp, T_res_f, T_0i, T_0_q
 !real,dimension(4):: ta,xa
 ! array for each reservoir for if inflow from that parcel
 ! to reservoir has been calculated
@@ -213,6 +213,7 @@ do nyear=start_year,end_year
     !
     !     Start the numbers of days-to-date counter
     !
+   ! print * ,'------------------------ day: ', nd, '------------------------'
     ndays=ndays+1
     !
     !    Daily period loop starts
@@ -283,7 +284,7 @@ do nyear=start_year,end_year
 
             T_0i = T_0  ! initial temperature, for writing energy_file
 
-
+  ! if(ncell .eq. 624)  print *, 'initial 624 temp: ', T_0i
             !    loop to set number of segments to cycle through based on if
             !   A) started in reservoir and B) finished downstream of reservoir
 
@@ -301,20 +302,28 @@ do nyear=start_year,end_year
 
             do nm=nm_start,1,-1  ! cycle through each segment parcel passed through
               z=depth(nncell)
+              if(z .lt. 5) z = 5
               nd2 = nd  ! cut out later, just to print day in energy module
               call energy(T_0,q_surf,nncell, ns, nyear, nd2)
               q_dot=(q_surf/(z*rfac))
 
         ! ################ This is specially for simple energy test###########!                
         !     q_dot = 0  ! ONLY for the simple test
-
+   !  if(ncell .eq. 624)  print *, 'T_0 as it flows', T_0, 'nm', nm
+      
               T_0=T_0+q_dot*dt_calc !adds heat added only during time parcel passed this segment
+
+                T_0_q = T_0
 
               if(T_0.lt.0.0) T_0=0.0
   !  write(*,*) 'pre trib subroutine      nd:  ', nd
 
              call trib_subroutine(nncell,ncell0, T_0,nr_trib, nr & 
                           ,ns, nseg, n2, DONE, dt_calc, dt_total, ncell)
+
+   
+    if(ncell .eq. 624 .and. ns .eq. 10)  write(93, *) time,ns,z, T_0i,q_dot*dt_calc,T_0_q,  T_0
+        
             end do ! end loop cycling through all segments parcel passed through
 
           end if   ! end river if loop
@@ -399,7 +408,6 @@ do nyear=start_year,end_year
           if (T_0.lt.0.5) T_0=0.5 ! set so lowest temp can be is 0.5
           temp(nr,ns,n2)=T_0    ! temperature will be used next simulation
           T_trib(nr)=T_0        ! temp of this reach, to calc trib inflow
-
 
           call WRITE(time,nd,nr,ncell,ns,T_0,T_head(nr),dbt(ncell),Q_out(ncell))
 

@@ -201,7 +201,6 @@ do nr=1,nreach !loop through all the reaches from first to last reach
     read(90,'(i5,11x,i4,10x,i5,15x,i5,15x,f10.0,i5)') no_cells(nr) & ! first header for each reach
        ,head_name,trib_cell,main_stem,rmile0
     ! trib_cell = cell the reach flows in to
-    
     !
     !     If this is reach that is tributary to cell TRIB_CELL, give it the
     !     pointer TRIB(TRIB_CELL) the index of this reach for further use.
@@ -256,6 +255,9 @@ do nr=1,nreach !loop through all the reaches from first to last reach
            read(90,'(5x,i5,5x,i5,8x,i5,6x,a8,6x,a10,7x,f10.0,i5)')  &
               node,nrow,ncol,lat,long,rmile1,ndelta(ncell)
         end if
+
+
+        if(node .eq. 624) print *, 'node',node,'ncell',ncell,'nr',nr
 
         !    Set the number of segments of the default, if not specified
         !
@@ -354,6 +356,9 @@ end if
 nwpd=1
 xwpd=nwpd
 dt_comp=86400./xwpd
+
+
+print *,'----------------------','should be 624: ',    nodes_x(234,5) 
 
 !
 !     ******************************************************

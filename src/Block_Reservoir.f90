@@ -46,7 +46,7 @@ module Block_Reservoir
         real, dimension (:), allocatable ::  surface_area, depth_total, depth_e, depth_h
         real, dimension (:), allocatable ::  delta_vol_e_x, delta_vol_h_x
         real, dimension (:), allocatable :: delta_vol_e_T_x, delta_vol_h_T_x, dV_dt_epi,dV_dt_hyp
-        real, parameter :: depth_e_frac=0.4, depth_h_frac=0.6
+        real, parameter :: depth_e_frac=0.2, depth_h_frac=0.8
         real, dimension (:), allocatable :: Q_tot, Q_pen, Q_spill
         real, dimension (:), allocatable :: depth_e_inital, volume_e_initial, depth_h_inital, volume_h_initial
         real, dimension (:), allocatable :: volume_e_x,volume_h_x, T_res, T_res_in, T_trib_tot, Q_res_in

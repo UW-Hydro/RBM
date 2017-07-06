@@ -26,7 +26,7 @@ SUBROUTINE reservoir_subroutine(nresx, nd, q_surf,time, nd_year, nyear)
         K_z(nresx) = 10**log_K_z
         if (K_z(nresx) > 2) K_z(nresx) = 2
         ! ONLY for no stratification run: 
-        K_z(nresx) =  1 
+        !K_z(nresx) =  1 
         write(57, *) nresx,K_z(nresx)
 
         !print *, 'depth',((depth_e(nresx) + depth_h(nresx))/2), 'density_dif',density_dif, 'n_stability', n_stability
@@ -124,6 +124,12 @@ SUBROUTINE reservoir_subroutine(nresx, nd, q_surf,time, nd_year, nyear)
       volume_tot = volume_e_x(nresx)  + volume_h_x(nresx)
       T_res(nresx) = (T_epil(nresx) * (volume_e_x(nresx)/volume_tot)) + &
          (T_hypo(nresx)*(volume_h_x(nresx)/volume_tot) ) ! weighted averge temp
+
+
+   !  if(nresx .eq. 13) then
+   !     write(93,*) time,  temp_out(nresx),  epix,  hypox, T_epil(nresx) &
+   !   ,  T_hypo(nresx), flow_out_epi_x, flow_out_hyp_x
+   !  end if
 
    ! ################ This is specially for energy test ###########!                
    !   T_res(nresx) = T_epil(nresx)
