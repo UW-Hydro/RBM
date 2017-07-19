@@ -1,6 +1,6 @@
 # RBM documentation README
 
-This directory contains that builds the RBM website (http://rbm.readthedocs.org). Below is a bit of information on how to edit, test, and serve the documentation.
+This directory contains files that build the RBM website (http://rbm.readthedocs.org). Below is a bit of information on how to edit, test, and serve the documentation.
 
 ## Style
 The RBM documentation source files are written in [Markdown](https://help.github.com/articles/markdown-basics/), and configured with a single YAML configuration file (`mkdocs.yml`). Mardown also supports some html so that is an option if pure markdown can't get the job done.
