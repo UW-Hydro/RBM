@@ -1,5 +1,7 @@
 Subroutine BEGIN(param_file,spatial_file)
 !
+!  Ryan testing if GitHub merge works (7/19/2017)
+!
 use Block_Energy
 use Block_Hydro
 use Block_Network
