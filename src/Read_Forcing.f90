@@ -8,7 +8,7 @@ IMPLICIT NONE
 !
 integer :: nc,ncell,nnd,no_flow,no_heat,nr,nrec_flow,nrec_heat
 real    :: Q_avg,Q_dmmy
-
+character(40) :: line
 
 no_flow=0
 no_heat=0
@@ -19,17 +19,27 @@ do nr=1,nreach
 !
     nrec_flow=flow_cells*(ndays-1)+no_flow
     nrec_heat=heat_cells*(ndays-1)+no_heat
+   ! print *, 'no_heat', no_heat,'nrec_flow',nrec_flow, 'nrec_heat', nrec_heat
 !
-    read(35,'(2i5,2f10.1,2f6.1,f7.1,f6.2)' &
-           ,rec=nrec_flow) nnd,ncell &
-           ,Q_out(no_heat),Q_dmmy,Q_diff(no_heat) &  
-           ,depth(no_heat),width(no_heat),u(no_heat)
+!    read(35,'(i1,1x,i1,1x,f5.1,1x,f4.1,1x,f2.1,1x,f2.1,1x,f3.1,1x,f1.2)' &
+    read(35,*) &
+    !  , rec=nrec_flow) & 
+           nnd,ncell &
+           ,Q_out(no_heat),Q_dmmy, Q_diff(no_heat) &
+           ,depth(no_heat) &
+           ,width(no_heat) &
+           ,u(no_heat)
 !
+
+!print *, 'nnd', nnd, 'ncell',ncell,'Q_out',Q_out(no_heat),'Q_dmy',Q_dmmy & 
+!,'Qdiff',Q_diff(no_heat),'dep',depth(no_heat),'width',width(no_heat),'u',u(no_heat)
     if(u(no_heat).lt.0.01) u(no_heat)=0.01
     if(ncell.ne.no_heat) write(*,*) 'Flow file error',ncell,no_heat 
 !
-    read(36,'(i5,2f6.1,2f7.4,f6.3,f7.1,f5.1)' &
-           ,rec=nrec_heat) ncell &
+!    read(36,'(i5,2f6.1,2f7.4,f6.3,f7.1,f5.1)' &
+     read(36, *)  &
+         !  ,rec=nrec_heat) 
+         ncell &
            ,dbt(no_heat),ea(no_heat) &
            ,Q_ns(no_heat),Q_na(no_heat),rho &
            ,press(no_heat),wind(no_heat)
@@ -68,8 +78,9 @@ do nr=1,nreach
 !
   Q_trib(nr)=Q_out(no_heat)    
   nrec_heat=heat_cells*(ndays-1)+no_heat
-  read(36,'(i5,2f6.1,2f7.4,f6.3,f7.1,f5.1)' &
-         ,rec=nrec_heat) ncell &
+!  read(36,'(i5,2f6.1,2f7.4,f6.3,f7.1,f5.1)' &
+!         ,rec=nrec_heat)
+   read(36, *)  ncell &
          ,dbt(no_heat),ea(no_heat) &   
          ,Q_ns(no_heat),Q_na(no_heat),rho &
          ,press(no_heat),wind(no_heat)
