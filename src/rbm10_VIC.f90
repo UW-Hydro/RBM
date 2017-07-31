@@ -17,7 +17,7 @@
 !     2. Output is written to Unit 20 (specified in the command line for executing
 !        RBM) and includes the simulated temperatures for the first computational cell
 !        in each segment in the same order as that of the *.network file and at the 
-!        same time step.  
+!        same time step.
 !
 !     Topology and routing is set up to be consistent with output
 !     from the Variable Infiltration Capacity (VIC) model developed by the
@@ -51,7 +51,7 @@ character (len=200 ):: net_file
 character (len=200 ):: param_file
 character (len=200 ):: temp_file
 character (len=200 ):: spatial_file
-character (len=8)   :: start_data,end_data     
+character (len=8)   :: start_data,end_data
 integer iargc
 integer numarg
 
@@ -80,7 +80,7 @@ param_file    = TRIM(inPrefix)//'_Parameters'
 spatial_file  = TRIM(outPrefix)//'.Spat'
 temp_file     = TRIM(outPrefix)//'.Temp'
 !
-write(*,*) 'Spatial file: ',spatial_file         
+write(*,*) 'Spatial file: ',spatial_file 
 write(*,*) 'Network file    : ',net_file
 write(*,*) 'Parameter file  : ',param_file!
 write(*,*) 'Temperature file: ',temp_file
