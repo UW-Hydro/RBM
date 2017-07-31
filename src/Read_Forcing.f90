@@ -95,6 +95,7 @@ do nr=1,nreach
   depth(no_heat)=depth(no_heat-1)
   width(no_heat)=width(no_heat-1)
   dt(no_heat)=dx(ncell)/u(no_heat)
+if(nnd .gt. 400) stop  ! ends run after certain day
 end do
 !
 ! Call the water balance subroutine

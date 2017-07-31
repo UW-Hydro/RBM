@@ -51,6 +51,9 @@ character (len=200 ):: net_file
 character (len=200 ):: param_file
 character (len=200 ):: temp_file
 character (len=200 ):: spatial_file
+character (len=200 ):: reservoir_output_file
+character (len=200 ):: reservoir_info_file
+character (len=200 ):: reservoir_storage_file
 character (len=8)   :: start_data,end_data
 integer iargc
 integer numarg
@@ -79,11 +82,13 @@ net_file      = TRIM(inPrefix)//'_Network'
 param_file    = TRIM(inPrefix)//'_Parameters'
 spatial_file  = TRIM(outPrefix)//'.Spat'
 temp_file     = TRIM(outPrefix)//'.Temp'
+reservoir_output_file     = TRIM(outPrefix)//'.Reservoir'
 !
 write(*,*) 'Spatial file: ',spatial_file 
 write(*,*) 'Network file    : ',net_file
-write(*,*) 'Parameter file  : ',param_file!
+write(*,*) 'Parameter file  : ',param_file
 write(*,*) 'Temperature file: ',temp_file
+write(*,*) 'Reservoir Output file: ',reservoir_output_file
 !
 OPEN(UNIT=90,FILE=TRIM(net_file),STATUS='OLD')
 !
@@ -94,14 +99,34 @@ read(90,'(A)') flow_file
 !
 !     Open file with hydrologic data
 !
-open(unit=35,FILE=TRIM(flow_file) ,FORM='FORMATTED',ACCESS='DIRECT' ,RECL=60,STATUS='old')
+!open(unit=35,FILE=TRIM(flow_file) ,FORM='FORMATTED',ACCESS='DIRECT' ,RECL=60,STATUS='old')
+open(unit=35,FILE=TRIM(flow_file) ,FORM='FORMATTED',ACCESS='SEQUENTIAL' ,STATUS='old')
 !
 !
 read(90,'(A)') heat_file
 !
 !     Open file with meteorologic data
 !     
-open(unit=36,FILE=TRIM(heat_file) ,FORM='FORMATTED',ACCESS='DIRECT' ,RECL=50,STATUS='old')
+!open(unit=36,FILE=TRIM(heat_file) ,FORM='FORMATTED',ACCESS='DIRECT' ,RECL=50,STATUS='old')
+open(unit=36,FILE=TRIM(heat_file) ,FORM='FORMATTED',ACCESS='SEQUENTIAL' ,STATUS='old')
+!
+!
+!
+read(90,'(A)') reservoir_info_file
+!
+!  open reservior information file
+!
+open(unit=37,FILE=TRIM(reservoir_info_file),ACCESS='SEQUENTIAL',FORM='FORMATTED', STATUS='old')
+!
+!
+!
+read(90,'(A)') reservoir_storage_file
+!
+!  open reservior storage file
+!
+open(unit=38,FILE=TRIM(reservoir_storage_file),ACCESS='SEQUENTIAL',FORM='FORMATTED',STATUS='old')
+ 
+
 !
 !     Call systems programs to get started
 !
@@ -124,6 +149,8 @@ write(*,*) ' Closing files after simulation'
 
 CLOSE(35)
 CLOSE(36)
+CLOSE(37)
+CLOSE(38)
 CLOSE(90)
 STOP
 END PROGRAM RBM10_VIC

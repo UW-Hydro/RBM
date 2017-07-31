@@ -35,7 +35,7 @@ real             :: tntrp
 real             :: dt_ttotal
 real,dimension(4):: ta,xa
 !
-real,dimension(:),allocatable     :: T_head,T_smth,T_trib
+real,dimension(:),allocatable     :: T_smth
 
 logical:: DONE
 !
