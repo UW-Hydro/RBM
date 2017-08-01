@@ -23,4 +23,6 @@ module Block_Hydro
     real, dimension(:), allocatable :: T_trib, T_head
     real, dimension(:), allocatable :: flow_source, source_num_cell
 
+    integer :: nsource
+
 end module Block_Hydro

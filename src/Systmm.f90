@@ -3,6 +3,7 @@ SUBROUTINE SYSTMM(temp_file,param_file)
 use Block_Energy
 use Block_Hydro
 use Block_Network
+use Block_Reservoir
 !
 Implicit None
 ! 
@@ -60,6 +61,60 @@ allocate (Q_ns(heat_cells))
 allocate (Q_na(heat_cells))
 allocate (press(heat_cells))
 allocate (wind(heat_cells))
+allocate (dt_res(2*heat_cells))
+allocate (resx(2*heat_cells))
+! 
+!   reservoir allocatable
+!
+allocate (depth_e(nres))
+allocate (depth_h(nres))
+allocate (surface_area(nres))
+allocate (T_epil(nres))
+T_epil = 10
+allocate (T_hypo(nres))
+T_hypo = 10
+allocate (stream_T_in(nres))
+stream_T_in = 10
+allocate (density_epil(nres))
+density_epil = 0
+allocate (density_hypo(nres))
+density_hypo = 0
+allocate (density_in(nres))
+density_in = 0
+allocate (volume_e_x(nres))
+allocate (volume_h_x(nres))
+allocate (dV_dt_epi(nres))
+allocate (dV_dt_hyp(nres))
+allocate (K_z(nres))
+K_z = 0.1
+allocate (temp_change_ep(nres))
+temp_change_ep = 0
+allocate (temp_change_hyp(nres))
+temp_change_hyp = 0
+allocate (res_run(nres))
+res_run = .false.
+allocate (res_start(nres))
+res_start = .false.
+allocate (T_res(nres))
+T_res = 10
+allocate (T_res_in(nres))
+T_res_in = 10
+allocate (Q_trib_tot(heat_cells))
+allocate (T_trib_tot(heat_cells))
+allocate (Q_res_in(nres))
+allocate(temp_out(nres))
+temp_out = 10
+allocate(temp_out_i(nres))
+temp_out_i = 10
+allocate (trib_res(heat_cells))
+allocate(diffusion_tot(nres))
+allocate(advec_hyp_tot(nres))
+allocate(advec_epi_tot(nres))
+allocate(qsurf_tot(nres))
+allocate(reservoir_storage(nres))
+allocate(reservoir_storage_prev(nres))
+
+
 !
 ! Initialize some arrays
 !
@@ -76,6 +131,16 @@ T_head=4.0
 ! Initialize smoothed air temperatures for estimating headwaters temperatures
 !
 T_smth=4.0
+
+!
+!    initialize reservoir geometery variables
+!
+depth_e = res_depth_feet(:) * depth_e_frac * ft_to_m  ! ft_to_m converst from feet to m
+depth_h = res_depth_feet(:) * depth_h_frac * ft_to_m  ! ft_to_m converst from feet to m
+surface_area = res_width_feet(:) *  res_length_feet(:) * ft_to_m * ft_to_m  !ft_to_m converst from feet to m
+volume_e_x = surface_area(:) * depth_e(:)
+volume_h_x = surface_area(:) * depth_h(:)
+
 
 !
 !     open the output file
@@ -115,6 +180,13 @@ do nyear=start_year,end_year
       DO ndd=1,nwpd
       xdd = ndd
       time=year+(xd+(xdd-0.5)*hpd)/xd_year 
+      !   ------------ reservoir arrays -----------
+      res_run = .false.  ! re-initialize reservoir fun T/F array
+      res_start = .false. ! re-initialize T/F for reservoir start
+      Q_trib_tot = 0 ! re-set the tributary flow to 0
+      T_trib_tot = 0 ! re-set the tributary flow to 0
+      trib_res = .false.
+
 
 !
 ! Read the hydrologic and meteorologic forcings
@@ -147,46 +219,58 @@ do nyear=start_year,end_year
 !
         do ns=1,no_celm(nr)
 ! 
-        DONE=.FALSE.
+        ! -----------------------------------------------------------------------
+        !
+        !                 River loop  
+        !
+        ! -----------------------------------------------------------------------
+
+
+          ! if segment in river reach, or the first segment of reservoir
+         if((res_pres(nr,segment_cell(nr,ns)) .eqv. .false.)  .or. &
+            (any(segment_cell(nr,ns) == res_start_node(:)) .eqv. .false. .and. &
+             res_pres(nr,segment_cell(nr,ns-1)) .eqv. .false.) ) then
+
+            DONE=.FALSE.
   
-! Testing new code 8/8/2016
-!
-!     Establish particle tracks
-!
-      call Particle_Track(nr,ns,nx_s,nx_head)
-!
-          ncell=segment_cell(nr,ns)
-!
-!     Now do the third-order interpolation to
-!     establish the starting temperature values
-!     for each parcel
-!
-          nseg=nstrt_elm(ns)
-!
-!     Perform polynomial interpolation
-!
-!
-!     Interpolation inside the domain
-!
-          npndx=2
-!
-!     Interpolation at the upstream boundary if the
-!     parcel has reached that boundary
-!
-          if(nx_head.eq.0) then
-            T_0 = T_head(nr)
-          else 
-!
-!
-!     Interpolation at the upstream or downstream boundary
-!
-            if(nseg .eq. 1 .or. nseg .eq. no_celm(nr)) npndx=1
-!
-            do ntrp=nterp(npndx),1,-1
+           ! Testing new code 8/8/2016
+           !
+           !     Establish particle tracks
+           !
+           call Particle_Track(nr,ns,nx_s,nx_head)
+           !
+           ncell=segment_cell(nr,ns)
+           !
+           !     Now do the third-order interpolation to
+           !     establish the starting temperature values
+           !     for each parcel
+           !
+           nseg=nstrt_elm(ns)
+           !
+           !     Perform polynomial interpolation
+           !
+           !
+           !     Interpolation inside the domain
+           !
+           npndx=2
+           !
+           !     Interpolation at the upstream boundary if the
+           !     parcel has reached that boundary
+           !
+           if(nx_head.eq.0) then
+             T_0 = T_head(nr)
+           else 
+           !
+           !
+           !     Interpolation at the upstream or downstream boundary
+           !
+           if(nseg .eq. 1 .or. nseg .eq. no_celm(nr)) npndx=1
+           !
+           do ntrp=nterp(npndx),1,-1
               npart=nseg+ntrp+ndltp(npndx)
               xa(ntrp)=x_dist(nr,npart)
               ta(ntrp)=temp(nr,npart,n1)
-            end do
+           end do
 !
 ! Start the cell counter for nx_s
 !
@@ -283,9 +367,26 @@ do nyear=start_year,end_year
             end if
             dt_total=dt_total+dt_calc
           end do
-          if (T_0.lt.0.5) T_0=0.5
+
+        end if ! end river loop
+
+        ! -----------------------------------------------------------------------
+        !
+        !                     Reservoir Loop
+        !
+        ! -----------------------------------------------------------------------
+
+        ! -------------  if cell is in reservoir ----------------
+        if(reservoir .and. res_pres(nr,segment_cell(nr,ns))) then
+
+
+
+        end if  ! end reservoir loop
+
+
+        if (T_0.lt.0.5) T_0=0.5
             temp(nr,ns,n2)=T_0
-	    T_trib(nr)=T_0
+            T_trib(nr)=T_0
 !
 !   Write all temperature output UW_JRY_11/08/2013
 !   The temperature is output at the beginning of the 
@@ -294,6 +395,10 @@ do nyear=start_year,end_year
 !   value of ndelta (now a vector)(UW_JRY_11/08/2013)
 !
             call WRITE(time,nd,nr,ncell,ns,T_0,T_head(nr),dbt(ncell),Q_inflow,Q_outflow)
+
+
+if(ncell .eq. 82)  write(67,*) nyear,',', ndays,',',nd,',',ncell,',',ns,',',T_0
+
 !
 !     End of computational element loop
 !

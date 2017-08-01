@@ -21,4 +21,11 @@ Module Block_Network
     real   :: delta_n,n_default=2
     real   :: dt_comp
     real, dimension(:), allocatable  :: ndelta
+!
+!      Logical variables
+!
+    logical :: source  ! presence of thermal plant
+
+
+
 end module Block_Network

@@ -1,10 +1,10 @@
 Subroutine BEGIN(param_file,spatial_file)
 !
-!    Ryan make a comment to verify PR (7/19/2017)
 !
 use Block_Energy
 use Block_Hydro
 use Block_Network
+use Block_Reservoir
 !
 implicit none
 !    
@@ -12,13 +12,15 @@ implicit none
     character (len=8) :: lat
     character (len=10):: long
     character (len=200):: param_file,source_file,spatial_file
+    character :: dam_name
 !
     integer:: Julian
     integer:: head_name,trib_cell
     integer:: jul_start,main_stem,nyear1,nyear2,nc,ncell,nseg
     integer:: ns_max_test,node,ncol,nrow,nr,cum_sgmnt
+    integer:: nreservoir, node_res
 !
-    logical:: first_cell,source
+    logical:: first_cell, res_presx
 !
     real :: nndlta
     real :: rmile0,rmile1,xwpd
@@ -43,7 +45,7 @@ write(*,'(2(2x,i4,2i2))')  &
 !
 jul_start = Julian(start_year,start_month,start_day)
 !
-read(90,*) nreach,flow_cells,heat_cells,source
+read(90,*) nreach, flow_cells, heat_cells, source, nsource, reservoir,  nres
 !
 ! Allocate dynamic arrays
 !
@@ -68,6 +70,50 @@ read(90,*) nreach,flow_cells,heat_cells,source
  allocate(head_cell(nreach))
  allocate(segment_cell(nreach,ns_max))
  allocate(x_dist(nreach,0:ns_max))
+! Allocate reservoir info
+ allocate(dam_lat(nres))
+ allocate(dam_lon(nres))
+ allocate(res_grid_lat(nres))
+ allocate(res_grid_lon(nres))
+ allocate(res_depth_feet(nres))
+ allocate(res_width_feet(nres))
+ allocate(res_length_feet(nres))
+ allocate(dam_number(nres))
+ allocate(start_operating_year(nres))
+ allocate(res_top_vol(nres))
+ allocate(res_bot_vol(nres))
+ allocate(res_max_flow(nres))
+ allocate(res_min_flow(nres))
+ allocate(res_start_node(nres))
+ allocate(res_end_node(nres))
+ allocate(nodes_x(nreach,0:ns_max))
+ allocate(res_num(nreach,0:ns_max))
+ allocate(res_pres(nreach,0:ns_max))
+ allocate(res_upstream(nreach,0:ns_max))
+ allocate(rmile_node(0:ns_max))
+ allocate(xres(0:ns_max))
+ allocate(dx_res(0:heat_cells))
+
+
+!
+!--------------- read in reservoir info (if reservoirs present) --------------
+!
+if(reservoir) then
+    read(37,*)
+    do nreservoir = 1,nres
+        read(37,*) dam_number(nreservoir)  &
+              , res_grid_lat(nreservoir), res_grid_lon(nreservoir) &
+              , res_top_vol(nreservoir) &
+              , res_bot_vol(nreservoir),res_depth_feet(nreservoir) &
+              , res_width_feet(nreservoir), res_length_feet(nreservoir) &
+              ,res_start_node(nreservoir), res_end_node(nreservoir) &
+              , res_min_flow(nreservoir)
+
+       print *, 'nreservoir', nreservoir, 'dam_num', dam_number(nreservoir) &
+    , 'end', res_end_node(nreservoir) , 'start', res_start_node(nreservoir)
+    end do
+end if
+
 !
 !     Start reading the reach date and initialize the reach index, NR
 !     and the cell index, NCELL
@@ -137,8 +183,27 @@ do nr=1,nreach
 !     Variable ndelta read in here.  At present, number of elements
 !     is entered manually into the network file (UW_JRY_2011/03/15)
 !
-    read(90,'(5x,i5,5x,i5,8x,i5,6x,a8,6x,a10,7x,f10.0,f5.0)')  &
+
+        if(reservoir) then
+           read(90,'(5x,i5,5x,i5,8x,i5,6x,a8,6x,a10,7x,f10.0,f5.0,i6)')  &  !nodes for each reach
+              node,nrow,ncol,lat,long,rmile1,ndelta(ncell),node_res
+           if(node_res .gt.0) then
+             res_presx = .true.
+           else
+             res_presx = .false.
+           end if
+
+        !      X,Y matrix with nodes in each reach
+            nodes_x(nr,ncell) = node    ! matrix of nodes for each cell
+            res_num(nr,ncell) = node_res   ! matrix of reservoir index values
+            res_pres(nr,ncell) = res_presx  ! matrix for if reservoir is present for each cell
+            rmile_node(ncell) = rmile1
+
+        else    ! IF no reservoir information in _Network file:
+           read(90,'(5x,i5,5x,i5,8x,i5,6x,a8,6x,a10,7x,f10.0,f5.0)')  &
               node,nrow,ncol,lat,long,rmile1,ndelta(ncell)
+        end if
+
 !
 !    Set the number of segments of the default, if not specified
 !
@@ -158,8 +223,24 @@ do nr=1,nreach
     nndlta=nndlta+1
     nseg=nseg+1
     segment_cell(nr,nseg)=ncell
-    write(*,*) 'nndlta -- ',nr,nndlta,nseg,ncell,segment_cell(nr,nseg)
     x_dist(nr,nseg)=x_dist(nr,nseg-1)-dx(ncell)
+
+
+!
+!  calcualte distance to next upstream reservoir
+!
+    if(reservoir) then
+        if(res_presx) then  !if cell in reservoir
+            res_upstream(nr,ncell) = .false.
+
+        else  if(any(res_pres(nr,:)) ) then   ! any reservoirs upstream of this cell in this reach
+            xres(1:size(res_end_node)) = ncell - res_end_node
+            res_upstream(nr,ncell) = .true.
+
+        end if
+
+    end if
+
 !
 !   Write Segment List for mapping to temperature output (UW_JRY_2008/11/19)
 !
