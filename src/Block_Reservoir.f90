@@ -23,11 +23,10 @@ Module Block_Reservoir
         logical, dimension(:), allocatable :: flag_turnover
         logical :: reservoir, res_upstreamx ! the first is TRUE or FALSE in fifth line of _Network file whether reserovirs are present 
         integer, dimension (:), allocatable :: xres, resx
-        integer :: xres2, nres, nm_start, ncell0res
+        integer :: xres2, nres, nm_start, ncell0res, resx2
         real, dimension(:), allocatable :: dx_res, dt_res,reservoir_storage,reservoir_storage_prev
         real ::  advec_tot,q_surf_tot
         real, dimension (:),allocatable::diffusion_tot,advec_hyp_tot,advec_epi_tot, qsurf_tot
-        ! real :: Q_res_in_1, T_res_in_1
 
         !----------------------------------------------------------------------
         !       variables from reservoir model

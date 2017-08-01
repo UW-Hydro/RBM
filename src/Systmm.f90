@@ -12,7 +12,7 @@ character (len=200):: temp_file
 character (len=200):: param_file
 ! 
 integer          :: ncell,nncell,ncell0,nc_head,no_flow,no_heat
-integer          :: nc,nd,ndd,nm,nr,ns
+integer          :: nc,nd,ndd,nm,nr,ns, i
 integer          :: nr_trib,ntribs
 integer          :: nrec_flow,nrec_heat
 integer          :: n1,n2,nnd,nobs,nyear,nd_year,ntmp
@@ -254,6 +254,37 @@ do nyear=start_year,end_year
            !
            npndx=2
            !
+           !    If parcel started in or above reservoir
+           !
+
+           ! --- if parcel started upstream of reservior and finished downstream -----
+           if (reservoir.and.any(res_pres(nr,segment_cell(nr,nseg):segment_cell(nr,ns)) ) &
+            .and. .not. res_pres(nr,segment_cell(nr,ns)) & 
+                .and. .not.res_pres(nr,segment_cell(nr,nseg))) then
+
+              do i = nseg, ns, 1
+                if(res_pres(nr,segment_cell(nr,i))) then
+                 T_0 = temp_out_i(res_num(nr,segment_cell(nr,i)))  !  
+                 res_upstreamx = .true.
+                 resx2 = res_num(nr,segment_cell(nr,i))
+                 ncell0res = res_end_node(resx2)
+                end if
+               end do
+
+           ! ------- if parcel started in reservoir and finished downstream -----------
+           else if (reservoir.and.res_pres(nr,segment_cell(nr,nseg))) then
+             T_0 = temp_out_i(res_num(nr,segment_cell(nr,nseg)))  !  
+             res_upstreamx = .true.
+             resx2 = res_num(nr,segment_cell(nr,nseg))
+             ncell0res = res_end_node(resx2)
+
+           ! ---- if parcel started in river or headwater, and did not cross reservoir ---
+           else
+            resx2 = 0
+            res_upstreamx = .false.
+
+           end if
+           !
            !     Interpolation at the upstream boundary if the
            !     parcel has reached that boundary
            !
@@ -280,6 +311,11 @@ do nyear=start_year,end_year
 !
             T_0=tntrp(xa,ta,x,nterp(npndx))
           end if
+if(ncell .eq. 19)  write(68,*) nyear,',', ndays,',',nd,',',ncell,',',ns &
+     ,',',T_0,',',nx_head,',',T_head(nr), ',',npndx, ',' ,nterp(npndx)
+
+
+
 !
 !
           nncell=segment_cell(nr,nstrt_elm(ns))
