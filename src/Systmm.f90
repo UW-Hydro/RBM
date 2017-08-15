@@ -1,18 +1,20 @@
-SUBROUTINE SYSTMM(temp_file,param_file)
+SUBROUTINE SYSTMM(temp_file,param_file,reservoir_output_file)
 !
 use Block_Energy
 use Block_Hydro
 use Block_Network
 use Block_Reservoir
+use Block_Res_Flow
 !
 Implicit None
 ! 
 !
 character (len=200):: temp_file
 character (len=200):: param_file
+character (len=200):: reservoir_output_file
 ! 
 integer          :: ncell,nncell,ncell0,nc_head,no_flow,no_heat
-integer          :: nc,nd,ndd,nm,nr,ns, i
+integer          :: nc,nd,ndd,nm,nr,ns,ncellx,nresx, i, j
 integer          :: nr_trib,ntribs
 integer          :: nrec_flow,nrec_heat
 integer          :: n1,n2,nnd,nobs,nyear,nd_year,ntmp
@@ -280,42 +282,38 @@ do nyear=start_year,end_year
 
            ! ---- if parcel started in river or headwater, and did not cross reservoir ---
            else
-            resx2 = 0
-            res_upstreamx = .false.
+             resx2 = 0
+             res_upstreamx = .false.
+
+             !
+             !     Interpolation at the upstream boundary if the
+             !     parcel has reached that boundary
+             !
+             if(nx_head.eq.0) then
+               T_0 = T_head(nr)
+             else 
+               !
+               !
+               !     Interpolation at the upstream or downstream boundary
+               !
+               if(nseg .eq. 1 .or. nseg .eq. no_celm(nr)) npndx=1
+               !
+               do ntrp=nterp(npndx),1,-1
+                 npart=nseg+ntrp+ndltp(npndx)
+                 xa(ntrp)=x_dist(nr,npart)
+                 ta(ntrp)=temp(nr,npart,n1)
+               end do
+               !
+               ! Start the cell counter for nx_s
+               !
+               x=x_part(nx_s)
+               !
+               !     Call the interpolation function
+               !
+               T_0=tntrp(xa,ta,x,nterp(npndx))
+             end if
 
            end if
-           !
-           !     Interpolation at the upstream boundary if the
-           !     parcel has reached that boundary
-           !
-           if(nx_head.eq.0) then
-             T_0 = T_head(nr)
-           else 
-           !
-           !
-           !     Interpolation at the upstream or downstream boundary
-           !
-           if(nseg .eq. 1 .or. nseg .eq. no_celm(nr)) npndx=1
-           !
-           do ntrp=nterp(npndx),1,-1
-              npart=nseg+ntrp+ndltp(npndx)
-              xa(ntrp)=x_dist(nr,npart)
-              ta(ntrp)=temp(nr,npart,n1)
-           end do
-!
-! Start the cell counter for nx_s
-!
-            x=x_part(nx_s)
-!
-!     Call the interpolation function
-!
-            T_0=tntrp(xa,ta,x,nterp(npndx))
-          end if
-if(ncell .eq. 19)  write(68,*) nyear,',', ndays,',',nd,',',ncell,',',ns &
-     ,',',T_0,',',nx_head,',',T_head(nr), ',',npndx, ',' ,nterp(npndx)
-
-
-
 !
 !
           nncell=segment_cell(nr,nstrt_elm(ns))
@@ -415,6 +413,66 @@ if(ncell .eq. 19)  write(68,*) nyear,',', ndays,',',nd,',',ncell,',',ns &
         ! -------------  if cell is in reservoir ----------------
         if(reservoir .and. res_pres(nr,segment_cell(nr,ns))) then
 
+            ncellx = segment_cell(nr,ns) ! cell (node) reservoir
+
+            ! ------ read in tributary flow and temperature -------
+              !this loop adds previous trib flow/temp to current trib flow/temp
+            if(trib_res(ncellx) .eqv. .false.)  then
+              call trib_res_subroutine(ncellx, nr_trib, nr, ns)
+              trib_res(ncellx) = .true. ! set flag to true, so doesn't run twice
+                                        ! for same cell
+            end if
+
+            do i = 1, nres
+
+              ! -------- if start of reservoir -------------------
+              if(reservoir .and. res_start_node(i) .eq. segment_cell(nr,ns).and. .not. res_start(i) ) then
+                nresx = i
+                Q_res_in(nresx) = Q_in(nncell)
+                T_res_in(nresx) = T_0 ! this will be advection from this reach to reservoir
+                Q_trib_tot_x = 0   ! initialize trib flow in this reser. as 0
+                T_trib_in_x = 0   ! initialize trib temp in this reser. as 0
+                res_start(i) = .true.    ! logical so it won't add another T_res_in
+              end if
+
+              ! ----- end of reservoir - calculate the reservoir temperature -----------  
+              if (reservoir .and. res_end_node(i) .eq. segment_cell(nr,ns) & 
+                .and..not. res_pres(nr,segment_cell(nr,ns+1)) .and. .not. res_run(i) ) then
+                nresx = i
+
+                ! ----- add tributary flow to reach inflow to reservoir ---
+                do j = res_start_node(nresx), res_end_node(nresx)
+
+                  T_res_in(nresx) =  (T_res_in(nresx) * Q_res_in(nresx) +T_trib_tot(j)*Q_trib_tot(j)) &
+                      /(Q_res_in(nresx) + Q_trib_tot(j))
+                  Q_res_in(nresx) = Q_res_in(nresx) + Q_trib_tot(j)
+
+                end do
+
+                call stream_density(T_res_in(nresx), density_in(nresx))
+                call stream_density(T_epil(nresx), density_epil(nresx))
+                call stream_density(T_hypo(nresx), density_hypo(nresx))
+
+                call flow_subroutine(flow_in_epi_x, flow_in_hyp_x,flow_epi_hyp_x &
+                  , flow_out_epi_x, flow_out_hyp_x, ratio_sp, ratio_pen &
+                  , nresx, dt_comp)
+
+                call energy(T_epil(nresx), q_surf, res_end_node(nresx))
+                call reservoir_subroutine (nresx, nd,q_surf, time,nd_year,nyear)
+
+                T_0 = T_res(nresx) !T_res is weighted average temperature
+
+                res_run(i) = .true.  !set reservoir run to "true"
+
+              !------ if segment on reservoir cell but reservoir already been simulated -------
+              else if(reservoir .and. res_end_node(i) .eq. segment_cell(nr,ns).and. res_run(i)) then
+                nresx = i
+                T_0 = T_res(nresx)
+
+              end if ! end reservoir loop
+
+
+            end do ! end individual reservoir loop-cycles thru all reservoirs
 
 
         end if  ! end reservoir loop
@@ -434,6 +492,7 @@ if(ncell .eq. 19)  write(68,*) nyear,',', ndays,',',nd,',',ncell,',',ns &
 
 
 if(ncell .eq. 82)  write(67,*) nyear,',', ndays,',',nd,',',ncell,',',ns,',',T_0
+if(ncell .eq. 68)  write(68,*) nyear,',', ndays,',',nd,',',ncell,',',ns,',',T_0
 
 !
 !     End of computational element loop
@@ -452,6 +511,23 @@ if(ncell .eq. 82)  write(67,*) nyear,',', ndays,',',nd,',',ncell,',',ns,',',T_0
 4700 format(f10.4,f6.0,15(f6.1,f8.3))
 4750 format(f10.4,10(i4,f8.0))
           end do
+
+          reservoir_storage_prev = reservoir_storage
+
+          temp_out_i(:) = temp_out(:) !set reservoir temperature for next time step
+
+          ! write output of reservoirs
+          open(19,file=TRIM(reservoir_output_file),status='unknown')
+          ! write(19,'(2i6, 6x, 50f10.2')
+          ! write(19,'(2i6, 6x, 50f10.2, 6x, 50f10.3, 6x, 50f10.3, 6x, 50e14.6,1x, 50f10.4)') &
+          !write(19, '(<n>(2I4))') (i, 2*i, i=1,n)
+
+           write(19, *) &
+           nyear,nd,T_epil(1:nres),T_hypo(1:nres),diffusion_tot(1:nres),advec_hyp_tot(1:nres),advec_epi_tot(1:nres)&
+            , qsurf_tot(1:nres),  volume_e_x(1:nres), volume_h_x(1:nres),T_res_in(1:nres)  &
+            , temp_change_hyp(1:nres)
+
+
 !
 !     End of main loop (ND=1,365/366)
 !
