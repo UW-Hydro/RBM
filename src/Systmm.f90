@@ -215,7 +215,7 @@ do nyear=start_year,end_year
             call energy(T_0,q_surf,nncell)
 !
             q_dot=(q_surf/(z*rfac))
-            T_0=T_0+q_dot*dt_calc
+!            T_0=T_0+q_dot*dt_calc
             if(T_0.lt.0.0) T_0=0.0
 !
 !    Add distributed flows
