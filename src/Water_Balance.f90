@@ -36,7 +36,8 @@ SUBROUTINE Water_Balance
             !
             !  Nonpoint flow is distributed evenly among all segments in the grid cell
             !
-            Q_diff(nrc) = (Q_out(nrc) - Q_in(nrc) - Q_sum_trib)/ndelta(nrc)
+            delta_sto_flux(nrc) = (Q_out(nrc) - Q_in(nrc) - Q_sum_trib - Q_local(nrc))/ndelta(nrc)
+            Q_local(nrc) = Q_local(nrc)/ndelta(nrc)
         !
         end do
     !

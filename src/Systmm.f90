@@ -25,8 +25,8 @@ SUBROUTINE SYSTMM(temp_file,param_file)
 
     !
     real             :: dt_calc,dt_total,hpd,q_dot,q_surf,z
-    real             :: Q_dstrb,Q_inflow,Q_outflow,Q_ratio,Q_trb,Q_trb_sum
-    real             :: T_dstrb,T_dstrb_load,T_trb_load
+    real             :: Q_dstrb,Q_inflow,Q_outflow,Q_ratio,Q_trb,Q_trb_sum,Q_sto,Q_trb_sum_origin
+    real             :: T_dstrb,T_dstrb_load,T_trb_load,T_sto_load
     real             :: rminsmooth
     real             :: T_0,T_dist
     real(8)          :: time
@@ -49,7 +49,9 @@ SUBROUTINE SYSTMM(temp_file,param_file)
     allocate (depth(heat_cells))
     allocate (Q_in(heat_cells))
     allocate (Q_out(heat_cells))
+    allocate (Q_local(heat_cells))
     allocate (Q_diff(heat_cells))
+    allocate (delta_sto_flux(heat_cells))
     allocate (Q_trib(nreach))
     allocate (width(heat_cells))
     allocate (u(heat_cells))
@@ -204,6 +206,7 @@ SUBROUTINE SYSTMM(temp_file,param_file)
                         !
                         Q_inflow = Q_in(nncell)
                         Q_outflow = Q_out(nncell)
+                        if(nr.eq.27.and.ns.eq.15.and.nd.lt.10) write(*,*) nncell, nseg, Q_inflow, Q_outflow
                         !
                         !    Set NCELL0 for purposes of tributary input
                         !
@@ -222,26 +225,28 @@ SUBROUTINE SYSTMM(temp_file,param_file)
                             !
                             T_dstrb_load  = 0.0
                             !
-                            Q_dstrb = Q_diff(nncell)
+                            Q_dstrb = Q_local(nncell)
                             !
-                            ! Temperature of distributed inflow assumed = 10.0 deg C
+                            !    Add flow from transient river storage
                             !
-                            if(Q_dstrb.gt.0.001) then
-                                T_dstrb  = 10.0
-                                T_dstrb_load  = Q_dstrb*T_dstrb
-                            else
-                                Q_dstrb = 0.0
-                                T_dstrb_load = 0.0
+                            T_sto_load = 0.0
+                            !
+                            Q_sto = delta_sto_flux(nncell)
+                            !
+                            if(Q_sto.gt.0) then
+                                T_sto_load = Q_sto * dbt(nncell)
+                                !
+                                ! When Q_sto is smaller than 0, we need to adjust
+                                ! Q_dstrb, Q_trb and Q_local to make water balance.
+                                !
                             end if
-
                             !
                             !     Look for a tributary.
                             !
                             ntribs=no_tribs(nncell)
                             Q_trb_sum   = 0.0
                             T_trb_load  = 0.0
-                            if(ntribs.gt.0.and..not.DONE) then
-                                !
+                            if(ntribs.gt.0) then
                                 do ntrb=1,ntribs
                                     nr_trib=trib(nncell,ntrb)
                                     if(Q_trib(nr_trib).gt.0.0) then
@@ -254,22 +259,80 @@ SUBROUTINE SYSTMM(temp_file,param_file)
                                             +  T_trb_load
                                     end if
                                 end do
-                                !
-                                DONE=.TRUE.
                             end if
+                            Q_trb_sum = Q_trb_sum/2
+                            T_trb_load = T_trb_load/2
+                            !
+                            ! Update inflow/outflow based on which segment
+                            ! the water particle is located
+                            ! We assume there are two segments in one grid cell
+                            !
+                            if(mod(nseg,2).eq.0.and..not.DONE) then
+                                Q_inflow=Q_outflow - Q_dstrb - Q_sto - Q_trb_sum
+                                !if(nr.eq.27.and.ns.eq.15.and.nd.lt.10) write(*,*) &
+                                !    '!!!!!',Q_outflow, Q_dstrb, Q_sto, Q_trb_sum, Q_inflow ! test code
+                                DONE = .TRUE.
+                            else
+                                Q_outflow=Q_inflow + Q_dstrb + Q_sto + Q_trb_sum
+                                DONE = .TRUE.
+                            end if
+                            !
+                            ! if Q_sto is smaller than 0, we need to adjust the water
+                            ! balance. Water can be withdrawn according to following rank,
+                            ! Local flow > Tributary > Inflow
+                            !
+                            !if(nr.eq.27.and.ns.eq.15.and.nd.lt.10) write(*,*) &
+                            !    'inflow-pre1', Q_inflow, 'ncell0', ncell0 ! test code
+                            if(Q_sto.lt.0) then
+                                if (Q_dstrb + Q_sto .gt. 0) then
+                                    Q_dstrb=Q_dstrb + Q_sto
+                                else
+                                    if (Q_dstrb + Q_trb_sum + Q_sto .gt. 0) then
+                                        Q_trb_sum_origin = Q_trb_sum
+                                        Q_trb_sum = Q_dstrb + Q_trb_sum + Q_sto
+                                        T_trb_load = (Q_trb_sum/Q_trb_sum_origin)*T_trb_load
+                                        Q_dstrb=0
+                                    else
+                                        Q_inflow=Q_inflow + Q_dstrb + Q_trb_sum + Q_sto
+                                        Q_dstrb=0
+                                        Q_trb_sum=0
+                                        T_trb_load=0
+                                    end if
+                                end if
+                                Q_sto = 0
+                            end if
+                            !
+                            ! Temperature of distributed inflow assumed = 10.0 deg C
+                            !
+                            T_dstrb  = 10.0
+                            T_dstrb_load  = Q_dstrb*T_dstrb
                             !
                             !  Update inflow and outflow
                             !
-                            Q_outflow = Q_inflow + Q_dstrb + Q_trb_sum
+                            !if(nr.eq.27.and.ns.eq.15.and.nd.lt.10) write(*,*) &
+                            !    'inflow-pre2', Q_inflow, 'ncell0', ncell0 ! test code
+                            Q_outflow = Q_inflow + Q_dstrb + Q_trb_sum + Q_sto
                             Q_ratio = Q_inflow/Q_outflow
+                            !if(nr.eq.27.and.ns.eq.15.and.nd.lt.240.and.nd.gt.180) write(*,*) 'ns', ns, 'nd', nd, &
+                            !    'inflow',Q_inflow, &
+                            !    'local',Q_dstrb, 'tributary', Q_trb_sum, &
+                            !    'storage', Q_sto,delta_sto_flux(nncell), 'outflow', Q_outflow ! test code
                             !
                             ! Do the mass/energy balance
                             !
-                            T_0  = T_0*Q_ratio                              &
-                                + (T_dstrb_load + T_trb_load)/Q_outflow    &
+                            T_0  = T_0*Q_ratio                                          &
+                                + (T_dstrb_load + T_trb_load + T_sto_load)/Q_outflow    &
                                 + q_dot*dt_calc
-                           if (T_0.lt.0.5) T_0 =0.5
+                            if(nr.eq.27.and.ns.eq.15.and.nd.lt.150.and.nd.gt.120) write(*,*) &
+                                'T_0', T_0, 'local',T_dstrb_load/Q_outflow, &
+                                'trb', T_trb_load/Q_outflow, 'storage', T_sto_load/Q_outflow, dbt(nncell),&
+                                'energy',  q_dot*dt_calc, &
+                                'inflow', Q_ratio,  T_0*Q_ratio, &
+                                'water balance', Q_ratio, Q_dstrb/Q_outflow, Q_trb_sum/Q_outflow, Q_sto/Q_outflow
+                            if (T_0.lt.0.5) T_0 =0.5
                             Q_inflow = Q_outflow
+                            !if(nr.eq.27.and.ns.eq.15.and.nd.lt.10) write(*,*) &
+                            !    'inflow-after1', Q_inflow ! test code
                             !
                             nseg=nseg+1
                             nncell=segment_cell(nr,nseg)
@@ -282,6 +345,8 @@ SUBROUTINE SYSTMM(temp_file,param_file)
                                 DONE=.FALSE.
                             end if
                             dt_total=dt_total+dt_calc
+                            !if(nr.eq.27.and.ns.eq.15.and.nd.lt.10) write(*,*) &
+                            !    'inflow-after2', Q_inflow, 'ncell0', ncell0 ! test code
                         end do
                         if (T_0.lt.0.5) T_0=0.5
                         temp(nr,ns,n2)=T_0
@@ -293,7 +358,7 @@ SUBROUTINE SYSTMM(temp_file,param_file)
                         !   other points by some additional code that keys on the
                         !   value of ndelta (now a vector)(UW_JRY_11/08/2013)
                         !
-                        call WRITE(time,nd,nr,ncell,ns,T_0,T_head(nr),dbt(ncell),Q_inflow,Q_outflow)
+                        call WRITE(time,nd,nr,ncell,ns,T_0,T_head(nr),dbt(ncell),Q_inflow,Q_outflow, Q_sto)
                     !
                     !     End of computational element loop
                     !
