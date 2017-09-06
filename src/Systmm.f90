@@ -82,7 +82,6 @@ SUBROUTINE SYSTMM(temp_file,param_file)
     !
     !     open the output file
     !
-
     open(20,file=TRIM(temp_file),status='unknown')
     !
     !
@@ -206,7 +205,6 @@ SUBROUTINE SYSTMM(temp_file,param_file)
                         !
                         Q_inflow = Q_in(nncell)
                         Q_outflow = Q_out(nncell)
-                        if(nr.eq.27.and.ns.eq.15.and.nd.lt.10) write(*,*) nncell, nseg, Q_inflow, Q_outflow
                         !
                         !    Set NCELL0 for purposes of tributary input
                         !
@@ -269,8 +267,6 @@ SUBROUTINE SYSTMM(temp_file,param_file)
                             !
                             if(mod(nseg,2).eq.0.and..not.DONE) then
                                 Q_inflow=Q_outflow - Q_dstrb - Q_sto - Q_trb_sum
-                                !if(nr.eq.27.and.ns.eq.15.and.nd.lt.10) write(*,*) &
-                                !    '!!!!!',Q_outflow, Q_dstrb, Q_sto, Q_trb_sum, Q_inflow ! test code
                                 DONE = .TRUE.
                             else
                                 Q_outflow=Q_inflow + Q_dstrb + Q_sto + Q_trb_sum
@@ -281,8 +277,6 @@ SUBROUTINE SYSTMM(temp_file,param_file)
                             ! balance. Water can be withdrawn according to following rank,
                             ! Local flow > Tributary > Inflow
                             !
-                            !if(nr.eq.27.and.ns.eq.15.and.nd.lt.10) write(*,*) &
-                            !    'inflow-pre1', Q_inflow, 'ncell0', ncell0 ! test code
                             if(Q_sto.lt.0) then
                                 if (Q_dstrb + Q_sto .gt. 0) then
                                     Q_dstrb=Q_dstrb + Q_sto
@@ -309,30 +303,16 @@ SUBROUTINE SYSTMM(temp_file,param_file)
                             !
                             !  Update inflow and outflow
                             !
-                            !if(nr.eq.27.and.ns.eq.15.and.nd.lt.10) write(*,*) &
-                            !    'inflow-pre2', Q_inflow, 'ncell0', ncell0 ! test code
                             Q_outflow = Q_inflow + Q_dstrb + Q_trb_sum + Q_sto
                             Q_ratio = Q_inflow/Q_outflow
-                            !if(nr.eq.27.and.ns.eq.15.and.nd.lt.240.and.nd.gt.180) write(*,*) 'ns', ns, 'nd', nd, &
-                            !    'inflow',Q_inflow, &
-                            !    'local',Q_dstrb, 'tributary', Q_trb_sum, &
-                            !    'storage', Q_sto,delta_sto_flux(nncell), 'outflow', Q_outflow ! test code
                             !
                             ! Do the mass/energy balance
                             !
                             T_0  = T_0*Q_ratio                                          &
                                 + (T_dstrb_load + T_trb_load + T_sto_load)/Q_outflow    &
                                 + q_dot*dt_calc
-                            if(nr.eq.27.and.ns.eq.15.and.nd.lt.150.and.nd.gt.120) write(*,*) &
-                                'T_0', T_0, 'local',T_dstrb_load/Q_outflow, &
-                                'trb', T_trb_load/Q_outflow, 'storage', T_sto_load/Q_outflow, dbt(nncell),&
-                                'energy',  q_dot*dt_calc, &
-                                'inflow', Q_ratio,  T_0*Q_ratio, &
-                                'water balance', Q_ratio, Q_dstrb/Q_outflow, Q_trb_sum/Q_outflow, Q_sto/Q_outflow
                             if (T_0.lt.0.5) T_0 =0.5
                             Q_inflow = Q_outflow
-                            !if(nr.eq.27.and.ns.eq.15.and.nd.lt.10) write(*,*) &
-                            !    'inflow-after1', Q_inflow ! test code
                             !
                             nseg=nseg+1
                             nncell=segment_cell(nr,nseg)
@@ -345,8 +325,6 @@ SUBROUTINE SYSTMM(temp_file,param_file)
                                 DONE=.FALSE.
                             end if
                             dt_total=dt_total+dt_calc
-                            !if(nr.eq.27.and.ns.eq.15.and.nd.lt.10) write(*,*) &
-                            !    'inflow-after2', Q_inflow, 'ncell0', ncell0 ! test code
                         end do
                         if (T_0.lt.0.5) T_0=0.5
                         temp(nr,ns,n2)=T_0
