@@ -25,7 +25,8 @@ SUBROUTINE SYSTMM(temp_file,param_file)
 
     !
     real             :: dt_calc,dt_total,hpd,q_dot,q_surf,z
-    real             :: Q_dstrb,Q_inflow,Q_outflow,Q_ratio,Q_trb,Q_trb_sum,Q_sto,Q_trb_sum_origin
+    real             :: Q_dstrb,Q_inflow,Q_outflow,Q_ratio
+    real             :: Q_trb,Q_trb_sum,Q_sto,Q_trb_sum_origin,Q_sto_out
     real             :: T_dstrb,T_dstrb_load,T_trb_load,T_sto_load
     real             :: rminsmooth
     real             :: T_0,T_dist
@@ -231,6 +232,8 @@ SUBROUTINE SYSTMM(temp_file,param_file)
                             !
                             Q_sto = delta_sto_flux(nncell)
                             !
+                            if(nm.eq.1) Q_sto_out = delta_sto_flux(nncell)
+                            !
                             if(Q_sto.gt.0) then
                                 T_sto_load = Q_sto * dbt(nncell)
                                 !
@@ -336,7 +339,9 @@ SUBROUTINE SYSTMM(temp_file,param_file)
                         !   other points by some additional code that keys on the
                         !   value of ndelta (now a vector)(UW_JRY_11/08/2013)
                         !
-                        call WRITE(time,nd,nr,ncell,ns,T_0,T_head(nr),dbt(ncell),Q_inflow,Q_outflow, Q_sto)
+                        !if(ncell.ne.nncell) write(*,*) &
+                        !    ns, nd, ncell, nncell
+                        call WRITE(time,nd,nr,ncell,ns,T_0,T_head(nr),dbt(ncell),Q_inflow,Q_outflow, Q_sto_out)
                     !
                     !     End of computational element loop
                     !
