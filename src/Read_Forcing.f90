@@ -22,7 +22,8 @@ SUBROUTINE Read_Forcing
             !
             read(35,*) nnd,ncell &
                 ,Q_out(no_heat),Q_dmmy,Q_diff(no_heat) &
-                ,depth(no_heat),width(no_heat),u(no_heat)
+                ,depth(no_heat),width(no_heat),u(no_heat), Q_local(no_heat)
+            if (Q_diff(no_heat) .gt. 0) write(*,*) 'Q_diff is not equal to 0', no_heat, Q_diff(no_heat)
             !
             if(u(no_heat).lt.0.01) u(no_heat)=0.01
             if(ncell.ne.no_heat) write(*,*) 'Flow file error',ncell,no_heat

@@ -24,8 +24,11 @@ SUBROUTINE SYSTMM(temp_file,param_file)
     integer, dimension(2):: nterp=(/2,3/)
     !
     real             :: dt_calc,dt_total,hpd,q_dot,q_surf,z
-    real             :: Q_dstrb,Q_inflow,Q_outflow,Q_ratio,Q_trb,Q_trb_sum
-    real             :: T_dstrb,T_dstrb_load,T_trb_load
+    real             :: Q_dstrb,Q_inflow,Q_outflow,Q_ratio,Q_inflow_origin
+    real             :: Q_inflow_out, Q_outflow_out, Q_tot
+    real             :: sto_pre, sto_post
+    real             :: Q_trb,Q_trb_sum,Q_sto,Q_sto_out, T_sto
+    real             :: T_dstrb,T_dstrb_load,T_trb_load,T_sto_load
     real             :: rminsmooth
     real             :: T_0,T_dist
     real(8)          :: time
@@ -42,13 +45,17 @@ SUBROUTINE SYSTMM(temp_file,param_file)
     ! Allocate the arrays
     !
     allocate (temp(nreach,0:ns_max,2))
+    allocate (sto(nreach,ns_max,2))
+    allocate (temp_sto(nreach,ns_max,2))
     allocate (T_head(nreach))
     allocate (T_smth(nreach))
     allocate (T_trib(nreach))
     allocate (depth(heat_cells))
     allocate (Q_in(heat_cells))
     allocate (Q_out(heat_cells))
+    allocate (Q_local(heat_cells))
     allocate (Q_diff(heat_cells))
+    allocate (delta_sto_flux(heat_cells))
     allocate (Q_trib(nreach))
     allocate (width(heat_cells))
     allocate (u(heat_cells))
@@ -67,9 +74,12 @@ SUBROUTINE SYSTMM(temp_file,param_file)
     no_dt=0
     nstrt_elm=0
     temp=0.5
+    sto=0
+    temp_sto=0.5
     ! Initialize headwaters temperatures
     !
     T_head=4.0
+    !
     !
     ! Initialize smoothed air temperatures for estimating headwaters temperatures
     !
@@ -91,7 +101,7 @@ SUBROUTINE SYSTMM(temp_file,param_file)
     !
     !     Year loop starts
     !
-    do nyear=start_year,end_year
+    DO nyear=start_year,end_year
         write(*,*) ' Simulation Year - ',nyear,start_year,end_year
         nd_year=365
         if (mod(nyear,4).eq.0) nd_year=366
@@ -121,7 +131,7 @@ SUBROUTINE SYSTMM(temp_file,param_file)
                 !
                 !     Begin cycling through the reaches
                 !
-                do nr=1,nreach
+                DO nr=1,nreach
                     !
                     nc_head=segment_cell(nr,1)
                     !
@@ -140,7 +150,7 @@ SUBROUTINE SYSTMM(temp_file,param_file)
                     !
                     ! Begin cell computational loop
                     !
-                    do ns=1,no_celm(nr)
+                    DO ns=1,no_celm(nr)
                         !
                         DONE=.FALSE.
                         !
@@ -204,37 +214,45 @@ SUBROUTINE SYSTMM(temp_file,param_file)
                         !
                         ncell0=nncell
                         dt_total=0.0
+                        !
+                        ! Set initial river storage (Initial storage for first grid cell is 0)
+                        !
+                        if(nyear.eq.start_year .and. nd.eq.1 .and. ndd.eq.1 .and. ns.ge.3) then
+                            !sto(nr,ns,n1) = width(ncell) * depth(ncell) * dx(ncell)/2
+                            temp_sto(nr,ns,n1) = T_head(nr)
+                        end if
+                        !
                         do nm=no_dt(ns),1,-1
                             dt_calc=dt_part(nm)
                             z=depth(nncell)
                             call energy(T_0,q_surf,nncell)
                             !
                             q_dot=(q_surf/(z*rfac))
-                            T_0=T_0+q_dot*dt_calc
+                            !T_0=T_0+q_dot*dt_calc
                             if(T_0.lt.0.0) T_0=0.0
                             !
                             !    Add distributed flows
                             !
-                            T_dstrb_load  = 0.0
+                            T_dstrb = smooth_param(nr)*dbt(nncell)+rminsmooth*T_smth(nr)
                             !
-                            Q_dstrb = Q_diff(nncell)
+                            Q_dstrb = Q_local(nncell)
                             !
-                            ! Temperature of distributed inflow assumed = 10.0 deg C
+                            T_dstrb_load  = T_dstrb * Q_dstrb
                             !
-                            if(Q_dstrb.gt.0.001) then
-                                T_dstrb  = 10.0
-                            else
-                                T_dstrb  = 10.0
-                            end if
-                            T_dstrb_load  = Q_dstrb*T_dstrb
+                            !    Add flow from transient river storage
+                            !
+                            T_sto_load = 0.0
+                            !
+                            Q_sto = delta_sto_flux(nncell)
+                            !
+                            if(nm.eq.1) Q_sto_out = delta_sto_flux(nncell)
                             !
                             !     Look for a tributary.
                             !
                             ntribs=no_tribs(nncell)
                             Q_trb_sum   = 0.0
                             T_trb_load  = 0.0
-                            if(ntribs.gt.0.and..not.DONE) then
-                                !
+                            if(ntribs.gt.0) then
                                 do ntrb=1,ntribs
                                     nr_trib=trib(nncell,ntrb)
                                     if(Q_trib(nr_trib).gt.0.0) then
@@ -247,22 +265,115 @@ SUBROUTINE SYSTMM(temp_file,param_file)
                                             +  T_trb_load
                                     end if
                                 end do
+                            end if
+                            Q_trb_sum = Q_trb_sum/2
+                            T_trb_load = T_trb_load/2
+                            !
+                            ! Update inflow/outflow based on which segment
+                            ! the water particle is located
+                            ! We assume there are two segments in one grid cell
+                            !
+                            if(mod(nseg,2).eq.0.and..not.DONE) then
+                                Q_inflow=Q_outflow - Q_dstrb - Q_sto - Q_trb_sum
+                                DONE = .TRUE.
+                            else
+                                Q_outflow=Q_inflow + Q_dstrb + Q_sto + Q_trb_sum
+                                DONE = .TRUE.
+                            end if
+                            !
+                            ! if Q_sto is smaller than 0, we need to adjust the water
+                            ! balance.
+                            !
+                            T_sto = temp_sto(nr,nseg,n1)
+                            if(Q_sto.ge.0) then
+                                sto_pre  = sto(nr,nseg,n1)
+                                sto_post = sto_pre - Q_sto*sec_day
+                                if(sto_post .lt. 0) then
+                                    sto_post = 0
+                                    T_sto_load=sto_pre/sec_day*T_sto
+                                end if
                                 !
-                                DONE=.TRUE.
+                                ! When Q_sto is smaller than 0, we need to adjust
+                                ! Q_dstrb, Q_trb and Q_local to make water balance.
+                                !
+                            else
+                                !
+                                ! If local flow can fulfill the deficiency in river storage
+                                !
+                                sto_pre  = sto(nr,nseg,n1)
+                                sto_post = sto_pre - Q_sto*sec_day
+                                T_sto_load=0
+                                !if (Q_dstrb + Q_sto .gt. 0) then
+                                !    Q_dstrb=Q_dstrb + Q_sto
+                                !    T_dstrb_load  = Q_dstrb*T_dstrb
+                                !    if(nm.eq.1) then
+                                !        sto(nr,ns,n1)=sto(nr,ns,n2) - Q_sto*sec_day
+                                !        temp_sto(nr,ns,n1) = ( sto(nr,ns,n2)*temp_sto(nr,ns,n2) &
+                                !                             + (-Q_sto * T_dstrb))/sto(nr,ns,n1)
+                                !    end if
+                                !else
+                                !    if (Q_dstrb + Q_trb_sum + Q_sto .gt. 0) then
+                                !        Q_trb_sum_origin = Q_trb_sum
+                                !        T_trb_load_origin = T_trb_load
+                                !        Q_trb_sum = Q_dstrb + Q_trb_sum + Q_sto
+                                !        T_trb_load = (Q_trb_sum/Q_trb_sum_origin)*T_trb_load
+                                !        if(nm.eq.1) then
+                                !            sto(nr,ns,n1)=sto(nr,ns,n2) - Q_sto*sec_day
+                                !            temp_sto(nr,ns,n1) = ( sto(nr,ns,n2)*temp_sto(nr,ns,n2) &
+                                !                                 + Q_dstrb*T_dstrb                  &
+                                !                                 + T_trb_load_origin - T_trb_load)  &
+                                !                                 /sto(nr,ns,n1)
+                                !        end if
+                                !        Q_dstrb=0
+                                !        T_dstrb_load=0
+                                !    else
+                                !        Q_inflow_origin=Q_inflow
+                                !        Q_inflow=Q_inflow + Q_dstrb + Q_trb_sum + Q_sto
+                                !        if(nm.eq.1) then
+                                !            sto(nr,ns,n1)=sto(nr,ns,n2) - Q_sto*sec_day
+                                !            temp_sto(nr,ns,n1) = ( sto(nr,ns,n2)*temp_sto(nr,ns,n2) &
+                                !                                 + Q_dstrb*T_dstrb                  &
+                                !                                 + T_trb_load                       &
+                                !                                 + (Q_inflow_origin-Q_inflow)*T_0)   &
+                                !                                 /sto(nr,ns,n1)
+                                !        end if
+                                !        Q_dstrb=0
+                                !        T_dstrb_load=0
+                                !        Q_trb_sum=0
+                                !        T_trb_load=0
+                                !    end if
+                                !end if
+                                !Q_sto = 0
+                                !T_sto_load=0
                             end if
                             !
                             !  Update inflow and outflow
                             !
-                            Q_outflow = Q_inflow + Q_dstrb + Q_trb_sum
-                            Q_ratio = Q_inflow/Q_outflow
+                            if(nr.eq.8 .and.ns.eq.3 .and. nd.lt.300 .and. nm.eq.1) write(*,*) &
+                                'nd', nd,  'T_0_pre', T_0, &
+                                Q_outflow, Q_inflow, Q_dstrb, Q_trb_sum, Q_sto, sto_post/sec_day
+                            Q_tot = Q_inflow + Q_dstrb + Q_trb_sum + Q_sto + sto_post/sec_day
+                            Q_ratio = Q_inflow/Q_tot
                             !
                             ! Do the mass/energy balance
                             !
-                            T_0  = T_0*Q_ratio                              &
-                                + (T_dstrb_load + T_trb_load)/Q_outflow    &
+                            !if(nr.eq.8 .and.ns.eq.3 .and. nd.lt.30 .and. nm.eq.1) write(*,*) &
+                            !'nd', nd, 'T_0 pre', T_0
+                            T_0 = T_0*Q_ratio                                           &
+                                + (T_dstrb_load + T_trb_load + T_sto_load               &
+                                + sto_post/sec_day*T_sto)/Q_tot                         &
                                 + q_dot*dt_calc
+                            if(nr.eq.8 .and.ns.eq.3 .and. nd.lt.300 .and. nm.eq.1) write(*,*) &
+                                'nd', nd, 'T_0 post', T_0, 'energy', q_dot*dt_calc, &
+                                'Inflow', Q_ratio, 'local', T_dstrb_load/Q_tot, &
+                                'tributary', T_trb_load/Q_tot, 'storage flow', T_sto_load/Q_tot, &
+                                'storage', sto_post/sec_day*T_sto/Q_tot
                             !
                             if (T_0.lt.0.5) T_0 =0.5
+                            !
+                            Q_inflow_out=Q_inflow
+                            Q_outflow_out=Q_outflow
+                            !
                             Q_inflow = Q_outflow
                             !
                             nseg=nseg+1
@@ -280,6 +391,8 @@ SUBROUTINE SYSTMM(temp_file,param_file)
                         if (T_0.lt.0.5) T_0=0.5
                         temp(nr,ns,n2)=T_0
                         T_trib(nr)=T_0
+                        sto(nr,ns,n2)=sto_post
+                        temp_sto(nr,ns,n2)= T_0
                         !
                         !   Write all temperature output UW_JRY_11/08/2013
                         !   The temperature is output at the beginning of the
@@ -287,7 +400,9 @@ SUBROUTINE SYSTMM(temp_file,param_file)
                         !   other points by some additional code that keys on the
                         !   value of ndelta (now a vector)(UW_JRY_11/08/2013)
                         !
-                        call WRITE(time,nd,nr,ncell,ns,T_0,T_head(nr),dbt(ncell),Q_inflow,Q_outflow)
+                        call WRITE(time,nd,nr,ncell,ns,T_0,T_head(nr),dbt(ncell), &
+                                   Q_inflow_out, Q_outflow_out,                   &
+                                   Q_sto_out, sto_post, temp_sto(nr,ns,n2))
                     !
                     !     End of computational element loop
                     !

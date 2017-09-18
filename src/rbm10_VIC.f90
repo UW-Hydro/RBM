@@ -54,7 +54,6 @@ PROGRAM RBM10_VIC
     character (len=8)   :: start_data,end_data
     integer iargc
     integer numarg
-
     !
     ! Command line input
     !
@@ -103,17 +102,17 @@ PROGRAM RBM10_VIC
     !
     open(unit=36,FILE=TRIM(heat_file), ACCESS='SEQUENTIAL',FORM='FORMATTED', STATUS='old')
     !
-    read(90,'(A)') reservoir_file
+    !read(90,'(A)') reservoir_file
     !
     !     Open file with reservoir parameters
     !
-    open(unit=37,FILE=TRIM(reservoir_file), ACCESS='SEQUENTIAL',FORM='FORMATTED', STATUS='old')
+    !open(unit=37,FILE=TRIM(reservoir_file), ACCESS='SEQUENTIAL',FORM='FORMATTED', STATUS='old')
     !
-    read(90,'(A)') reservoir_storage_file
+    !read(90,'(A)') reservoir_storage_file
     !
     !     Open file with reservoir storage data
     !
-    open(unit=38,FILE=TRIM(reservoir_storage_file),ACCESS='SEQUENTIAL',FORM='FORMATTED', STATUS='old')
+    !open(unit=38,FILE=TRIM(reservoir_storage_file),ACCESS='SEQUENTIAL',FORM='FORMATTED', STATUS='old')
     !
     !     Call systems programs to get started
     !
@@ -137,8 +136,8 @@ PROGRAM RBM10_VIC
 
     CLOSE(35)
     CLOSE(36)
-    CLOSE(37)
-    CLOSE(38)
+    !CLOSE(37)
+    !CLOSE(38)
     CLOSE(90)
     STOP
 END PROGRAM RBM10_VIC
