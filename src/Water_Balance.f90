@@ -18,6 +18,9 @@ SUBROUTINE Water_Balance
                 !  Flow into the headwaters cell is the same as the flow out
                 !
                 Q_in(nrc) = Q_out(nrc)
+                Q_local(nrc) = 0
+                !Q_in(nrc) = 0
+                !
             else
                 !
                 !  Flow into downstream cells is equal to the flow out of the most upstream cell
@@ -32,6 +35,12 @@ SUBROUTINE Water_Balance
                     ncnf = conflnce(nrc,nntrib)
                     Q_sum_trib = Q_sum_trib + Q_out(ncnf)
                 end do
+            end if
+            !
+            !  Assume the storage doesn't change for last grid cell
+            !
+            if (nr.eq.nreach .and. nc.eq.no_cells(nr)) then
+                Q_out(nrc) = Q_in(nrc)
             end if
             !
             !  Nonpoint flow is distributed evenly among all segments in the grid cell

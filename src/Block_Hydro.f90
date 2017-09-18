@@ -21,5 +21,7 @@ module Block_Hydro
     real, dimension(:,:), allocatable  :: temp_nps,thermal
     real, dimension(:,:), allocatable  :: x_dist
     real, dimension(:,:,:), allocatable :: temp
+    real, dimension(:,:,:), allocatable :: sto ! river transient storage for each river segment
+    real, dimension(:,:,:), allocatable :: temp_sto ! temperature for river storage
 
 end module Block_Hydro
