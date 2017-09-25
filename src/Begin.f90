@@ -3,6 +3,7 @@ Subroutine BEGIN(param_file,spatial_file)
     use Block_Energy
     use Block_Hydro
     use Block_Network
+    use Block_Reservoir
     !
     implicit none
     !
@@ -15,6 +16,8 @@ Subroutine BEGIN(param_file,spatial_file)
     integer:: head_name,trib_cell
     integer:: jul_start,main_stem,nyear1,nyear2,nc,ncell,nseg
     integer:: ns_max_test,node,ncol,nrow,nr,cum_sgmnt
+    !
+    integer:: nreservoir
     !
     logical:: first_cell,source
     !
@@ -41,7 +44,7 @@ Subroutine BEGIN(param_file,spatial_file)
     !
     jul_start = Julian(start_year,start_month,start_day)
     !
-    read(90,*) nreach,flow_cells,heat_cells,source
+    read(90,*) nreach,flow_cells,heat_cells,source,reservoir,nres
     !
     ! Allocate dynamic arrays
     !
@@ -67,12 +70,42 @@ Subroutine BEGIN(param_file,spatial_file)
     allocate(segment_cell(nreach,ns_max))
     allocate(x_dist(nreach,0:ns_max))
     !
+    ! Allocate grid cells for reservoir variables
+    !
+    allocate(res_num(heat_cells))
+    allocate(res_pres(heat_cells))
+    allocate(dam_number(nres))
+    allocate(dam_grid_lat(nres))
+    allocate(dam_grid_lon(nres))
+    allocate(res_depth_meter(nres))
+    allocate(res_width_meter(nres))
+    allocate(res_area_km2(nres))
+    allocate(res_start_node(nres))
+    allocate(res_end_node(nres))
+    !
     !     Start reading the reach date and initialize the reach index, NR
     !     and the cell index, NCELL
     !
     ncell=0
     !
     ns_max_test=-1
+    !
+    !     Read in reservoir information
+    !
+    if(reservoir) then
+        read(37,*) ! Skip the first line in reservoir file
+        do nreservoir = 1,nres
+            read(37,*) dam_number(nreservoir),  &
+                       dam_grid_lat(nreservoir), dam_grid_lon(nreservoir), &
+                       res_depth_meter(nreservoir), res_width_meter(nreservoir),&
+                       res_area_km2(nreservoir), &
+                       res_start_node(nreservoir), res_end_node(nreservoir)
+
+            print *, dam_number(nreservoir), res_depth_meter(nreservoir), &
+                     res_width_meter(nreservoir), res_area_km2(nreservoir), &
+                     res_start_node(nreservoir), res_end_node(nreservoir)
+        end do
+    end if
     !
     !     Card Group IIb. Reach characteristics
     !
@@ -136,8 +169,16 @@ Subroutine BEGIN(param_file,spatial_file)
             !     Variable ndelta read in here.  At present, number of elements
             !     is entered manually into the network file (UW_JRY_2011/03/15)
             !
-            read(90,'(5x,i5,5x,i5,8x,i5,6x,a8,6x,a10,7x,f10.0,f5.0)')  &
-                node,nrow,ncol,lat,long,rmile1,ndelta(ncell)
+            read(90,'(5x,i5,5x,i5,8x,i5,6x,a8,6x,a10,7x,f10.0,f5.0,i5)')  &
+                node,nrow,ncol,lat,long,rmile1,ndelta(ncell),res_num(ncell)
+            if(res_num(ncell) .gt. 0) then
+                res_pres(ncell) = .TRUE.
+            end if
+
+            !
+            !
+            !
+
             !
             !    Set the number of segments of the default, if not specified
             !

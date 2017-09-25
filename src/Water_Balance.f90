@@ -40,7 +40,7 @@ SUBROUTINE Water_Balance
             !  Assume the storage doesn't change for last grid cell
             !
             if (nr.eq.nreach .and. nc.eq.no_cells(nr)) then
-                Q_out(nrc) = Q_in(nrc)
+                Q_out(nrc) = Q_in(nrc) + Q_sum_trib + Q_local(nrc)
             end if
             !
             !  Nonpoint flow is distributed evenly among all segments in the grid cell

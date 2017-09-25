@@ -3,13 +3,16 @@ SUBROUTINE Read_Forcing
     USE Block_Energy
     USE Block_Hydro
     USE Block_Network
+    USE Block_Reservoir
     !
     IMPLICIT NONE
     !
     integer :: nc,ncell,nnd,no_flow,no_heat,nr,nrec_flow,nrec_heat
+    integer :: nreservoir,n1,n2
     real    :: Q_avg,Q_dmmy
-
-
+    !
+    n1=1
+    n2=2
     no_flow=0
     no_heat=0
     do nr=1,nreach
@@ -81,6 +84,14 @@ SUBROUTINE Read_Forcing
         depth(no_heat)=depth(no_heat-1)
         width(no_heat)=width(no_heat-1)
         dt(no_heat)=dx(ncell)/u(no_heat)
+    end do
+    !
+    ! Read in reservoir storage data
+    !
+    res_storage(:,n2)=res_storage(:,n1)
+    read(38,*) ! Skip reading the date in storage file
+    do nreservoir=1,nres
+        read(38,*) res_storage(nreservoir, n1)
     end do
     !
     ! Call the water balance subroutine
