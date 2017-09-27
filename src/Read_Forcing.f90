@@ -10,6 +10,7 @@ SUBROUTINE Read_Forcing
     integer :: nc,ncell,nnd,no_flow,no_heat,nr,nrec_flow,nrec_heat
     integer :: nreservoir,n1,n2
     real    :: Q_avg,Q_dmmy
+    real    :: z_temp,w_temp
     !
     n1=1
     n2=2
@@ -26,6 +27,18 @@ SUBROUTINE Read_Forcing
             read(35,*) nnd,ncell &
                 ,Q_out(no_heat),Q_dmmy,Q_diff(no_heat) &
                 ,depth(no_heat),width(no_heat),u(no_heat), Q_local(no_heat)
+            !
+            !     If the streamflow is 0, recalculate water velocity based on
+            !     local streamflow
+            !
+            if (Q_out(no_heat) .eq. 0) then
+                z_temp = a_z * (Q_local(no_heat)**b_z)
+                w_temp = a_w * (Q_local(no_heat)**b_w)
+                u(no_heat) = Q_local(no_heat)/(z_temp*w_temp)
+                depth(no_heat) = z_temp
+                width(no_heat) = w_temp
+            end if
+            !
             if (Q_diff(no_heat) .gt. 0) write(*,*) 'Q_diff is not equal to 0', no_heat, Q_diff(no_heat)
             !
             if(u(no_heat).lt.0.01) u(no_heat)=0.01
@@ -44,7 +57,6 @@ SUBROUTINE Read_Forcing
             !
             Q_avg=0.5*(Q_in(no_heat)+Q_out(no_heat))
             dt(no_heat)=dx(no_heat)/u(no_heat)
-
             !
             !  Added check to see if travel time of parcel exceeds the
             !  computational interval.  If so, it writes to file fort.45.
@@ -64,26 +76,35 @@ SUBROUTINE Read_Forcing
         !       Read the meteorology for the last cell, but not the flow
         !
         no_heat=no_heat+1
-        Q_out(no_heat)=Q_out(no_heat-1)
-        !
-        ! Tributary flow from this reach equals Q_out for this cell
-        !
-        Q_trib(nr)=Q_out(no_heat)
-        nrec_heat=heat_cells*(ndays-1)+no_heat
         read(36,*) ncell &
             ,dbt(no_heat),ea(no_heat) &
             ,Q_ns(no_heat),Q_na(no_heat),rho &
             ,press(no_heat),wind(no_heat)
-        !
-        !  The flow and hydraulics for the last cell has to be
-        !  modified so they do not
-        !  take the values of the segment to which it is tributary
-        !
-        Q_in(no_heat)=Q_out(no_heat-1)
-        u(no_heat)=u(no_heat-1)
-        depth(no_heat)=depth(no_heat-1)
-        width(no_heat)=width(no_heat-1)
-        dt(no_heat)=dx(ncell)/u(no_heat)
+        if (nr .eq. nreach .and. nc .eq. no_cells(nr)) then
+            read(35,*) nnd,ncell &
+                ,Q_out(no_heat),Q_dmmy,Q_diff(no_heat) &
+                ,depth(no_heat),width(no_heat),u(no_heat), Q_local(no_heat)
+            Q_trib(nr)=0
+            Q_in(no_heat)=Q_out(no_heat-1)
+            dt(no_heat)=dx(ncell)/u(no_heat)
+        else
+            Q_out(no_heat)=Q_out(no_heat-1)
+            !
+            ! Tributary flow from this reach equals Q_out for this cell
+            !
+            Q_trib(nr)=Q_out(no_heat)
+            nrec_heat=heat_cells*(ndays-1)+no_heat
+            !
+            !  The flow and hydraulics for the last cell has to be
+            !  modified so they do not
+            !  take the values of the segment to which it is tributary
+            !
+            Q_in(no_heat)=Q_out(no_heat-1)
+            u(no_heat)=u(no_heat-1)
+            depth(no_heat)=depth(no_heat-1)
+            width(no_heat)=width(no_heat-1)
+            dt(no_heat)=dx(ncell)/u(no_heat)
+        end if
     end do
     !
     ! Read in reservoir storage data

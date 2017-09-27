@@ -2,6 +2,7 @@ SUBROUTINE Water_Balance
     !
     USE Block_Hydro
     USE Block_Network
+    USE Block_Reservoir
     !
     IMPLICIT NONE
     !
@@ -17,7 +18,7 @@ SUBROUTINE Water_Balance
                 !
                 !  Flow into the headwaters cell is the same as the flow out
                 !
-                Q_in(nrc) = Q_out(nrc)
+                Q_in(nrc) = Q_local(nrc)
                 Q_local(nrc) = 0
                 !Q_in(nrc) = 0
                 !
@@ -37,15 +38,9 @@ SUBROUTINE Water_Balance
                 end do
             end if
             !
-            !  Assume the storage doesn't change for last grid cell
-            !
-            if (nr.eq.nreach .and. nc.eq.no_cells(nr)) then
-                Q_out(nrc) = Q_in(nrc) + Q_sum_trib + Q_local(nrc)
-            end if
-            !
             !  Nonpoint flow is distributed evenly among all segments in the grid cell
             !
-            delta_sto_flux(nrc) = (Q_out(nrc) - Q_in(nrc) - Q_sum_trib - Q_local(nrc))/ndelta(nrc)
+            !!delta_sto_flux(nrc) = (Q_out(nrc) - Q_in(nrc) - Q_sum_trib - Q_local(nrc))/ndelta(nrc)
             Q_local(nrc) = Q_local(nrc)/ndelta(nrc)
         !
         end do

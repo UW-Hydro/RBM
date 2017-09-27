@@ -82,6 +82,7 @@ Subroutine BEGIN(param_file,spatial_file)
     allocate(res_area_km2(nres))
     allocate(res_start_node(nres))
     allocate(res_end_node(nres))
+    allocate(res_capacity_mcm(nres))
     !
     !     Start reading the reach date and initialize the reach index, NR
     !     and the cell index, NCELL
@@ -97,8 +98,8 @@ Subroutine BEGIN(param_file,spatial_file)
         do nreservoir = 1,nres
             read(37,*) dam_number(nreservoir),  &
                        dam_grid_lat(nreservoir), dam_grid_lon(nreservoir), &
-                       res_depth_meter(nreservoir), res_width_meter(nreservoir),&
-                       res_area_km2(nreservoir), &
+                       res_depth_meter(nreservoir), res_width_meter(nreservoir), &
+                       res_area_km2(nreservoir), res_capacity_mcm(nreservoir), &
                        res_start_node(nreservoir), res_end_node(nreservoir)
 
             print *, dam_number(nreservoir), res_depth_meter(nreservoir), &

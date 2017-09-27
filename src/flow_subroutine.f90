@@ -38,7 +38,7 @@ SUBROUTINE flow_subroutine (res_no)
     !
     if (initial_storage(res_no)) then
         water_withdrawal(res_no) = 0
-        res_storage_pre = res_storage_post + water_withdrawal(res_no) - (Q1 - Q2)
+        res_storage_pre = res_capacity_mcm(res_no) * (10**6) * 0.95
         initial_storage(res_no)=.FALSE.
     end if
     !
@@ -48,19 +48,25 @@ SUBROUTINE flow_subroutine (res_no)
     flow_out_hyp_x = Q2 ! * ftsec_to_msec * dt_comp
     flow_out_epi_x = 0
     flow_epi_hyp_x = flow_in_epi_x
-
     ! based on inflow and outflow
     vol_change_epi_x = flow_in_epi_x - flow_out_epi_x - flow_epi_hyp_x
     vol_change_hyp_x = flow_in_hyp_x + flow_epi_hyp_x - flow_out_hyp_x
-
-    ! ------------------------- calculate dV/dt terms ---------------------------
-    dV_dt_epi(res_no) = vol_change_epi_x * T_epil(res_no)
-    dV_dt_hyp(res_no) = vol_change_hyp_x * T_hypo(res_no)
-
+    !
+    !     Check whether hypolimnion volume is smaller than minimum hypolimnion volume
+    !
+    volume_h_min(res_no) = res_capacity_mcm(res_no) * (10**6) * 0.01
+    if ((volume_h_x(res_no) + vol_change_hyp_x) .lt. volume_h_min(res_no)) then
+        vol_change_epi_x = vol_change_epi_x + vol_change_hyp_x - &
+                           (volume_h_x(res_no) - volume_h_min(res_no))
+        vol_change_hyp_x = volume_h_x(res_no) - volume_h_min(res_no)
+    end if
     !----- update epilimnion and hypolimnion volume  -------
     volume_e_x(res_no) = volume_e_x(res_no) + vol_change_epi_x
     volume_h_x(res_no) = volume_h_x(res_no) + vol_change_hyp_x
     outflow_x = flow_out_epi_x + flow_out_hyp_x
+    ! ------------------------- calculate dV/dt terms ---------------------------
+    dV_dt_epi(res_no) = vol_change_epi_x * T_epil(res_no)
+    dV_dt_hyp(res_no) = vol_change_hyp_x * T_hypo(res_no)
 
     depth_e(res_no) = volume_e_x(res_no) / surface_area(res_no)
     depth_h(res_no) = volume_h_x(res_no) / surface_area(res_no)

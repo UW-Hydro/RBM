@@ -50,6 +50,8 @@ module Block_Reservoir
     real, dimension(:),   allocatable  :: advec_hyp_tot
     real, dimension(:),   allocatable  :: advec_epi_tot
     real, dimension(:),   allocatable  :: qsurf_tot
+    real, dimension(:),   allocatable  :: res_capacity_mcm
+    real, dimension(:),   allocatable  :: volume_h_min
     real, dimension(:,:),   allocatable  :: res_storage
     !
     !

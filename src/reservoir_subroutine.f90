@@ -20,32 +20,11 @@ SUBROUTINE reservoir_subroutine(res_no,q_surf)
     if(n_stability < 0.000001) n_stability = 0.000001
     log_K_z = log10(n_stability) * (-1)  - 5.699 ! high scenario - 2  w/ adjusted intercept based on empirical equation in Quay et al. 1980, Fig 11
     K_z(res_no) = 10**log_K_z
-    if (K_z(res_no) > 2) K_z(res_no) = 2
+    ! if (K_z(res_no) > 2) K_z(res_no) = 2
     ! ONLY for no stratification run:
     write(57, *) res_no,K_z(res_no)
 
-      ! IF well mixed
-    !  if ( ( T_epil(res_no) - T_hypo(res_no)) .lt. (2) .and. dayx .gt. 245) then !245 is September 1st
 
-    !          if(flag_turnover(res_no) .eqv. .false.) then
-        !            write(67, *) nyear,dayx,res_no, T_epil(res_no), T_hypo(res_no)
-    !                flag_turnover(res_no) = .true.
-    !          end if
-
-    !          if( (T_epil(res_no) - T_hypo(res_no)) .lt. (0) ) then
-    !                   K_z(res_no) = 5 ! set high K_z when moderately unstable
-    !          else
-    !                   K_z(res_no) = 0.1 ! set moderate K_z when system is unstable
-    !          end if
-
-       ! IF thermally stratified
-    !   else ! if T_epil greater than T_hypo
-    !            K_z(res_no) = 0.01  ! set the diffusion coeff. in m^2/day
-       !         K_z(res_no) = K_z(res_no) / (depth_e(res_no)/2) ! divide by approx thickness of thermocl.
-    !   end if
-
-      ! ################ This is specially for energy test###########!
-      !    K_z(res_no) = 0
 
     ! -------------------- calculate temperature terms  -------------------------
     dif_epi_x  = K_z(res_no) * surface_area(res_no) *  (T_hypo(res_no) - T_epil(res_no)) / volume_e_x(res_no)
@@ -66,10 +45,11 @@ SUBROUTINE reservoir_subroutine(res_no,q_surf)
 
     advec_epi_hyp = flow_epi_hyp_x *  (T_epil(res_no) - T_hypo(res_no)) /volume_h_x(res_no)
 
-    !  if(res_no .eq. 8) then
-    ! print *,time,'advec_in_epi',advec_in_epix, 'flow_in_epi',flow_in_epi_x, 'T_res_inflow', T_res_inflow(res_no),'T_epil)', T_epil(res_no) &
-    !           ,  'vol',volume_e_x(res_no)
-    !   end if
+    if(res_no .eq. 28) then
+    write(*,*) 'advec_in_epi',advec_in_epix, 'flow_in_epi',flow_in_epi_x, 'T_res_inflow', &
+            T_res_inflow(res_no),'T_epil)', T_epil(res_no), &
+            'vol',volume_e_x(res_no)
+    end if
     ! ------------------- calculate change in temperature  ---------------------
 
     ! ---------------- epilimnion -----------
