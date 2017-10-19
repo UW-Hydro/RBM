@@ -10,6 +10,8 @@ module Block_Reservoir
     logical, dimension(:),   allocatable  :: res_start !
     logical, dimension(:),   allocatable  :: initial_storage !
     logical, dimension(:),   allocatable  :: res_trib_calc !
+    logical, dimension(:),   allocatable  :: res_stratif_start !
+    logical, dimension(:),   allocatable  :: res_turnover !
     !
     !
     real, parameter :: depth_e_frac=0.4, depth_h_frac=0.6

@@ -114,6 +114,8 @@ SUBROUTINE SYSTMM(temp_file,param_file)
     allocate (depth_e(nres))
     allocate (depth_h(nres))
     allocate (volume_h_min(nres))
+    allocate (res_stratif_start(nres))
+    allocate (res_turnover(nres))
     !
     !
     ! Initialize some arrays
@@ -150,13 +152,7 @@ SUBROUTINE SYSTMM(temp_file,param_file)
     !
     !     Reservoir geomorphic information initialization
     !
-    depth_e = res_depth_meter(:) * depth_e_frac
-    depth_h = res_depth_meter(:) * depth_h_frac
     surface_area = res_area_km2(:) * km_to_m * km_to_m
-    volume_e_x = surface_area(:) * depth_e(:)
-    volume_h_x = surface_area(:) * depth_h(:)
-    print *, 'depth_epil', depth_e
-    print *, 'depth_hypo', depth_h
     !
     !     Year loop starts
     !
@@ -164,6 +160,20 @@ SUBROUTINE SYSTMM(temp_file,param_file)
         write(*,*) ' Simulation Year - ',nyear,start_year,end_year
         nd_year=365
         if (mod(nyear,4).eq.0) nd_year=366
+        !
+        !     Reset stratification and turnover
+        !
+        res_stratif_start = .FALSE.
+        res_turnover = .FALSE.
+        !
+        !     At the start of each year, reset the depth of epilimnion
+        !     and hypolimnion.
+        !
+        !res_depth_meter = depth_e(:) + depth_h(:)
+        !depth_e = res_depth_meter(:) * depth_e_frac
+        !depth_h = res_depth_meter(:) * depth_h_frac
+        !volume_e_x = surface_area(:) * depth_e(:)
+        !volume_h_x = surface_area(:) * depth_h(:)
         !
         !     Day loop starts
         !
@@ -188,6 +198,7 @@ SUBROUTINE SYSTMM(temp_file,param_file)
                 !     Begin reach computations
                 !
                 res_start=.FALSE.
+                res_trib_calc=.FALSE.
                 !
                 !     Begin cycling through the reaches
                 !
@@ -346,92 +357,6 @@ SUBROUTINE SYSTMM(temp_file,param_file)
                                 Q_trb_sum = Q_trb_sum/2
                                 T_trb_load = T_trb_load/2
                                 !
-                                ! Update inflow/outflow based on which segment
-                                ! the water particle is located
-                                ! We assume there are two segments in one grid cell
-                                !
-                                !if(mod(nseg,2).eq.0.and..not.DONE) then
-                                !    Q_inflow=Q_outflow - Q_dstrb - Q_sto - Q_trb_sum
-                                !    DONE = .TRUE.
-                                !else
-                                !    Q_outflow=Q_inflow + Q_dstrb + Q_sto + Q_trb_sum
-                                !    DONE = .TRUE.
-                                !end if
-                                !
-                                ! if Q_sto is smaller than 0, we need to adjust the water
-                                ! balance.
-                                !
-                                !!T_sto = temp_sto(nr,nseg,n1)
-                                !!if(Q_sto.ge.0) then
-                                    !!sto_pre  = sto(nr,nseg,n1)
-                                    !!sto_post = sto_pre - Q_sto*sec_day
-                                    !!if(sto_post .lt. 0) then
-                                    !!    sto_post = 0
-                                    !!    T_sto_load=sto_pre/sec_day*T_sto
-                                    !!end if
-                                    !
-                                    ! When Q_sto is smaller than 0, we need to adjust
-                                    ! Q_dstrb, Q_trb and Q_local to make water balance.
-                                    !
-                                !!else
-                                    !
-                                    ! If local flow can fulfill the deficiency in river storage
-                                    !
-                                    !!sto_pre  = sto(nr,nseg,n1)
-                                    !!sto_post = sto_pre - Q_sto*sec_day
-                                    !!T_sto_load=0
-                                    !if (Q_dstrb + Q_sto .gt. 0) then
-                                    !    Q_dstrb=Q_dstrb + Q_sto
-                                    !    T_dstrb_load  = Q_dstrb*T_dstrb
-                                    !    if(nm.eq.1) then
-                                    !        sto(nr,ns,n1)=sto(nr,ns,n2) - Q_sto*sec_day
-                                    !        temp_sto(nr,ns,n1) = ( sto(nr,ns,n2)*temp_sto(nr,ns,n2) &
-                                    !                             + (-Q_sto * T_dstrb))/sto(nr,ns,n1)
-                                    !    end if
-                                    !else
-                                    !    if (Q_dstrb + Q_trb_sum + Q_sto .gt. 0) then
-                                    !        Q_trb_sum_origin = Q_trb_sum
-                                    !        T_trb_load_origin = T_trb_load
-                                    !        Q_trb_sum = Q_dstrb + Q_trb_sum + Q_sto
-                                    !        T_trb_load = (Q_trb_sum/Q_trb_sum_origin)*T_trb_load
-                                    !        if(nm.eq.1) then
-                                    !            sto(nr,ns,n1)=sto(nr,ns,n2) - Q_sto*sec_day
-                                    !            temp_sto(nr,ns,n1) = ( sto(nr,ns,n2)*temp_sto(nr,ns,n2) &
-                                    !                                 + Q_dstrb*T_dstrb                  &
-                                    !                                 + T_trb_load_origin - T_trb_load)  &
-                                    !                                 /sto(nr,ns,n1)
-                                    !        end if
-                                    !        Q_dstrb=0
-                                    !        T_dstrb_load=0
-                                    !    else
-                                    !        Q_inflow_origin=Q_inflow
-                                    !        Q_inflow=Q_inflow + Q_dstrb + Q_trb_sum + Q_sto
-                                    !        if(nm.eq.1) then
-                                    !            sto(nr,ns,n1)=sto(nr,ns,n2) - Q_sto*sec_day
-                                    !            temp_sto(nr,ns,n1) = ( sto(nr,ns,n2)*temp_sto(nr,ns,n2) &
-                                    !                                 + Q_dstrb*T_dstrb                  &
-                                    !                                 + T_trb_load                       &
-                                    !                                 + (Q_inflow_origin-Q_inflow)*T_0)   &
-                                    !                                 /sto(nr,ns,n1)
-                                    !        end if
-                                    !        Q_dstrb=0
-                                    !        T_dstrb_load=0
-                                    !        Q_trb_sum=0
-                                    !        T_trb_load=0
-                                    !    end if
-                                    !end if
-                                    !Q_sto = 0
-                                    !T_sto_load=0
-                                !!end if
-                                !
-                                !  Update inflow and outflow
-                                !
-                                !!if(nr.eq.8 .and.ns.eq.3 .and. nd.lt.300 .and. nm.eq.1) write(*,*) &
-                                !!    'nd', nd,  'T_0_pre', T_0, &
-                                !!    Q_outflow, Q_inflow, Q_dstrb, Q_trb_sum, Q_sto, sto_post/sec_day
-                                !!Q_tot = Q_inflow + Q_dstrb + Q_trb_sum + Q_sto + sto_post/sec_day
-                                !!Q_ratio = Q_inflow/Q_tot
-                                !
                                 ! Do the mass/energy balance
                                 !
                                 Q_outflow = Q_inflow + Q_dstrb + Q_trb_sum
@@ -488,11 +413,10 @@ SUBROUTINE SYSTMM(temp_file,param_file)
                             !
                             if(ncell .eq. res_start_node(res_no) .and. &
                                 .NOT. res_start(res_no)) then
+                                if(res_no.eq.3 .and. nd.lt.5) write(*,*) res_start_node(res_no)
                                 ns_res_start(res_no) = ns
                                 Q_res_in(res_no) = Q_in(ncell)                  ! Inflow for reservoir
                                 T_res_in(res_no) = temp(nr,ns-1,n1)               ! Inflow temperature
-                                !if (res_no.eq.28 .and. nd.lt.115) write(*,*) &
-                                !    nr, ns-1, n1, T_res_in(res_no)
                                 Q_res_trib_tot = 0                              ! Initialize total tributary flow
                                 T_res_trib_load_tot = 0                         ! Initialize tributary energy load
                                 Q_res_dstrb_tot = Q_local(ncell)                ! Initialize local flow
@@ -500,8 +424,7 @@ SUBROUTINE SYSTMM(temp_file,param_file)
                                     + rminsmooth*T_smth(nr)
                                 if (T_res_dstrb .lt. 0) T_res_dstrb=0
                                 T_res_dstrb_load_tot = Q_res_dstrb_tot*T_res_dstrb
-                                !if (res_no.eq.28 .and. nd.lt.115) write(*,*) &
-                                !    'local', ncell, Q_res_dstrb_tot, T_res_dstrb
+                                Q_res_outflow(res_no) = Q_out(ncell)    !!!!!!!!!TESTINFLOW
                                 res_start(res_no) = .TRUE.
                                 !
                                 !     Calculate tributary flow for reservoir grid cells
@@ -551,15 +474,21 @@ SUBROUTINE SYSTMM(temp_file,param_file)
                                     end do
                                     res_trib_calc(ncell) = .TRUE.
                                 end if
+                                !
+                                !     If it is the last segment in the reservoir
+                                !
                                 if(ncell .eq. res_end_node(res_no) .and. &
                                     .NOT. res_pres(segment_cell(nr,ns+1))) then
                                     !write(*,*) 'test: start of loop 2'
                                     ns_res_end(res_no) = ns
-                                    Q_res_outflow(res_no) = Q_out(ncell)
+                                    !Q_res_outflow(res_no) = Q_out(ncell)     !!!!TESTINFLOW(need to uncomment)
                                     !
                                     !      Sum up all streamflow into inflow
                                     !
                                     Q_res_inflow(res_no) = Q_res_in(res_no) + Q_res_dstrb_tot + Q_res_trib_tot
+                                    if (res_no.eq.3) write(55,*) &
+                                        time, T_res_in(res_no), Q_res_in(res_no), &
+                                        Q_res_trib_tot, Q_res_dstrb_tot            !!!!!!! test code
                                     if (Q_res_inflow(res_no) .gt. 0) then
                                         T_res_inflow(res_no) = (Q_res_in(res_no)*T_res_in(res_no) +  &
                                             T_res_trib_load_tot + T_res_dstrb_load_tot)/  &
@@ -574,14 +503,16 @@ SUBROUTINE SYSTMM(temp_file,param_file)
                                     !
                                     !     Calculate the density of inflow, compared with epilimnion/hypolimnion
                                     !
+                                    T_res_inflow(res_no) = SIN(nd/365.0*2.0*pi - 0.5*pi)*14 + 16    ! TESTINFLOW
+                                    Q_res_inflow(res_no) =  Q_res_outflow(res_no) + Q_res_trib_tot ! TESTINFLOW
+                                    !
+                                    !
                                     call stream_density(T_res_inflow(res_no), density_in(res_no))
                                     call stream_density(T_epil(res_no), density_epil(res_no))
                                     call stream_density(T_hypo(res_no), density_hypo(res_no))
                                     !
                                     !     Calculate flow subroutine
                                     !
-                                    !call flow_subroutine(flow_in_epi_x, flow_in_hyp_x, flow_epi_hyp_x, &
-                                    !    flow_out_epi_x, flow_out_hyp_x, res_no)
                                     call flow_subroutine(res_no)
                                     !
                                     !     Energy balance
@@ -590,7 +521,8 @@ SUBROUTINE SYSTMM(temp_file,param_file)
                                     !
                                     !     Calculate reservoir temperature
                                     !
-                                    call reservoir_subroutine_implicit(res_no,q_surf)
+                                    !call reservoir_subroutine(res_no,q_surf)
+                                    call reservoir_subroutine_implicit(res_no,q_surf,nd,dbt(ncell))
                                     !
                                     T_0 = T_hypo(res_no) ! In reservoir, water is released from hypolimnion
                                     if (T_0.lt.0.5) T_0=0.5
@@ -637,8 +569,11 @@ SUBROUTINE SYSTMM(temp_file,param_file)
 4650            format(16x,12(6x,f6.0,6x))
 4700            format(f10.4,f6.0,15(f6.1,f8.3))
 4750            format(f10.4,10(i4,f8.0))
-                write(75,*) nyear, nd, T_epil(:), T_hypo(:)
-                write(76,*) nyear, nd, depth_e(:), depth_h(:)
+                write(75,*) nyear, nd, T_epil(:), T_hypo(:), T_res_inflow(:), K_z(:), depth_e(:), depth_h(:),&
+                    Q_res_inflow(:), Q_res_outflow(:)
+                write(76,'(2i6, 37f15.10, 37f15.10)') nyear, nd, depth_e(:), depth_h(:), volume_e_x,volume_h_x
+                write(77,*) nyear, nd, diffusion_tot, advec_hyp_tot,advec_epi_tot,qsurf_tot
+
             end do
         !
         !     End of main loop (ND=1,365/366)

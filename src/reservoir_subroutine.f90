@@ -16,12 +16,18 @@ SUBROUTINE reservoir_subroutine(res_no,q_surf)
     density_dif = density_epil(res_no) - density_hypo(res_no)
     if(density_dif .gt. -0.00001 .and. density_dif .lt. 0.00001) density_dif= 0.00001
     n_stability = (-1) * (gravity/density_epil(res_no)) * &
-        ((density_dif)/((depth_e(res_no) + depth_h(res_no))/2))
+            ((density_dif)/((depth_e(res_no) + depth_h(res_no))/2))
     if(n_stability < 0.000001) n_stability = 0.000001
+    !log_K_z = log10(n_stability) * (-1)  - 5.699 ! original relationship: based on empirical equation in Quay et al. 1980, Fig 11
+    !log_K_z = log10(n_stability) * (-0.74)  - 3.8 ! high scenario based on empirical equation in Quay et al. 1980, Fig 11
+    !log_K_z = log10(n_stability) * (-0.74)  - 4.6 ! moderate scenario based on empirical equation in Quay et al. 1980, Fig 11
+    !log_K_z = log10(n_stability) * (-0.74)  - 5.4 ! low scenario based on empirical equation in Quay et al. 1980, Fig 11
     log_K_z = log10(n_stability) * (-1)  - 5.699 ! high scenario - 2  w/ adjusted intercept based on empirical equation in Quay et al. 1980, Fig 11
+    !log_K_z = log10(n_stability) * (-0.55)  - 2.3 ! high scenario - 3  w/ adjusted intercept based on empirical equation in Quay et al. 1980, Fig 11
     K_z(res_no) = 10**log_K_z
-    ! if (K_z(res_no) > 2) K_z(res_no) = 2
+    if (K_z(res_no) > 2) K_z(res_no) = 2
     ! ONLY for no stratification run:
+    !K_z(res_no) =  1
     write(57, *) res_no,K_z(res_no)
 
 
@@ -39,6 +45,9 @@ SUBROUTINE reservoir_subroutine(res_no,q_surf)
 
     if(flow_in_hyp_x .lt. volume_h_x(res_no)) then
         advec_in_hypx = flow_in_hyp_x * (T_res_inflow(res_no) - T_hypo(res_no)) /volume_h_x(res_no)
+        if(res_no .eq. 2) then
+            write(47,*) advec_in_hypx, flow_in_hyp_x, T_res_inflow(res_no), T_hypo(res_no), volume_h_x(res_no)
+        end if
     else
         advec_in_hypx = volume_h_x(res_no) * (T_res_inflow(res_no) - T_hypo(res_no))/volume_h_x(res_no)
     end if
@@ -76,6 +85,11 @@ SUBROUTINE reservoir_subroutine(res_no,q_surf)
     hypox= T_hypo(res_no)*(flow_out_hyp_x/outflow_x)  ! portion of temperature from hypol.
     temp_out(res_no) = epix + hypox   ! average outflow temperature
     volume_tot = volume_e_x(res_no)  + volume_h_x(res_no)
+    write(48,'(2f20.4, 6f20.4, 10f20.4)') T_res_in(res_no),T_epil(res_no), advec_in_epix, energy_x, dif_epi_x &
+                                  ,flow_in_epi_x, volume_e_x(res_no) &
+                                  ,T_hypo(res_no), advec_in_hypx, advec_epi_hyp, dif_hyp_x, flow_in_hyp_x,  volume_h_x(res_no) &
+                                  ,flow_epi_hyp_x,  temp_out(res_no), q_surf,  dt_comp, depth_e(res_no)
+    end if
     !
     !     Update reservoir storage based on water withdrawal
     !
@@ -95,6 +109,5 @@ SUBROUTINE reservoir_subroutine(res_no,q_surf)
     advec_hyp_tot(res_no) = advec_in_hypx
     advec_epi_tot(res_no) = advec_in_epix
     qsurf_tot(res_no) = energy_x
-
 
 end subroutine reservoir_subroutine

@@ -91,6 +91,8 @@ Subroutine BEGIN(param_file,spatial_file)
     !
     ns_max_test=-1
     !
+    res_pres = .FALSE.
+    !
     !     Read in reservoir information
     !
     if(reservoir) then
@@ -170,16 +172,18 @@ Subroutine BEGIN(param_file,spatial_file)
             !     Variable ndelta read in here.  At present, number of elements
             !     is entered manually into the network file (UW_JRY_2011/03/15)
             !
-            read(90,'(5x,i5,5x,i5,8x,i5,6x,a8,6x,a10,7x,f10.0,f5.0,i5)')  &
-                node,nrow,ncol,lat,long,rmile1,ndelta(ncell),res_num(ncell)
-            if(res_num(ncell) .gt. 0) then
-                res_pres(ncell) = .TRUE.
+            if (reservoir) then
+                read(90,'(5x,i5,5x,i5,8x,i5,6x,a8,6x,a10,7x,f10.0,f5.0,i6)')  &
+                    node,nrow,ncol,lat,long,rmile1,ndelta(ncell),res_num(ncell)
+                write(*,*) node,nrow,ncol,lat,long,rmile1,ndelta(ncell),res_num(ncell)
+                if(res_num(ncell) .gt. 0) then
+                    res_pres(ncell) = .TRUE.
+                end if
+            else
+                read(90,'(5x,i5,5x,i5,8x,i5,6x,a8,6x,a10,7x,f10.0,f5.0)')  &
+                    node,nrow,ncol,lat,long,rmile1,ndelta(ncell)
+                write(*,*) node,nrow,ncol,lat,long,rmile1,ndelta(ncell)
             end if
-
-            !
-            !
-            !
-
             !
             !    Set the number of segments of the default, if not specified
             !
