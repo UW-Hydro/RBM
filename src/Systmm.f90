@@ -537,9 +537,6 @@ SUBROUTINE SYSTMM(temp_file,param_file)
                                             Q_res_inflow(res_no), Q_res_outflow(res_no), &
                                             res_storage_post, T_res(res_no))
                                     end do
-
-                                else
-
                                 end if
                             end if
                         end if
@@ -569,11 +566,12 @@ SUBROUTINE SYSTMM(temp_file,param_file)
 4650            format(16x,12(6x,f6.0,6x))
 4700            format(f10.4,f6.0,15(f6.1,f8.3))
 4750            format(f10.4,10(i4,f8.0))
-                write(75,*) nyear, nd, T_epil(:), T_hypo(:), T_res_inflow(:), K_z(:), depth_e(:), depth_h(:),&
-                    Q_res_inflow(:), Q_res_outflow(:)
-                write(76,'(2i6, 37f15.10, 37f15.10)') nyear, nd, depth_e(:), depth_h(:), volume_e_x,volume_h_x
-                write(77,*) nyear, nd, diffusion_tot, advec_hyp_tot,advec_epi_tot,qsurf_tot
-
+                if (reservoir) then
+                    write(75,*) nyear, nd, T_epil(:), T_hypo(:), T_res_inflow(:), K_z(:), depth_e(:), depth_h(:),&
+                        Q_res_inflow(:), Q_res_outflow(:)
+                    write(76,'(2i6, 37f15.10, 37f15.10)') nyear, nd, depth_e(:), depth_h(:), volume_e_x,volume_h_x
+                    write(77,*) nyear, nd, diffusion_tot, advec_hyp_tot,advec_epi_tot,qsurf_tot
+                end if
             end do
         !
         !     End of main loop (ND=1,365/366)
