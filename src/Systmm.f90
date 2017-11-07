@@ -114,6 +114,7 @@ SUBROUTINE SYSTMM(temp_file,param_file)
     allocate (depth_e(nres))
     allocate (depth_h(nres))
     allocate (volume_h_min(nres))
+    allocate (volume_e_min(nres))
     allocate (res_stratif_start(nres))
     allocate (res_turnover(nres))
     !
@@ -169,11 +170,11 @@ SUBROUTINE SYSTMM(temp_file,param_file)
         !     At the start of each year, reset the depth of epilimnion
         !     and hypolimnion.
         !
-        !res_depth_meter = depth_e(:) + depth_h(:)
-        !depth_e = res_depth_meter(:) * depth_e_frac
-        !depth_h = res_depth_meter(:) * depth_h_frac
-        !volume_e_x = surface_area(:) * depth_e(:)
-        !volume_h_x = surface_area(:) * depth_h(:)
+        res_depth_meter = depth_e(:) + depth_h(:)
+        depth_e = res_depth_meter(:) * depth_e_frac
+        depth_h = res_depth_meter(:) * depth_h_frac
+        volume_e_x = surface_area(:) * depth_e(:)
+        volume_h_x = surface_area(:) * depth_h(:)
         !
         !     Day loop starts
         !
@@ -239,6 +240,7 @@ SUBROUTINE SYSTMM(temp_file,param_file)
                             !     Establish particle tracks
                             !
                             call Particle_Track(nr,ns,nx_s,nx_head,ns_res_pres,ns_res_num)
+                            !if (ncell .gt. 860) write(*,*) nr,ns,nx_s,nx_head,ns_res_pres,ns_res_num
                             !
                             !     Now do the third-order interpolation to
                             !     establish the starting temperature values
@@ -251,6 +253,7 @@ SUBROUTINE SYSTMM(temp_file,param_file)
                             !
                             if(ns_res_pres) then
                                 T_0 = temp(nr,nseg-1,n1)
+                                !if(ncell.eq.911) write(*,*) nd, ns, nseg, T_0, temp(nr,nseg-1,n1), n1, temp(300,50,:)
                             else
                                 !
                                 !     Perform polynomial interpolation
@@ -276,7 +279,7 @@ SUBROUTINE SYSTMM(temp_file,param_file)
                                         npart=nseg+ntrp+ndltp(npndx)
                                         xa(ntrp)=x_dist(nr,npart)
                                         ta(ntrp)=temp(nr,npart,n1)
-                                        !if(nr.eq.2 .and.ns.eq.2 .and. nd.lt.30) write(*,*) &
+                                        !if(ncell .eq. 3022) write(*,*) &
                                         !    'nd', nd, 'ntrp', ntrp, 'npart',npart,xa(ntrp), ta(ntrp)
                                     end do
                                     !
@@ -287,6 +290,8 @@ SUBROUTINE SYSTMM(temp_file,param_file)
                                     !     Call the interpolation function
                                     !
                                     T_0=tntrp(xa,ta,x,nterp(npndx))
+                                    !if (ncell .eq. 3022) write(*,*) &
+                                    !   nd, ns, 'xa', xa, 'ta', ta, 'x', x, T_0,T_head(nr)
                                 end if
                             end if
                             !
@@ -311,12 +316,16 @@ SUBROUTINE SYSTMM(temp_file,param_file)
                             !!end if
                             !
                             do nm=no_dt(ns),1,-1
+                                !if (ncell .eq. 912) write(*,*) &
+                                    !nd, ns, nm, 'begin', T_0, dbt(nncell), nncell, nseg
                                 dt_calc=dt_part(nm)
                                 z=depth(nncell)
                                 call energy(T_0,q_surf,nncell)
                                 !
                                 q_dot=(q_surf/(z*rfac))
                                 T_0=T_0+q_dot*dt_calc
+                                !if (ncell .eq. 912) write(*,*) &
+                                !    nd, ns, nm, 'end', T_0, q_surf, z, q_dot*dt_calc
                                 if(T_0.lt.0.0) T_0=0.0
                                 !
                                 !    Add distributed flows
@@ -400,7 +409,6 @@ SUBROUTINE SYSTMM(temp_file,param_file)
                             !
                             if(ncell .eq. res_start_node(res_no) .and. &
                                 .NOT. res_start(res_no)) then
-                                if(res_no.eq.3 .and. nd.lt.5) write(*,*) res_start_node(res_no)
                                 ns_res_start(res_no) = ns
                                 Q_res_in(res_no) = Q_in(ncell)                  ! Inflow for reservoir
                                 T_res_in(res_no) = temp(nr,ns-1,n1)               ! Inflow temperature
@@ -464,7 +472,8 @@ SUBROUTINE SYSTMM(temp_file,param_file)
                                 !     If it is the last segment in the reservoir
                                 !
                                 if(ncell .eq. res_end_node(res_no) .and. &
-                                    .NOT. res_pres(segment_cell(nr,ns+1))) then
+                                    (.NOT. res_pres(segment_cell(nr,ns+1)) &
+                                    .or. res_num(segment_cell(nr,ns+1)) .ne. res_no)) then
                                     ns_res_end(res_no) = ns
                                     Q_res_outflow(res_no) = Q_out(ncell)     !!!!TESTINFLOW(need to uncomment)
                                     !
@@ -487,7 +496,7 @@ SUBROUTINE SYSTMM(temp_file,param_file)
                                     !
                                     !     Calculate flow subroutine
                                     !
-                                    call flow_subroutine(res_no)
+                                    call flow_subroutine(res_no, nyear, nd)
                                     !
                                     !     Energy balance
                                     !
@@ -496,11 +505,15 @@ SUBROUTINE SYSTMM(temp_file,param_file)
                                     !     Calculate reservoir temperature
                                     !
                                     !call reservoir_subroutine(res_no,q_surf)
-                                    call reservoir_subroutine_implicit(res_no,q_surf,nd,dbt(ncell))
+                                    !if (res_storage(res_no,1) .gt.res_capacity_mcm(res_no)*(10**6)*0.2) then
+                                        call reservoir_subroutine_implicit(res_no,q_surf,nd,dbt(ncell))
+                                    !else
+                                    !    call reservoir_single_subroutine(res_no,q_surf,nd)
+                                    !end if 
                                     !
                                     T_0 = T_hypo(res_no) ! In reservoir, water is released from hypolimnion
                                     if (T_0.lt.0.5) T_0=0.5
-                                    temp(nr,ns,n2)=T_0
+                                    temp(nr,ns_res_start(res_no):ns_res_end(res_no),n2)=T_0
                                     T_trib(nr)=T_0
                                     !
                                     !     Write output
@@ -543,7 +556,7 @@ SUBROUTINE SYSTMM(temp_file,param_file)
                 if (reservoir) then
                     write(75,*) nyear, nd, T_epil(:), T_hypo(:), T_res_inflow(:), K_z(:), depth_e(:), depth_h(:),&
                         Q_res_inflow(:), Q_res_outflow(:)
-                    write(76,'(2i6, 37f15.10, 37f15.10)') nyear, nd, depth_e(:), depth_h(:), volume_e_x,volume_h_x
+                    write(76,'(i8, i6, 240f15.10, 240f15.10)') nyear, nd, depth_e(:), depth_h(:), volume_e_x,volume_h_x
                     write(77,*) nyear, nd, diffusion_tot, advec_hyp_tot,advec_epi_tot,qsurf_tot
                 end if
             end do

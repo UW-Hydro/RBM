@@ -175,14 +175,14 @@ Subroutine BEGIN(param_file,spatial_file)
             if (reservoir) then
                 read(90,'(5x,i5,5x,i5,8x,i5,6x,a8,6x,a10,7x,f10.0,f5.0,i6)')  &
                     node,nrow,ncol,lat,long,rmile1,ndelta(ncell),res_num(ncell)
-                write(*,*) node,nrow,ncol,lat,long,rmile1,ndelta(ncell),res_num(ncell)
+                !write(*,*) node,nrow,ncol,lat,long,rmile1,ndelta(ncell),res_num(ncell)
                 if(res_num(ncell) .gt. 0) then
                     res_pres(ncell) = .TRUE.
                 end if
             else
                 read(90,'(5x,i5,5x,i5,8x,i5,6x,a8,6x,a10,7x,f10.0,f5.0)')  &
                     node,nrow,ncol,lat,long,rmile1,ndelta(ncell)
-                write(*,*) node,nrow,ncol,lat,long,rmile1,ndelta(ncell)
+                !write(*,*) node,nrow,ncol,lat,long,rmile1,ndelta(ncell)
             end if
             !
             !    Set the number of segments of the default, if not specified

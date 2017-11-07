@@ -52,7 +52,7 @@ SUBROUTINE reservoir_subroutine_implicit(res_no,q_surf,nd,tair)
     if (temp_epi - temp_hyp .gt. 0.2 .and. .NOT. res_stratif_start(res_no)) then
         res_stratif_start(res_no) = .TRUE.
     end if
-
+    
     if (temp_epi - temp_hyp .lt. 1 .and. nd.gt.180 .and. .NOT. res_turnover(res_no)) then
         res_turnover(res_no) = .TRUE.
     end if
@@ -93,7 +93,11 @@ SUBROUTINE reservoir_subroutine_implicit(res_no,q_surf,nd,tair)
     !
     depth_e(res_no) = volume_e_x(res_no) / surface_area(res_no)
     depth_h(res_no) = volume_h_x(res_no) / surface_area(res_no)
-    !
+    
     T_res(res_no) = (T_epil(res_no) * (volume_e_x(res_no)/volume_tot)) + &
         (T_hypo(res_no)*(volume_h_x(res_no)/volume_tot) ) ! weighted averge temp
+    !
+    if(res_no .eq. 19) write(*,*) nd, T_epil(res_no), T_hypo(res_no),&
+volume_e_x(res_no)/surface_area(res_no), &
+volume_h_x(res_no)/surface_area(res_no)
 end subroutine reservoir_subroutine_implicit

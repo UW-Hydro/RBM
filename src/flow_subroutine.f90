@@ -1,4 +1,4 @@
-SUBROUTINE flow_subroutine (res_no)
+SUBROUTINE flow_subroutine (res_no, nyear, nd)
 
     use Block_Hydro
     use Block_Network
@@ -10,7 +10,7 @@ SUBROUTINE flow_subroutine (res_no)
     real :: ratio_sp, ratio_pen
     real :: Q1, Q2
     !real :: res_vol_delta_x, vol_change_hyp_x, vol_change_epi_x
-    integer :: res_no, nnd
+    integer :: res_no, nnd, nyear, nd
  
  
     !*************************************************************************
@@ -55,18 +55,36 @@ SUBROUTINE flow_subroutine (res_no)
     flow_out_hyp_x = Q2 ! * ftsec_to_msec * dt_comp
     flow_out_epi_x = 0
     flow_epi_hyp_x = flow_in_epi_x
+    !
+    !     if res_storage_post > res_storage_pre, when reservoir is storing water
+    !
+    if (Q1 - Q2 .gt. 0 .and. flow_in_epi_x .gt. 0 &
+        .and. volume_e_x(res_no) .lt. res_capacity_mcm(res_no)*(10**6)*0.3) then
+        flow_epi_hyp_x = flow_out_hyp_x
+    end if
+    !
     ! based on inflow and outflow
+    !
     vol_change_epi_x = flow_in_epi_x - flow_out_epi_x - flow_epi_hyp_x
     vol_change_hyp_x = flow_in_hyp_x + flow_epi_hyp_x - flow_out_hyp_x
     !
     !     Check whether hypolimnion volume is smaller than minimum hypolimnion volume
     !
-    volume_h_min(res_no) = 0 !res_capacity_mcm(res_no) * (10**6) * 0.1
+    !volume_h_min(res_no) = 0 !res_capacity_mcm(res_no) * (10**6) * 0.1
+    volume_h_min(res_no) = res_capacity_mcm(res_no) * (10**6) * 0.05
     if ((volume_h_x(res_no) + vol_change_hyp_x) .lt. volume_h_min(res_no)) then
-        vol_change_epi_x = vol_change_epi_x + vol_change_hyp_x + &
+        vol_change_epi_x =  vol_change_epi_x + vol_change_hyp_x + & 
                            (volume_h_x(res_no) - volume_h_min(res_no))
         vol_change_hyp_x = - (volume_h_x(res_no) - volume_h_min(res_no))
     end if
+    
+    volume_e_min(res_no) = res_capacity_mcm(res_no) * (10**6) * 0.05
+    if (res_no .eq. 19) write(*,*) volume_h_min(res_no), volume_e_min(res_no) 
+    if ((volume_e_x(res_no) + vol_change_epi_x) .lt. volume_e_min(res_no)) then
+        vol_change_hyp_x = vol_change_epi_x + vol_change_hyp_x + &
+                           (volume_e_x(res_no) - volume_e_min(res_no))
+        vol_change_epi_x = - (volume_e_x(res_no) - volume_e_min(res_no))
+    end if 
     !----- update epilimnion and hypolimnion volume  -------
     volume_e_x(res_no) = volume_e_x(res_no) + vol_change_epi_x
     volume_h_x(res_no) = volume_h_x(res_no) + vol_change_hyp_x
@@ -77,4 +95,6 @@ SUBROUTINE flow_subroutine (res_no)
 
     depth_e(res_no) = volume_e_x(res_no) / surface_area(res_no)
     depth_h(res_no) = volume_h_x(res_no) / surface_area(res_no)
+    !if(res_no .eq. 11) write(*,*) vol_change_epi_x, &
+    !        vol_change_hyp_x, depth_e(res_no), depth_h(res_no) 
 END SUBROUTINE flow_subroutine

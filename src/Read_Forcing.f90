@@ -11,6 +11,7 @@ SUBROUTINE Read_Forcing
     integer :: nreservoir,n1,n2
     real    :: Q_avg,Q_dmmy
     real    :: z_temp,w_temp
+    real    :: min_flow = 5.0
     !
     n1=1
     n2=2
@@ -31,10 +32,10 @@ SUBROUTINE Read_Forcing
             !     If the streamflow is 0, recalculate water velocity based on
             !     local streamflow
             !
-            if (Q_out(no_heat) .eq. 0) then
-                z_temp = a_z * (Q_local(no_heat)**b_z)
-                w_temp = a_w * (Q_local(no_heat)**b_w)
-                u(no_heat) = Q_local(no_heat)/(z_temp*w_temp)
+            if (Q_out(no_heat) .lt. min_flow) then
+                z_temp = a_z * (min_flow**b_z)
+                w_temp = a_w * (min_flow**b_w)
+                u(no_heat) = min_flow/(z_temp*w_temp)
                 depth(no_heat) = z_temp
                 width(no_heat) = w_temp
             end if
