@@ -47,7 +47,7 @@ Implicit None
 !
 character (len=200):: temp_file, reservoir_output_file, energy_file
 !
-integer :: njb, resx2, i, j
+integer :: njb, resx2, i, j, ncell_res_in
 !
 real :: tntrp, T_res_f, T_0i, T_0_q
 !real,dimension(4):: ta,xa
@@ -353,7 +353,13 @@ do nyear=start_year,end_year
               ! -------- if start of reservoir -------------------
               if(reservoir .and. res_start_node(i) .eq. segment_cell(nr,ns) .and. .not. res_start(i) ) then
                 nresx = i                
-                Q_res_in(nresx) = Q_in(nncell)
+                !Q_res_in(nresx) = Q_in(nncell)
+                if (ns .gt. 1) then 
+                    ncell_res_in = segment_cell(nr,ns-1)
+                else
+                    ncell_res_in = segment_cell(nr,ns)
+                end if
+                Q_res_in(nresx) = Q_in(ncell_res_in)
                 T_res_in(nresx) = T_0 ! this will be advection from this reach to reservoir
                 Q_trib_tot_x = 0   ! initialize trib flow in this reser. as 0
                 T_trib_in_x = 0   ! initialize trib temp in this reser. as 0
