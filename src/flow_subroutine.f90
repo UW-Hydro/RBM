@@ -33,11 +33,11 @@ implicit none
 
 
         if ( density_in(nresx) .le. density_hypo(nresx) ) then
-                flow_in_hyp_x = Q1 * 0.2 
-                flow_in_epi_x = Q1 * 0.8 ! majority of flow goes to epil.
+                flow_in_hyp_x = Q1 * 0.0 
+                flow_in_epi_x = Q1 * 1.0 ! majority of flow goes to epil.
         else
-                flow_in_hyp_x = Q1 * 0.8
-                flow_in_epi_x = Q1 * 0.2 ! majority flow goes to hypo
+                flow_in_hyp_x = Q1 * 1.0
+                flow_in_epi_x = Q1 * 0.0 ! majority flow goes to hypo
         end if
 
       !-------------- measured releases (penstock and spillway) ---------------
