@@ -79,7 +79,7 @@ SUBROUTINE flow_subroutine (res_no, nyear, nd)
     end if
     
     volume_e_min(res_no) = res_capacity_mcm(res_no) * (10**6) * 0.05
-    if (res_no .eq. 19) write(*,*) volume_h_min(res_no), volume_e_min(res_no) 
+    !if (res_no .eq. 19) write(*,*) volume_h_min(res_no), volume_e_min(res_no) 
     if ((volume_e_x(res_no) + vol_change_epi_x) .lt. volume_e_min(res_no)) then
         vol_change_hyp_x = vol_change_epi_x + vol_change_hyp_x + &
                            (volume_e_x(res_no) - volume_e_min(res_no))

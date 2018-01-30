@@ -45,6 +45,10 @@ SUBROUTINE Read_Forcing
             if(u(no_heat).lt.0.01) u(no_heat)=0.01
             if(ncell.ne.no_heat) write(*,*) 'Flow file error',ncell,no_heat
             !
+            !#############just for test
+            if(no_heat .eq. 3442) write(*,*) 'output',Q_out(no_heat), depth(no_heat), &
+                width(no_heat), u(no_heat)
+            !#############just for test
             read(36,*) ncell &
                 ,dbt(no_heat),ea(no_heat) &
                 ,Q_ns(no_heat),Q_na(no_heat),rho &
