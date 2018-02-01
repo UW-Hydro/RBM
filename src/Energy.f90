@@ -1,8 +1,10 @@
-SUBROUTINE Energy(T_surf,q_surf,ncell)
+SUBROUTINE Energy(T_surf,q_surf,ncell,z)
    use Block_Energy
    implicit none
    integer::i,ncell,nd
    real::A,B,e0,q_surf,q_conv,q_evap,q_ws,td,T_surf
+   real::const1,const2,z
+   real::deriv_1st !,deriv_conv,deriv_evap,deriv_ws
    real, dimension(2):: q_fit, T_fit
 !
    td=nd
@@ -29,9 +31,22 @@ SUBROUTINE Energy(T_surf,q_surf,ncell)
    A=(q_fit(1)-q_fit(2))/(T_fit(1)-T_fit(2))
    q_surf=0.5*(q_fit(1)+q_fit(2))
    B=(q_surf/A)-(T_fit(1)+T_fit(2))/2.
+   
+   deriv_1st=(q_surf/(z*rfac))
 !
 !     ******************************************************
 !               Return to Subroutine RIVMOD
 !     ******************************************************
 !
+!     Calculate the second derivative of Temperature
+!
+    const1=1000.*evap_coeff*wind(ncell)*pf
+    const2=1000.*evap_coeff*wind(ncell)
+    e0=2.1718E8*EXP(-4157.0/(T_surf+239.09))
+    deriv_conv=const1*(-(597.0-0.57*T_surf) -0.57*(dbt(ncell)-T_surf))
+    deriv_evap=const2*(-0.57*(e0-ea(ncell))+(597.0-0.57*T_surf)*e0*(4157.0/((T_surf+239.09)**2)))
+    deriv_ws=1.471E-3
+
+    deriv_2nd=deriv_1st*(deriv_conv-deriv_evap-deriv_ws)/(z*rfac) 
+
 END Subroutine Energy

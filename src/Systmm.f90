@@ -25,7 +25,7 @@ SUBROUTINE SYSTMM(temp_file,param_file)
     integer, dimension(2):: ndltp=(/-1,-2/)
     integer, dimension(2):: nterp=(/2,3/)
     !
-    real             :: dt_calc,dt_total,hpd,q_dot,q_surf,z
+    real             :: dt_calc,dt_total,hpd,q_dot,q_surf,z,q_dot_pre
     real             :: Q_dstrb,Q_inflow,Q_outflow,Q_ratio,Q_inflow_origin
     real             :: Q_inflow_out, Q_outflow_out, Q_tot
     real             :: sto_pre, sto_post
@@ -320,13 +320,33 @@ SUBROUTINE SYSTMM(temp_file,param_file)
                                     nd, ns, nm, 'begin', T_0, T_head(nr), dbt(nncell), nncell, nseg
                                 dt_calc=dt_part(nm)
                                 z=depth(nncell)
-                                call energy(T_0,q_surf,nncell)
+                                call energy(T_0,q_surf,nncell,z)
+                                !
+                                ! apply a different numerical method to solve
+                                ! energy balance for river temperature
                                 !
                                 q_dot=(q_surf/(z*rfac))
+                                !
+                                ! Initialize dH/dt (temperature increase because
+                                ! of energy balance)
+                                !
+                                if (nyear.eq.start_year .and. nd.eq.1) q_dot_pre = q_dot
+                                !
+                                ! caluclate stream temperature based on Heun
+                                ! mehtod
+                                !
                                 T_0=T_0+q_dot*dt_calc
+                                !
+                                ! 
+                                !
+                                error_EE=deriv_2nd*dt_calc**2/2
                                 if (ncell .eq. 3442) write(*,*) &
-                                    nd, ns, nm, 'end', T_0, q_surf, z, q_dot*dt_calc, dt_calc
+                                    nd, ns, nm, 'end', T_0, z, q_dot*dt_calc, dt_calc, error_EE, &
+                                    deriv_conv*q_dot/deriv_2nd/(z*rfac), &
+                                    deriv_evap*q_dot/deriv_2nd/(z*rfac), &
+                                    deriv_ws*q_dot/deriv_2nd/(z*rfac)
                                 if(T_0.lt.0.0) T_0=0.0
+                                q_dot_pre = q_dot
                                 !
                                 !    Add distributed flows
                                 !
@@ -355,8 +375,8 @@ SUBROUTINE SYSTMM(temp_file,param_file)
                                         end if
                                     end do
                                 end if
-                                Q_trb_sum = Q_trb_sum/2
-                                T_trb_load = T_trb_load/2
+                                Q_trb_sum = Q_trb_sum/ndelta(nncell)
+                                T_trb_load = T_trb_load/ndelta(nncell)
                                 !
                                 ! Do the mass/energy balance
                                 !
@@ -394,6 +414,12 @@ SUBROUTINE SYSTMM(temp_file,param_file)
                             !!temp_sto(nr,ns,n2)= T_0
                         !
                         !   if the segment is located in reservoir
+                        !
+                        !   
+                        !   test output for a specific grid cell 
+                        !
+                        if (ncell.eq.3442) write(34,*) nyear, nd, &
+                            ncell,ns,T_0,T_head(nr),dbt(ncell)
                         !
                         call WRITE(time,nd,nr,ncell,ns,T_0,T_head(nr),dbt(ncell), &
                             Q_inflow_out, Q_outflow_out)
