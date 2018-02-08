@@ -424,7 +424,7 @@ SUBROUTINE SYSTMM(temp_file,param_file)
                         !
                         do nseg_temp=1,nseg_out_num
                             if (nseg_out(nr,ncell,nseg_temp).eq.ns) then
-                                call WRITE(time,nd,nr,ncell,nseg_temp,T_0,T_head(nr),dbt(ncell), &
+                                call WRITE(time,nd,nr,ncell,ns,T_0,T_head(nr),dbt(ncell), &
                                     Q_inflow_out, Q_outflow_out)
                             end if
                         end do
@@ -550,10 +550,14 @@ SUBROUTINE SYSTMM(temp_file,param_file)
                                     !     Write output
                                     !
                                     do nsegment=ns_res_start(res_no),ns_res_end(res_no)
-                                        call WRITE(time,nd,nr,ncell,nsegment,T_0, &
-                                            T_head(nr),dbt(segment_cell(nr,nsegment)), &
-                                            Q_res_inflow(res_no), Q_res_outflow(res_no), &
-                                            res_storage_post, T_res(res_no))
+                                        do nseg_temp=1,nseg_out_num
+                                            if (nseg_out(nr,ncell,nseg_temp).eq.nsegment) then
+                                                call WRITE(time,nd,nr,ncell,nsegment,T_0, &
+                                                    T_head(nr),dbt(segment_cell(nr,nsegment)), &
+                                                    Q_res_inflow(res_no), Q_res_outflow(res_no), &
+                                                    res_storage_post, T_res(res_no))
+                                            end if
+                                        end do 
                                     end do
                                 end if
                             end if

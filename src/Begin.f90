@@ -17,7 +17,7 @@ Subroutine BEGIN(param_file,spatial_file)
     integer:: jul_start,main_stem,nyear1,nyear2,nc,ncell,nseg
     integer:: ns_max_test,node,ncol,nrow,nr,cum_sgmnt
     !
-    integer:: nreservoir,nseg_temp
+    integer:: nreservoir,nseg_temp,nseg_cum
     !
     logical:: first_cell,source
     !
@@ -83,7 +83,7 @@ Subroutine BEGIN(param_file,spatial_file)
     allocate(res_start_node(nres))
     allocate(res_end_node(nres))
     allocate(res_capacity_mcm(nres))
-    allocate(nseg_out(nres,400,nseg_out_num))
+    allocate(nseg_out(nreach,heat_cells,nseg_out_num))
     !
     !     Start reading the reach date and initialize the reach index, NR
     !     and the cell index, NCELL
@@ -118,6 +118,7 @@ Subroutine BEGIN(param_file,spatial_file)
         !     Initialize NSEG, the total number of segments in this reach
         !
         nseg=0
+        nseg_cum=0
         write(*,*) ' Starting to read reach ',nr
         !
         !     Read the number of cells in this reach, the headwater #,
@@ -199,19 +200,18 @@ Subroutine BEGIN(param_file,spatial_file)
             !
             dx(ncell)=miles_to_ft*(rmile0-rmile1)/ndelta(ncell)
             rmile0=rmile1
+            !
+            ! Here we define the output segments
+            !
+            do nseg_temp=1,nseg_out_num
+                nseg_out(nr,ncell,nseg_temp)=nseg_cum+ndelta(ncell)*nseg_temp/(nseg_out_num) 
+            end do
+            nseg_cum = nseg_cum+ndelta(ncell)
             nndlta=0
 200     continue
         nndlta=nndlta+1
         nseg=nseg+1
         segment_cell(nr,nseg)=ncell
-        !
-        ! Here we define the output segments
-        !
-        do nseg_temp=1,nseg_out_num
-            if (ndelta(ncell)/nseg.eq.nseg_temp) then
-                nseg_out(nr,ncell,nseg_temp)=nseg 
-            end if
-        end do
         !write(*,*) 'nndlta -- ',nr,nndlta,nseg,ncell,segment_cell(nr,nseg)
         x_dist(nr,nseg)=x_dist(nr,nseg-1)-dx(ncell)
         !
@@ -228,6 +228,7 @@ Subroutine BEGIN(param_file,spatial_file)
         no_celm(nr)=nseg
         segment_cell(nr,nseg)=ncell
         x_dist(nr,nseg)=miles_to_ft*rmile1
+        write(*,*) 'number of segment in reach', nr, nseg
     !
     ! End of cell and segment loop
     !
