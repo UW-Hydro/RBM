@@ -419,7 +419,7 @@ SUBROUTINE SYSTMM(temp_file,param_file)
                         !   test output for a specific grid cell 
                         !
                         if (ncell.eq.3442) write(34,*) nyear, nd, &
-                            ncell,ns,T_0,T_head(nr),dbt(ncell)
+                            ncell,ns,T_0,T_head(nr),dbt(ncell),error_EE
                         !
                         call WRITE(time,nd,nr,ncell,ns,T_0,T_head(nr),dbt(ncell), &
                             Q_inflow_out, Q_outflow_out)
