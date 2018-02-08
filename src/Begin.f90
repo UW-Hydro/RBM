@@ -17,7 +17,7 @@ Subroutine BEGIN(param_file,spatial_file)
     integer:: jul_start,main_stem,nyear1,nyear2,nc,ncell,nseg
     integer:: ns_max_test,node,ncol,nrow,nr,cum_sgmnt
     !
-    integer:: nreservoir
+    integer:: nreservoir,nseg_temp
     !
     logical:: first_cell,source
     !
@@ -83,6 +83,7 @@ Subroutine BEGIN(param_file,spatial_file)
     allocate(res_start_node(nres))
     allocate(res_end_node(nres))
     allocate(res_capacity_mcm(nres))
+    allocate(nseg_out(nres,400,nseg_out_num))
     !
     !     Start reading the reach date and initialize the reach index, NR
     !     and the cell index, NCELL
@@ -203,6 +204,14 @@ Subroutine BEGIN(param_file,spatial_file)
         nndlta=nndlta+1
         nseg=nseg+1
         segment_cell(nr,nseg)=ncell
+        !
+        ! Here we define the output segments
+        !
+        do nseg_temp=1,nseg_out_num
+            if (ndelta(ncell)/nseg.eq.nseg_temp) then
+                nseg_out(nr,ncell,nseg_temp)=nseg 
+            end if
+        end do
         !write(*,*) 'nndlta -- ',nr,nndlta,nseg,ncell,segment_cell(nr,nseg)
         x_dist(nr,nseg)=x_dist(nr,nseg-1)-dx(ncell)
         !

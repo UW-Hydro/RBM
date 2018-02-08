@@ -18,6 +18,7 @@ SUBROUTINE SYSTMM(temp_file,param_file)
     integer          :: n1,n2,nnd,nobs,nyear,nd_year,ntmp
     integer          :: npart,nseg,nx_s,nx_part,nx_head
     integer          :: ns_res_num, res_no, nsegment
+    integer          :: nseg_temp
     !
     ! Indices for lagrangian interpolation
     !
@@ -421,8 +422,12 @@ SUBROUTINE SYSTMM(temp_file,param_file)
                         !if (ncell.eq.3442) write(34,*) nyear, nd, &
                         !    ncell,ns,T_0,T_head(nr),dbt(ncell),error_EE
                         !
-                        call WRITE(time,nd,nr,ncell,ns,T_0,T_head(nr),dbt(ncell), &
-                            Q_inflow_out, Q_outflow_out)
+                        do nseg_temp=1,nseg_out_num
+                            if (nseg_out(nr,ncell,nseg_temp).eq.ns) then
+                                call WRITE(time,nd,nr,ncell,nseg_temp,T_0,T_head(nr),dbt(ncell), &
+                                    Q_inflow_out, Q_outflow_out)
+                            end if
+                        end do
                         end if
 
                         if (res_pres(ncell)) then
