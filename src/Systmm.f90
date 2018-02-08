@@ -279,8 +279,8 @@ SUBROUTINE SYSTMM(temp_file,param_file)
                                         npart=nseg+ntrp+ndltp(npndx)
                                         xa(ntrp)=x_dist(nr,npart)
                                         ta(ntrp)=temp(nr,npart,n1)
-                                        if(ncell .eq. 3442) write(*,*) &
-                                            'nd', nd, 'ntrp', ntrp, 'npart',npart,xa(ntrp), ta(ntrp)
+                                        !if(ncell .eq. 3442) write(*,*) &
+                                        !    'nd', nd, 'ntrp', ntrp, 'npart',npart,xa(ntrp), ta(ntrp)
                                     end do
                                     !
                                     ! Start the cell counter for nx_s
@@ -290,8 +290,8 @@ SUBROUTINE SYSTMM(temp_file,param_file)
                                     !     Call the interpolation function
                                     !
                                     T_0=tntrp(xa,ta,x,nterp(npndx))
-                                    if (ncell .eq. 3442) write(*,*) &
-                                       nd, ns, 'xa', xa, 'ta', ta, 'x', x, T_0,T_head(nr)
+                                    !if (ncell .eq. 3442) write(*,*) &
+                                    !   nd, ns, 'xa', xa, 'ta', ta, 'x', x, T_0,T_head(nr)
                                 end if
                             end if
                             !
@@ -316,8 +316,8 @@ SUBROUTINE SYSTMM(temp_file,param_file)
                             !!end if
                             !
                             do nm=no_dt(ns),1,-1
-                                if (ncell .eq. 3442) write(*,*) &
-                                    nd, ns, nm, 'begin', T_0, T_head(nr), dbt(nncell), nncell, nseg
+                                !if (ncell .eq. 3442) write(*,*) &
+                                !    nd, ns, nm, 'begin', T_0, T_head(nr), dbt(nncell), nncell, nseg
                                 dt_calc=dt_part(nm)
                                 z=depth(nncell)
                                 call energy(T_0,q_surf,nncell,z)
@@ -340,11 +340,11 @@ SUBROUTINE SYSTMM(temp_file,param_file)
                                 ! 
                                 !
                                 error_EE=deriv_2nd*dt_calc**2/2
-                                if (ncell .eq. 3442) write(*,*) &
-                                    nd, ns, nm, 'end', T_0, z, q_dot*dt_calc, dt_calc, error_EE, &
-                                    deriv_conv*q_dot/deriv_2nd/(z*rfac), &
-                                    deriv_evap*q_dot/deriv_2nd/(z*rfac), &
-                                    deriv_ws*q_dot/deriv_2nd/(z*rfac)
+                                !if (ncell .eq. 3442) write(*,*) &
+                                !    nd, ns, nm, 'end', T_0, z, q_dot*dt_calc, dt_calc, error_EE, &
+                                !    deriv_conv*q_dot/deriv_2nd/(z*rfac), &
+                                !    deriv_evap*q_dot/deriv_2nd/(z*rfac), &
+                                !    deriv_ws*q_dot/deriv_2nd/(z*rfac)
                                 if(T_0.lt.0.0) T_0=0.0
                                 q_dot_pre = q_dot
                                 !
@@ -418,8 +418,8 @@ SUBROUTINE SYSTMM(temp_file,param_file)
                         !   
                         !   test output for a specific grid cell 
                         !
-                        if (ncell.eq.3442) write(34,*) nyear, nd, &
-                            ncell,ns,T_0,T_head(nr),dbt(ncell),error_EE
+                        !if (ncell.eq.3442) write(34,*) nyear, nd, &
+                        !    ncell,ns,T_0,T_head(nr),dbt(ncell),error_EE
                         !
                         call WRITE(time,nd,nr,ncell,ns,T_0,T_head(nr),dbt(ncell), &
                             Q_inflow_out, Q_outflow_out)
