@@ -1,4 +1,4 @@
-SUBROUTINE SYSTMM(temp_file,param_file)
+SUBROUTINE SYSTMM(temp_file,res_file,param_file)
     !
     use Block_Energy
     use Block_Hydro
@@ -10,6 +10,7 @@ SUBROUTINE SYSTMM(temp_file,param_file)
     !
     character (len=200):: temp_file
     character (len=200):: param_file
+    character (len=200):: res_file
     !
     integer          :: ncell,nncell,ncell0,nc_head,no_flow,no_heat
     integer          :: nc,nd,ndd,nm,nr,ns
@@ -589,7 +590,9 @@ SUBROUTINE SYSTMM(temp_file,param_file)
 4700            format(f10.4,f6.0,15(f6.1,f8.3))
 4750            format(f10.4,10(i4,f8.0))
                 if (reservoir) then
-                    write(75,*) nyear, nd, T_epil(:), T_hypo(:), T_res_inflow(:), K_z(:), depth_e(:), depth_h(:),&
+                    open(75,file=TRIM(res_file),status='unknown') 
+                    write(75, '(i8, i6, 1680f20.10)') nyear, nd, T_epil(:), T_hypo(:), T_res_inflow(:),& 
+                        depth_e(:), depth_h(:),&
                         Q_res_inflow(:), Q_res_outflow(:)
                     write(76,'(i8, i6, 240f15.10, 240f15.10)') nyear, nd, depth_e(:), depth_h(:), volume_e_x,volume_h_x
                     write(77,*) nyear, nd, diffusion_tot, advec_hyp_tot,advec_epi_tot,qsurf_tot
