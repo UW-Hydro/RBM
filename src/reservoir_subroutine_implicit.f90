@@ -96,6 +96,9 @@ SUBROUTINE reservoir_subroutine_implicit(res_no,q_surf,nd,tair)
     
     T_res(res_no) = (T_epil(res_no) * (volume_e_x(res_no)/volume_tot)) + &
         (T_hypo(res_no)*(volume_h_x(res_no)/volume_tot) ) ! weighted averge temp
+
+    if(T_epil(res_no).lt.0.5) T_epil(res_no) = 0.5
+    if(T_hypo(res_no).lt.0.5) T_hypo(res_no) = 0.5
     !
     !if(res_no .eq. 19) write(*,*) nd, T_epil(res_no), T_hypo(res_no),&
     !    volume_e_x(res_no)/surface_area(res_no), &

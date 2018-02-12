@@ -2,8 +2,8 @@
 ! Module for hydraulic characteristics and water quality constituents of the basin
 !
 module Block_Hydro
-    integer, dimension(2000):: no_dt,nstrt_elm
-    real, dimension(2000)   :: dt_part,x_part
+    integer, dimension(2500):: no_dt,nstrt_elm
+    real, dimension(2500)   :: dt_part,x_part
 !
     real, dimension(:),   allocatable  :: depth
     real, dimension(:),   allocatable  :: width

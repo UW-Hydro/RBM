@@ -217,8 +217,12 @@ Subroutine BEGIN(param_file,spatial_file)
         !
         !   Write Segment List for mapping to temperature output (UW_JRY_2008/11/19)
         !
-        open(22,file=TRIM(spatial_file),status='unknown') ! (changed by WUR_WF_MvV_2011/01/05)
-        write(22,'(4i6,1x,a8,1x,a10,f5.0)') nr,ncell,nrow,ncol,lat,long,nndlta
+        do nseg_temp=1,nseg_out_num
+            if (nseg_out(nr,ncell,nseg_temp).eq.nseg) then
+                open(22,file=TRIM(spatial_file),status='unknown') ! (changed by WUR_WF_MvV_2011/01/05)
+                write(22,'(4i6,1x,a8,1x,a10,i5)') nr,ncell,nrow,ncol,lat,long,nseg_temp
+            end if
+        end do
         !
         !
         !

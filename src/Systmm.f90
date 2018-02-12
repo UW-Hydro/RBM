@@ -227,8 +227,6 @@ SUBROUTINE SYSTMM(temp_file,res_file,param_file)
                     DO ns=1,no_celm(nr)
                         !
                         ncell=segment_cell(nr,ns)
-                        !if (res_pres(ncell)) then
-                            !write(*,*) ncell
                         !end if
                         !
                         !   If this segment is not located in the reservoir
@@ -242,7 +240,6 @@ SUBROUTINE SYSTMM(temp_file,res_file,param_file)
                             !     Establish particle tracks
                             !
                             call Particle_Track(nr,ns,nx_s,nx_head,ns_res_pres,ns_res_num)
-                            !if (ncell .gt. 860) write(*,*) nr,ns,nx_s,nx_head,ns_res_pres,ns_res_num
                             !
                             !     Now do the third-order interpolation to
                             !     establish the starting temperature values
@@ -255,7 +252,6 @@ SUBROUTINE SYSTMM(temp_file,res_file,param_file)
                             !
                             if(ns_res_pres) then
                                 T_0 = temp(nr,nseg-1,n1)
-                                !if(ncell.eq.911) write(*,*) nd, ns, nseg, T_0, temp(nr,nseg-1,n1), n1, temp(300,50,:)
                             else
                                 !
                                 !     Perform polynomial interpolation
@@ -281,8 +277,6 @@ SUBROUTINE SYSTMM(temp_file,res_file,param_file)
                                         npart=nseg+ntrp+ndltp(npndx)
                                         xa(ntrp)=x_dist(nr,npart)
                                         ta(ntrp)=temp(nr,npart,n1)
-                                        !if(ncell .eq. 3442) write(*,*) &
-                                        !    'nd', nd, 'ntrp', ntrp, 'npart',npart,xa(ntrp), ta(ntrp)
                                     end do
                                     !
                                     ! Start the cell counter for nx_s
@@ -292,8 +286,6 @@ SUBROUTINE SYSTMM(temp_file,res_file,param_file)
                                     !     Call the interpolation function
                                     !
                                     T_0=tntrp(xa,ta,x,nterp(npndx))
-                                    !if (ncell .eq. 3442) write(*,*) &
-                                    !   nd, ns, 'xa', xa, 'ta', ta, 'x', x, T_0,T_head(nr)
                                 end if
                             end if
                             !
@@ -312,14 +304,7 @@ SUBROUTINE SYSTMM(temp_file,res_file,param_file)
                             !
                             ! Set initial river storage (Initial storage for first grid cell is 0)
                             !
-                            !!if(nyear.eq.start_year .and. nd.eq.1 .and. ndd.eq.1 .and. ns.ge.3) then
-                                !sto(nr,ns,n1) = width(ncell) * depth(ncell) * dx(ncell)/2
-                            !!    temp_sto(nr,ns,n1) = T_head(nr)
-                            !!end if
-                            !
                             do nm=no_dt(ns),1,-1
-                                !if (ncell .eq. 3442) write(*,*) &
-                                !    nd, ns, nm, 'begin', T_0, T_head(nr), dbt(nncell), nncell, nseg
                                 dt_calc=dt_part(nm)
                                 z=depth(nncell)
                                 call energy(T_0,q_surf,nncell,z)
@@ -339,14 +324,10 @@ SUBROUTINE SYSTMM(temp_file,res_file,param_file)
                                 !
                                 T_0=T_0+q_dot*dt_calc
                                 !
-                                ! 
+                                ! estimate the error by numerical method 
                                 !
                                 error_EE=deriv_2nd*dt_calc**2/2
-                                !if (ncell .eq. 3442) write(*,*) &
-                                !    nd, ns, nm, 'end', T_0, z, q_dot*dt_calc, dt_calc, error_EE, &
-                                !    deriv_conv*q_dot/deriv_2nd/(z*rfac), &
-                                !    deriv_evap*q_dot/deriv_2nd/(z*rfac), &
-                                !    deriv_ws*q_dot/deriv_2nd/(z*rfac)
+                                !
                                 if(T_0.lt.0.0) T_0=0.0
                                 q_dot_pre = q_dot
                                 !
@@ -420,8 +401,6 @@ SUBROUTINE SYSTMM(temp_file,res_file,param_file)
                         !   
                         !   test output for a specific grid cell 
                         !
-                        !if (ncell.eq.3442) write(34,*) nyear, nd, &
-                        !    ncell,ns,T_0,T_head(nr),dbt(ncell),error_EE
                         !
                         do nseg_temp=1,nseg_out_num
                             if (nseg_out(nr,ncell,nseg_temp).eq.ns) then

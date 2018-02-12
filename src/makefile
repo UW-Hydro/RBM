@@ -13,7 +13,7 @@ objects = rbm10_VIC.o Begin.o Systmm.o Particle_Track.o \
           reservoir_subroutine_implicit.o \
           reservoir_single_subroutine.o \
           Water_Balance.o Write.o
-f90comp = gfortran
+f90comp = gfortran -O0 -g
 # Makefile
 rbm10_VIC: $(objects)
 	$(f90comp) -o rbm10_VIC $(objects)

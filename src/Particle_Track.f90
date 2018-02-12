@@ -59,6 +59,6 @@ SUBROUTINE Particle_Track(nr,ns,nx_s,nx_head,ns_res_pres,ns_res_num)
     nx_part=max(1,nx_part)
     nstrt_elm(ns)=nx_part
     no_dt(ns)=nx_s
-    if (nr.eq.1078 .and. ns.le.2) write(*,*) 'particle track', nx_head, &
-        nx_part, nstrt_elm(ns), no_dt(ns), nx_s, x_part(nx_s)
+    !if (nr.eq.1247 .and. ns.eq.2017) write(*,*) 'particle track', nx_head, &
+    !    nx_part, nstrt_elm(ns), no_dt(ns), nx_s, x_part(nx_s)
 END SUBROUTINE Particle_Track
