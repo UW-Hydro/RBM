@@ -1,13 +1,12 @@
-SUBROUTINE Energy(T_surf,q_surf,ncell,z)
+SUBROUTINE Energy(T_surf,q_surf,ncell,z,nd)
    use Block_Energy
    implicit none
    integer::i,ncell,nd
-   real::A,B,e0,q_surf,q_conv,q_evap,q_ws,td,T_surf
+   real::A,B,e0,q_surf,q_conv,q_evap,q_ws,T_surf
    real::const1,const2,z
    real::deriv_1st !,deriv_conv,deriv_evap,deriv_ws
    real, dimension(2):: q_fit, T_fit
 !
-   td=nd
    T_fit(1)=T_surf-1.0
    T_fit(2)=T_surf+1.0
    do i=1,2
@@ -31,7 +30,6 @@ SUBROUTINE Energy(T_surf,q_surf,ncell,z)
    A=(q_fit(1)-q_fit(2))/(T_fit(1)-T_fit(2))
    q_surf=0.5*(q_fit(1)+q_fit(2))
    B=(q_surf/A)-(T_fit(1)+T_fit(2))/2.
-   
    deriv_1st=(q_surf/(z*rfac))
 !
 !     ******************************************************

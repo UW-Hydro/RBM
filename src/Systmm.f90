@@ -307,7 +307,7 @@ SUBROUTINE SYSTMM(temp_file,res_file,param_file)
                             do nm=no_dt(ns),1,-1
                                 dt_calc=dt_part(nm)
                                 z=depth(nncell)
-                                call energy(T_0,q_surf,nncell,z)
+                                call energy(T_0,q_surf,nncell,z,nd)
                                 !
                                 ! apply a different numerical method to solve
                                 ! energy balance for river temperature
