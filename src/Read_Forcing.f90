@@ -50,6 +50,10 @@ SUBROUTINE Read_Forcing
                 ,Q_ns(no_heat),Q_na(no_heat),rho &
                 ,press(no_heat),wind(no_heat)
             !
+            !   Set the minimum wind speed to be 1 [m s-1]
+            !
+            if(wind(no_heat).lt.1.0) wind(no_heat)=1.0
+            !
             if(ncell.ne.no_heat) write(*,*) 'Heat file error',ncell,no_heat
             !
             !  Added variable ndelta (UW_JRY_2011/03/15
