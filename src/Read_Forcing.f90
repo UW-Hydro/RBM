@@ -85,6 +85,7 @@ SUBROUTINE Read_Forcing
             ,dbt(no_heat),ea(no_heat) &
             ,Q_ns(no_heat),Q_na(no_heat),rho &
             ,press(no_heat),wind(no_heat)
+        if(wind(no_heat).lt.1.0) wind(no_heat)=1.0
         if (nr .eq. nreach .and. nc .eq. no_cells(nr)) then
             read(35,*) nnd,ncell &
                 ,Q_out(no_heat),Q_dmmy,Q_diff(no_heat) &

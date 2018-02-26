@@ -328,6 +328,8 @@ SUBROUTINE SYSTMM(temp_file,res_file,param_file)
                                 !
                                 error_EE=deriv_2nd*dt_calc**2/2
                                 !
+                                !if (ncell.eq.4089 .and. nd.gt.220.and.nd.lt.230) write(*,*) &
+                                !     nyear,nd,ns,nm,wind(nncell),q_ns(nncell)+q_na(nncell),T_0,error_EE
                                 if(T_0.lt.0.0) T_0=0.0
                                 q_dot_pre = q_dot
                                 !
@@ -406,6 +408,7 @@ SUBROUTINE SYSTMM(temp_file,res_file,param_file)
                             if (nseg_out(nr,ncell,nseg_temp).eq.ns) then
                                 call WRITE(time,nd,nr,ncell,ns,T_0,T_head(nr),dbt(ncell), &
                                     Q_inflow_out, Q_outflow_out)
+                            !if (ncell.eq.4089) write(*,*)nyear,nd,nr,ncell,ns,T_0
                             end if
                         end do
                         end if
