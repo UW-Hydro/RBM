@@ -17,11 +17,14 @@ Module Block_Network
     integer,parameter::nseg_out_num=2
     integer:: start_year,start_month,start_day
     integer:: end_year,end_month,end_day
+    integer:: numsub !number of subdaily timestep
+    integer:: nsub
 !
 ! Real variables
 !
     real   :: delta_n,n_default=2
     real   :: dt_comp
+    real   :: dt_res
     real, dimension(:), allocatable  :: ndelta
 !
 !      Logical variables

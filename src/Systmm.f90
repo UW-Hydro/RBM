@@ -488,6 +488,8 @@ SUBROUTINE SYSTMM(temp_file,res_file,param_file)
                                 if(ncell .eq. res_end_node(res_no) .and. &
                                     (.NOT. res_pres(segment_cell(nr,ns+1)) &
                                     .or. res_num(segment_cell(nr,ns+1)) .ne. res_no)) then
+                                    exceed_error_bound=.FALSE.
+                                    adjust_timestep=.FALSE.
                                     ns_res_end(res_no) = ns
                                     Q_res_outflow(res_no) = Q_out(ncell)     !!!!TESTINFLOW(need to uncomment)
                                     !
@@ -505,22 +507,60 @@ SUBROUTINE SYSTMM(temp_file,res_file,param_file)
                                     !     Calculate the density of inflow, compared with epilimnion/hypolimnion
                                     !
                                     call stream_density(T_res_inflow(res_no), density_in(res_no))
-                                    call stream_density(T_epil(res_no), density_epil(res_no))
-                                    call stream_density(T_hypo(res_no), density_hypo(res_no))
+                                    !call stream_density(T_epil(res_no),density_epil(res_no))
+                                    !call stream_density(T_hypo(res_no),density_hypo(res_no))
                                     !
-                                    !     Calculate flow subroutine
+                                    !     Start the subdaily calculation
                                     !
-                                    call flow_subroutine(res_no, nyear, nd)
+500                                 continue
+                                    numsub=1
                                     !
-                                    !     Energy balance
+                                    !     calculate the number of timestep based
+                                    !     on error bound
                                     !
-                                    call energy(T_epil(res_no), q_surf, ncell)
-                                    !
-                                    !     Calculate reservoir temperature
-                                    !
-                                    !call reservoir_subroutine(res_no,q_surf)
-                                    !if (res_storage(res_no,1) .gt.res_capacity_mcm(res_no)*(10**6)*0.2) then
-                                        call reservoir_subroutine_implicit(res_no,q_surf,nd,dbt(ncell))
+                                    if (exceed_error_bound) then
+                                        numsub=MAX(ceiling(sqrt(abs(error_e)/error_threshold)), &
+                                                   ceiling(sqrt(abs(error_h)/error_threshold)))
+                                        numsub=MIN(20,numsub)
+                                    end if
+                                    dt_res = dt_comp/numsub
+                                    DO nsub=1,numsub
+                                        !
+                                        !     Calculate stream density 
+                                        !
+                                        call stream_density(T_epil(res_no), density_epil(res_no))
+                                        call stream_density(T_hypo(res_no), density_hypo(res_no))
+                                        !
+                                        !     Calculate flow subroutine
+                                        !
+                                        call flow_subroutine(res_no, nyear, nd)
+                                        !
+                                        !     Energy balance
+                                        !
+                                        call energy(T_epil(res_no), q_surf, ncell)
+                                        !
+                                        !     Error estimation
+                                        !
+                                        if (.not.exceed_error_bound) then
+                                            call Error_estimate(nd,res_no)
+                                        end if
+                                        !
+                                        !     Adjust the timestep based on error
+                                        !
+                                        if (exceed_error_bound .and..not.adjust_timestep) then
+                                             adjust_timestep=.TRUE.
+                                             go to 500
+                                        end if
+                                        !
+                                        !     Calculate reservoir temperature
+                                        !
+                                        !call reservoir_subroutine(res_no,q_surf)
+                                        !if (res_storage(res_no,1) .gt.res_capacity_mcm(res_no)*(10**6)*0.2) then
+                                            call reservoir_subroutine_implicit(res_no,q_surf,nd,dbt(ncell))
+                                        !if(res_no.eq.63) write(*,*) &
+                                        !        nyear,nd,nsub,dt_res,T_epil(res_no),T_hypo(res_no)
+                                    end do
+                                         
                                     !else
                                     !    call reservoir_single_subroutine(res_no,q_surf,nd)
                                     !end if 

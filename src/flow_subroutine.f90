@@ -16,12 +16,14 @@ SUBROUTINE flow_subroutine (res_no, nyear, nd)
     !*************************************************************************
     !      read inflow from vic/rvic simulations
     !*************************************************************************
-    res_storage_pre = res_storage(res_no,2)
-    res_storage_post = res_storage(res_no,1)
+    if (.not.adjust_timestep) then
+        res_storage_pre = res_storage(res_no,2)
+        res_storage_post = res_storage(res_no,1)
+    end if
     !res_storage_pre = res_capacity_mcm(res_no) * (10**6) * 0.95 ! TESTINFLOW
     !res_storage_post = res_capacity_mcm(res_no) * (10**6) * 0.95 ! TESTINFLOW
 
-    Q1 = Q_res_inflow(res_no) * ftsec_to_msec * dt_comp
+    Q1 = Q_res_inflow(res_no) * ftsec_to_msec * dt_res
     ! converts ft^3/sec to m^3/sec, multiplys by seconds per time step
 
     if ( density_in(res_no) .le. density_hypo(res_no) ) then
@@ -34,7 +36,7 @@ SUBROUTINE flow_subroutine (res_no, nyear, nd)
     !
     !     calculate the reservoir storage
     !
-    Q2 = Q_res_outflow(res_no) * ftsec_to_msec * dt_comp
+    Q2 = Q_res_outflow(res_no) * ftsec_to_msec * dt_res
     !
     !     Initialization of reservoir storage
     !
@@ -51,8 +53,8 @@ SUBROUTINE flow_subroutine (res_no, nyear, nd)
     !
     !     calculate water withdrawal based on inflow/outflow and storage change
     !
-    water_withdrawal(res_no) = Q1 - Q2 - (res_storage_post - res_storage_pre)
-    flow_out_hyp_x = Q2 ! * ftsec_to_msec * dt_comp
+    if (nsub.eq.1) water_withdrawal(res_no) = Q1 - Q2 - (res_storage_post - res_storage_pre)/numsub
+    flow_out_hyp_x = Q2 ! * ftsec_to_msec * dt_res
     flow_out_epi_x = 0
     flow_epi_hyp_x = flow_in_epi_x
     !
