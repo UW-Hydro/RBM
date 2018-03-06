@@ -44,12 +44,10 @@ SUBROUTINE Error_estimate(nd,res_no)
         const1 = ((flow_in_epi_x+flow_in_hyp_x)*T_res_inflow(res_no) + &
                  (q_surf*dt_res*surface_area(res_no))/(density*heat_c_kcal))&
                  /(volume_e_x(res_no)+volume_h_x(res_no))/dt_res
-        error_e = -0.5*(m11**2*temp_epi_pre+m11*const1)
+        error_e = -0.5*(m11**2*temp_epi_pre+m11*const1)*dt_res**2
         error_h = error_e
     end if
-    if (res_no.eq.66) write(*,*) res_no,nd,dt_res,error_e,error_h
     if (abs(error_e) > error_threshold.or. abs(error_h)>error_threshold) then
         exceed_error_bound=.TRUE.
-        if (res_no.eq.66) write(*,*) 'new',res_no,nd,exceed_error_bound
     end if
 end subroutine Error_estimate 

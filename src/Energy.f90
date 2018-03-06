@@ -19,8 +19,9 @@ SUBROUTINE Energy(T_surf,q_surf,ncell,z,nd)
       q_evap=q_evap*(e0-ea(ncell))
       q_ws=6.693E-2+1.471E-3*T_fit(i)
       q_fit(i)=q_ns(ncell)+q_na(ncell)-q_ws-q_evap+q_conv
-      if (ncell.eq.2034) write(88,*) &
-        q_ns(ncell),q_na(ncell),q_ws,q_evap,q_conv
+      !if (ncell.eq.4480) write(*,*) &
+      !  'energy',q_ns(ncell),q_na(ncell),-q_ws,-q_evap,q_conv, &
+      !  'air',dbt(ncell),wind(ncell)
    end do
 !
 !     q=AT+B

@@ -14,6 +14,7 @@ module Block_Reservoir
     logical, dimension(:),   allocatable  :: res_turnover !
     logical :: exceed_error_bound
     logical :: adjust_timestep
+    logical :: recalculate_volume
     !
     !
     real, parameter :: depth_e_frac=0.4, depth_h_frac=0.6

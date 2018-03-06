@@ -490,6 +490,7 @@ SUBROUTINE SYSTMM(temp_file,res_file,param_file)
                                     .or. res_num(segment_cell(nr,ns+1)) .ne. res_no)) then
                                     exceed_error_bound=.FALSE.
                                     adjust_timestep=.FALSE.
+                                    recalculate_volume=.FALSE.
                                     ns_res_end(res_no) = ns
                                     Q_res_outflow(res_no) = Q_out(ncell)     !!!!TESTINFLOW(need to uncomment)
                                     !
@@ -549,16 +550,13 @@ SUBROUTINE SYSTMM(temp_file,res_file,param_file)
                                         !
                                         if (exceed_error_bound .and..not.adjust_timestep) then
                                              adjust_timestep=.TRUE.
+                                             recalculate_volume=.TRUE.
                                              go to 500
                                         end if
                                         !
                                         !     Calculate reservoir temperature
                                         !
-                                        !call reservoir_subroutine(res_no,q_surf)
-                                        !if (res_storage(res_no,1) .gt.res_capacity_mcm(res_no)*(10**6)*0.2) then
-                                            call reservoir_subroutine_implicit(res_no,q_surf,nd,dbt(ncell))
-                                        !if(res_no.eq.63) write(*,*) &
-                                        !        nyear,nd,nsub,dt_res,T_epil(res_no),T_hypo(res_no)
+                                        call reservoir_subroutine_implicit(res_no,q_surf,nd,dbt(ncell))
                                     end do
                                          
                                     !else
