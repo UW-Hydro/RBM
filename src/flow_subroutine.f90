@@ -23,13 +23,12 @@ SUBROUTINE flow_subroutine (res_no, nyear, nd)
     !
     !     if we need to adjust the timestep, we need to make the volume
     !     go back to the beginning of the timestep.
-    ! 
+    !
     if (recalculate_volume) then
         volume_e_x(res_no) = volume_e_x(res_no) - vol_change_epi_x
         volume_h_x(res_no) = volume_h_x(res_no) - vol_change_hyp_x
         recalculate_volume=.FALSE. ! This only needs to be done once
     end if 
-
     !res_storage_pre = res_capacity_mcm(res_no) * (10**6) * 0.95 ! TESTINFLOW
     !res_storage_post = res_capacity_mcm(res_no) * (10**6) * 0.95 ! TESTINFLOW
 
@@ -52,7 +51,8 @@ SUBROUTINE flow_subroutine (res_no, nyear, nd)
     !
     if (initial_storage(res_no)) then
         water_withdrawal(res_no) = 0
-        res_depth_meter(res_no) =  res_storage(res_no,1) / surface_area(res_no)
+        !res_depth_meter(res_no) =  res_storage(res_no,1) / surface_area(res_no)
+        res_depth_meter(res_no) =  res_capacity_mcm(res_no) * 0.95 * 1e6 / surface_area(res_no)
         depth_e(res_no) = res_depth_meter(res_no) * depth_e_frac
         depth_h(res_no) = res_depth_meter(res_no) * depth_h_frac
         volume_e_x(res_no) = surface_area(res_no) * depth_e(res_no)

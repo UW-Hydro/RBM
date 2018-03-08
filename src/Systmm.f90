@@ -551,6 +551,9 @@ SUBROUTINE SYSTMM(temp_file,res_file,param_file)
                                         if (exceed_error_bound .and..not.adjust_timestep) then
                                              adjust_timestep=.TRUE.
                                              recalculate_volume=.TRUE.
+                                             if (nyear.eq.start_year.and.nd.eq.1) then
+                                                initial_storage(res_no)=.TRUE. 
+                                             end if
                                              go to 500
                                         end if
                                         !
@@ -558,10 +561,6 @@ SUBROUTINE SYSTMM(temp_file,res_file,param_file)
                                         !
                                         call reservoir_subroutine_implicit(res_no,q_surf,nd,dbt(ncell))
                                     end do
-                                         
-                                    !else
-                                    !    call reservoir_single_subroutine(res_no,q_surf,nd)
-                                    !end if 
                                     !
                                     T_0 = T_hypo(res_no) ! In reservoir, water is released from hypolimnion
                                     if (T_0.lt.0.5) T_0=0.5
