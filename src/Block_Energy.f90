@@ -34,6 +34,7 @@ module Block_Energy
       real             :: lvp,rb,rho
       real             :: deriv_2nd,error_EE
       real             :: deriv_conv,deriv_evap,deriv_ws 
+      real             :: temp_equil,time_equil
       real,parameter   :: evap_coeff=1.5e-9 !Lake Hefner coefficient, 1/meters
       real,parameter   :: pf=0.640,pi=3.14159
       real,parameter   :: rfac=304.8 !rho/Cp kg/meter**3/Kilocalories/kg/Deg K  

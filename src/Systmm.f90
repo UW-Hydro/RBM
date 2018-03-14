@@ -305,6 +305,8 @@ SUBROUTINE SYSTMM(temp_file,res_file,param_file)
                             ! Set initial river storage (Initial storage for first grid cell is 0)
                             !
                             do nm=no_dt(ns),1,-1
+                                if (ncell.eq.1827.and.nd.eq.197) write(88,*) &
+                                    nyear,nd,ns,nm
                                 dt_calc=dt_part(nm)
                                 z=depth(nncell)
                                 call energy(T_0,q_surf,nncell,z,nd)
@@ -404,11 +406,12 @@ SUBROUTINE SYSTMM(temp_file,res_file,param_file)
                         !   test output for a specific grid cell 
                         !
                         !
+                        if (ncell.eq.1827.and.nd.eq.197) write(*,*) nyear,nd,nr,ncell,ns,T_0
                         do nseg_temp=1,nseg_out_num
                             if (nseg_out(nr,ncell,nseg_temp).eq.ns) then
                                 call WRITE(time,nd,nr,ncell,ns,T_0,T_head(nr),dbt(ncell), &
                                     Q_inflow_out, Q_outflow_out)
-                            !if (ncell.eq.4089) write(*,*)nyear,nd,nr,ncell,ns,T_0
+                            if (ncell.eq.1827) write(89,*)nyear,nd,nr,ncell,ns,T_0,temp_equil,time_equil,deriv_2nd*dt_comp**2/2
                             end if
                         end do
                         end if
