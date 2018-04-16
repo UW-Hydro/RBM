@@ -57,7 +57,9 @@ SUBROUTINE flow_subroutine (res_no, nyear, nd)
         depth_h(res_no) = res_depth_meter(res_no) * depth_h_frac
         volume_e_x(res_no) = surface_area(res_no) * depth_e(res_no)
         volume_h_x(res_no) = surface_area(res_no) * depth_h(res_no)
-        res_storage_pre = res_storage(res_no,1)
+        !res_storage_pre = res_storage(res_no,1)
+        res_storage_post = res_storage(res_no,1)
+        res_storage_pre = volume_e_x(res_no) + volume_h_x(res_no)
         initial_storage(res_no)=.FALSE.
     end if
     !
