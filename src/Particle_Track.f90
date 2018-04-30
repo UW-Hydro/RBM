@@ -29,7 +29,7 @@ SUBROUTINE Particle_Track(nr,ns,nx_s,nx_head,ns_res_pres,ns_res_num)
         ncell=segment_cell(nr,nx_part)
         dt_part(nx_s)=dt(ncell)
         dt_total=dt_total+dt_part(nx_s)
-        if (dt_total .le. dt_comp) nx_part_next=nx_part_next-1
+        if (dt_total.le.dt_comp) nx_part_next=nx_part_next-1
         !
         !     Increment the segment counter if the total time is less than the
         !     computational interval
@@ -59,4 +59,6 @@ SUBROUTINE Particle_Track(nr,ns,nx_s,nx_head,ns_res_pres,ns_res_num)
     nx_part=max(1,nx_part)
     nstrt_elm(ns)=nx_part
     no_dt(ns)=nx_s
+    !if (nr.eq.1247 .and. ns.eq.2017) write(*,*) 'particle track', nx_head, &
+    !    nx_part, nstrt_elm(ns), no_dt(ns), nx_s, x_part(nx_s)
 END SUBROUTINE Particle_Track

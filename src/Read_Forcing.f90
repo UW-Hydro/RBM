@@ -12,6 +12,7 @@ SUBROUTINE Read_Forcing
     real    :: Q_avg,Q_dmmy
     real    :: z_temp,w_temp
     real    :: min_flow = 5.0
+    real    :: min_depth = 5.0
     !
     n1=1
     n2=2
@@ -38,6 +39,15 @@ SUBROUTINE Read_Forcing
                 u(no_heat) = min_flow/(z_temp*w_temp)
                 depth(no_heat) = z_temp
                 width(no_heat) = w_temp
+                Q_out(no_heat) = min_flow
+            end if
+            !
+            !     If the river depth is smaller than minimum river depth,
+            !     recalculate water width based on river depth
+            !
+            if (depth(no_heat).lt.min_depth) then
+                depth(no_heat) = min_depth
+                width(no_heat) = Q_out(no_heat)/(u(no_heat)*depth(no_heat))
             end if
             !
             if (Q_diff(no_heat) .gt. 0) write(*,*) 'Q_diff is not equal to 0', no_heat, Q_diff(no_heat)
@@ -49,6 +59,10 @@ SUBROUTINE Read_Forcing
                 ,dbt(no_heat),ea(no_heat) &
                 ,Q_ns(no_heat),Q_na(no_heat),rho &
                 ,press(no_heat),wind(no_heat)
+            !
+            !   Set the minimum wind speed to be 1 [m s-1]
+            !
+            if(wind(no_heat).lt.1.0) wind(no_heat)=1.0
             !
             if(ncell.ne.no_heat) write(*,*) 'Heat file error',ncell,no_heat
             !
@@ -81,6 +95,7 @@ SUBROUTINE Read_Forcing
             ,dbt(no_heat),ea(no_heat) &
             ,Q_ns(no_heat),Q_na(no_heat),rho &
             ,press(no_heat),wind(no_heat)
+        if(wind(no_heat).lt.1.0) wind(no_heat)=1.0
         if (nr .eq. nreach .and. nc .eq. no_cells(nr)) then
             read(35,*) nnd,ncell &
                 ,Q_out(no_heat),Q_dmmy,Q_diff(no_heat) &

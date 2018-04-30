@@ -39,7 +39,7 @@ SUBROUTINE reservoir_subroutine_implicit(res_no,q_surf,nd,tair)
     coeff_e1 = volume_e_x(res_no) + flow_in_epi_x + K_z(res_no) * surface_area(res_no)
     coeff_h1 = - K_z(res_no) * surface_area(res_no)
     const_1  = volume_e_x(res_no)*temp_epi_pre + flow_in_epi_x*T_res_inflow(res_no) + &
-                (q_surf * dt_comp * surface_area(res_no)) / (density * heat_c_kcal)
+                (q_surf * dt_res * surface_area(res_no)) / (density * heat_c_kcal)
     coeff_e2 = -(flow_epi_hyp_x + K_z(res_no) * surface_area(res_no))
     coeff_h2 = volume_h_x(res_no) + flow_in_hyp_x + flow_epi_hyp_x  &
                 + K_z(res_no) * surface_area(res_no)
@@ -64,14 +64,12 @@ SUBROUTINE reservoir_subroutine_implicit(res_no,q_surf,nd,tair)
     if (temp_epi - temp_hyp .le. 0 .or. res_turnover(res_no)) then
         temp_epi = (volume_h_x(res_no)*T_hypo(res_no) + volume_e_x(res_no)*T_epil(res_no) + &
                    (flow_in_epi_x + flow_in_hyp_x) * T_res_inflow(res_no) + &
-                   (q_surf * dt_comp * surface_area(res_no)) / (density * heat_c_kcal)) / &
+                   (q_surf * dt_res * surface_area(res_no)) / (density * heat_c_kcal)) / &
                    (volume_h_x(res_no) + volume_e_x(res_no) + flow_in_epi_x + flow_in_hyp_x)
         temp_hyp = temp_epi
     end if
-
     T_epil(res_no) = temp_epi
     T_hypo(res_no) = temp_hyp
-    !if (res_no .eq. 3) write(49,*) flow_in_hyp_x+flow_in_epi_x, T_res_inflow(res_no)
     !
     !     Update reservoir storage based on water withdrawal
     !
@@ -96,8 +94,7 @@ SUBROUTINE reservoir_subroutine_implicit(res_no,q_surf,nd,tair)
     
     T_res(res_no) = (T_epil(res_no) * (volume_e_x(res_no)/volume_tot)) + &
         (T_hypo(res_no)*(volume_h_x(res_no)/volume_tot) ) ! weighted averge temp
-    !
-    if(res_no .eq. 19) write(*,*) nd, T_epil(res_no), T_hypo(res_no),&
-volume_e_x(res_no)/surface_area(res_no), &
-volume_h_x(res_no)/surface_area(res_no)
+
+    if(T_epil(res_no).lt.0.5) T_epil(res_no) = 0.5
+    if(T_hypo(res_no).lt.0.5) T_hypo(res_no) = 0.5
 end subroutine reservoir_subroutine_implicit
