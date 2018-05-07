@@ -12,6 +12,9 @@ module Block_Reservoir
     logical, dimension(:),   allocatable  :: res_trib_calc !
     logical, dimension(:),   allocatable  :: res_stratif_start !
     logical, dimension(:),   allocatable  :: res_turnover !
+    logical :: exceed_error_bound
+    logical :: adjust_timestep
+    logical :: recalculate_volume
     !
     !
     real, parameter :: depth_e_frac=0.4, depth_h_frac=0.6
@@ -23,6 +26,13 @@ module Block_Reservoir
     real :: flow_epi_hyp_x, outflow_x
     real :: res_vol_delta_x, vol_change_hyp_x, vol_change_epi_x
     real :: res_storage_pre, res_storage_post
+    ! 
+    !     Error estimation
+    !
+    real :: m11,m12,m21,m22
+    real :: const1,const2
+    real :: error_e,error_h
+    real, parameter :: error_threshold = 0.1
     real, dimension(:),   allocatable  :: K_z
     real, dimension(:),   allocatable  :: depth_e, depth_h
     real, dimension(:),   allocatable  :: density_epil, density_hypo
@@ -54,6 +64,7 @@ module Block_Reservoir
     real, dimension(:),   allocatable  :: qsurf_tot
     real, dimension(:),   allocatable  :: res_capacity_mcm
     real, dimension(:),   allocatable  :: volume_h_min
+    real, dimension(:),   allocatable  :: volume_e_min
     real, dimension(:,:),   allocatable  :: res_storage
     !
     !

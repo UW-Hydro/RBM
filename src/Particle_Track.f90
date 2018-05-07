@@ -26,16 +26,19 @@ SUBROUTINE Particle_Track(nr,ns,nx_s,nx_head,ns_res_pres,ns_res_num)
             .and. .NOT. ns_res_pres)
         nx_s=nx_s+1
         x_part(nx_s)=x_dist(nr,nx_part_next)
-        ncell=segment_cell(nr,nx_part_next)
+        ncell=segment_cell(nr,nx_part)
         dt_part(nx_s)=dt(ncell)
         dt_total=dt_total+dt_part(nx_s)
+        if (dt_total.le.dt_comp) nx_part_next=nx_part_next-1
         !
         !     Increment the segment counter if the total time is less than the
         !     computational interval
         !
         if (nx_s.gt.1) nx_part=nx_part-1
-        nx_part_next=nx_part_next-1
-        ns_res_pres = res_pres(segment_cell(nr,nx_part_next))
+        !nx_part_next=nx_part_next-1
+        if (nx_part_next .gt. 0) then
+            ns_res_pres = res_pres(segment_cell(nr,nx_part_next))
+        end if 
     end do
     ! If water particle travels back to a reservoir,
     ! ns_res_num denotes the number of the grid cell.
@@ -52,8 +55,10 @@ SUBROUTINE Particle_Track(nr,ns,nx_s,nx_head,ns_res_pres,ns_res_num)
         dt_part(nx_s)=dt_part(nx_s)-dt_xcess
         x_part(nx_s)=x_dist(nr,nx_part+1)+u(ncell)*dt_part(nx_s)
     end if
-    nx_head=nx_part
+    nx_head=nx_part_next
     nx_part=max(1,nx_part)
     nstrt_elm(ns)=nx_part
     no_dt(ns)=nx_s
+    !if (nr.eq.1247 .and. ns.eq.2017) write(*,*) 'particle track', nx_head, &
+    !    nx_part, nstrt_elm(ns), no_dt(ns), nx_s, x_part(nx_s)
 END SUBROUTINE Particle_Track

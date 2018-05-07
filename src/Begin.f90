@@ -17,7 +17,7 @@ Subroutine BEGIN(param_file,spatial_file)
     integer:: jul_start,main_stem,nyear1,nyear2,nc,ncell,nseg
     integer:: ns_max_test,node,ncol,nrow,nr,cum_sgmnt
     !
-    integer:: nreservoir
+    integer:: nreservoir,nseg_temp,nseg_cum
     !
     logical:: first_cell,source
     !
@@ -83,6 +83,7 @@ Subroutine BEGIN(param_file,spatial_file)
     allocate(res_start_node(nres))
     allocate(res_end_node(nres))
     allocate(res_capacity_mcm(nres))
+    allocate(nseg_out(nreach,heat_cells,nseg_out_num))
     !
     !     Start reading the reach date and initialize the reach index, NR
     !     and the cell index, NCELL
@@ -117,6 +118,7 @@ Subroutine BEGIN(param_file,spatial_file)
         !     Initialize NSEG, the total number of segments in this reach
         !
         nseg=0
+        nseg_cum=0
         write(*,*) ' Starting to read reach ',nr
         !
         !     Read the number of cells in this reach, the headwater #,
@@ -175,14 +177,14 @@ Subroutine BEGIN(param_file,spatial_file)
             if (reservoir) then
                 read(90,'(5x,i5,5x,i5,8x,i5,6x,a8,6x,a10,7x,f10.0,f5.0,i6)')  &
                     node,nrow,ncol,lat,long,rmile1,ndelta(ncell),res_num(ncell)
-                write(*,*) node,nrow,ncol,lat,long,rmile1,ndelta(ncell),res_num(ncell)
+                !write(*,*) node,nrow,ncol,lat,long,rmile1,ndelta(ncell),res_num(ncell)
                 if(res_num(ncell) .gt. 0) then
                     res_pres(ncell) = .TRUE.
                 end if
             else
                 read(90,'(5x,i5,5x,i5,8x,i5,6x,a8,6x,a10,7x,f10.0,f5.0)')  &
                     node,nrow,ncol,lat,long,rmile1,ndelta(ncell)
-                write(*,*) node,nrow,ncol,lat,long,rmile1,ndelta(ncell)
+                !write(*,*) node,nrow,ncol,lat,long,rmile1,ndelta(ncell)
             end if
             !
             !    Set the number of segments of the default, if not specified
@@ -198,6 +200,13 @@ Subroutine BEGIN(param_file,spatial_file)
             !
             dx(ncell)=miles_to_ft*(rmile0-rmile1)/ndelta(ncell)
             rmile0=rmile1
+            !
+            ! Here we define the output segments
+            !
+            do nseg_temp=1,nseg_out_num
+                nseg_out(nr,ncell,nseg_temp)=nseg_cum+ndelta(ncell)*nseg_temp/(nseg_out_num) 
+            end do
+            nseg_cum = nseg_cum+ndelta(ncell)
             nndlta=0
 200     continue
         nndlta=nndlta+1
@@ -208,8 +217,12 @@ Subroutine BEGIN(param_file,spatial_file)
         !
         !   Write Segment List for mapping to temperature output (UW_JRY_2008/11/19)
         !
-        open(22,file=TRIM(spatial_file),status='unknown') ! (changed by WUR_WF_MvV_2011/01/05)
-        write(22,'(4i6,1x,a8,1x,a10,f5.0)') nr,ncell,nrow,ncol,lat,long,nndlta
+        do nseg_temp=1,nseg_out_num
+            if (nseg_out(nr,ncell,nseg_temp).eq.nseg) then
+                open(22,file=TRIM(spatial_file),status='unknown') ! (changed by WUR_WF_MvV_2011/01/05)
+                write(22,'(4i6,1x,a8,1x,a10,i5)') nr,ncell,nrow,ncol,lat,long,nseg_temp
+            end if
+        end do
         !
         !
         !
@@ -219,6 +232,7 @@ Subroutine BEGIN(param_file,spatial_file)
         no_celm(nr)=nseg
         segment_cell(nr,nseg)=ncell
         x_dist(nr,nseg)=miles_to_ft*rmile1
+        write(*,*) 'number of segment in reach', nr, nseg
     !
     ! End of cell and segment loop
     !

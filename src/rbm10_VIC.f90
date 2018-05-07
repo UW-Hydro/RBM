@@ -50,6 +50,7 @@ PROGRAM RBM10_VIC
     character (len=200 ):: net_file
     character (len=200 ):: param_file
     character (len=200 ):: temp_file
+    character (len=200 ):: res_file
     character (len=200 ):: spatial_file
     character (len=200 ):: reservoir_file
     character (len=200 ):: reservoir_storage_file
@@ -80,11 +81,13 @@ PROGRAM RBM10_VIC
     param_file    = TRIM(inPrefix)//'_Parameters'
     spatial_file  = TRIM(outPrefix)//'.Spat'
     temp_file     = TRIM(outPrefix)//'.Temp'
+    res_file      = TRIM(outPrefix)//'.Resv'
     !
-    write(*,*) 'Spatial file: ',spatial_file
     write(*,*) 'Network file    : ',net_file
     write(*,*) 'Parameter file  : ',param_file!
     write(*,*) 'Temperature file: ',temp_file
+    write(*,*) 'Spatial file: ',spatial_file
+    write(*,*) 'Reservoir file:   ',res_file
     !
     OPEN(UNIT=90,FILE=TRIM(net_file),STATUS='OLD')
     !
@@ -130,7 +133,7 @@ PROGRAM RBM10_VIC
     !
     !     SUBROUTINE SYSTMM performs the simulations
     !
-    CALL SYSTMM(temp_file,param_file) ! (WUR_WF_MvV_2011/01/05)
+    CALL SYSTMM(temp_file,res_file,param_file) ! (WUR_WF_MvV_2011/01/05)
     !
     !     Close files after simulation is complete
     !

@@ -1,4 +1,4 @@
-SUBROUTINE SYSTMM(temp_file,param_file)
+SUBROUTINE SYSTMM(temp_file,res_file,param_file)
     !
     use Block_Energy
     use Block_Hydro
@@ -10,6 +10,7 @@ SUBROUTINE SYSTMM(temp_file,param_file)
     !
     character (len=200):: temp_file
     character (len=200):: param_file
+    character (len=200):: res_file
     !
     integer          :: ncell,nncell,ncell0,nc_head,no_flow,no_heat
     integer          :: nc,nd,ndd,nm,nr,ns
@@ -18,6 +19,7 @@ SUBROUTINE SYSTMM(temp_file,param_file)
     integer          :: n1,n2,nnd,nobs,nyear,nd_year,ntmp
     integer          :: npart,nseg,nx_s,nx_part,nx_head
     integer          :: ns_res_num, res_no, nsegment
+    integer          :: nseg_temp
     !
     ! Indices for lagrangian interpolation
     !
@@ -25,7 +27,7 @@ SUBROUTINE SYSTMM(temp_file,param_file)
     integer, dimension(2):: ndltp=(/-1,-2/)
     integer, dimension(2):: nterp=(/2,3/)
     !
-    real             :: dt_calc,dt_total,hpd,q_dot,q_surf,z
+    real             :: dt_calc,dt_total,hpd,q_dot,q_surf,z,q_dot_pre
     real             :: Q_dstrb,Q_inflow,Q_outflow,Q_ratio,Q_inflow_origin
     real             :: Q_inflow_out, Q_outflow_out, Q_tot
     real             :: sto_pre, sto_post
@@ -114,6 +116,7 @@ SUBROUTINE SYSTMM(temp_file,param_file)
     allocate (depth_e(nres))
     allocate (depth_h(nres))
     allocate (volume_h_min(nres))
+    allocate (volume_e_min(nres))
     allocate (res_stratif_start(nres))
     allocate (res_turnover(nres))
     !
@@ -169,11 +172,11 @@ SUBROUTINE SYSTMM(temp_file,param_file)
         !     At the start of each year, reset the depth of epilimnion
         !     and hypolimnion.
         !
-        !res_depth_meter = depth_e(:) + depth_h(:)
-        !depth_e = res_depth_meter(:) * depth_e_frac
-        !depth_h = res_depth_meter(:) * depth_h_frac
-        !volume_e_x = surface_area(:) * depth_e(:)
-        !volume_h_x = surface_area(:) * depth_h(:)
+        res_depth_meter = depth_e(:) + depth_h(:)
+        depth_e = res_depth_meter(:) * depth_e_frac
+        depth_h = res_depth_meter(:) * depth_h_frac
+        volume_e_x = surface_area(:) * depth_e(:)
+        volume_h_x = surface_area(:) * depth_h(:)
         !
         !     Day loop starts
         !
@@ -224,8 +227,6 @@ SUBROUTINE SYSTMM(temp_file,param_file)
                     DO ns=1,no_celm(nr)
                         !
                         ncell=segment_cell(nr,ns)
-                        !if (res_pres(ncell)) then
-                            !write(*,*) ncell
                         !end if
                         !
                         !   If this segment is not located in the reservoir
@@ -276,8 +277,6 @@ SUBROUTINE SYSTMM(temp_file,param_file)
                                         npart=nseg+ntrp+ndltp(npndx)
                                         xa(ntrp)=x_dist(nr,npart)
                                         ta(ntrp)=temp(nr,npart,n1)
-                                        !if(nr.eq.2 .and.ns.eq.2 .and. nd.lt.30) write(*,*) &
-                                        !    'nd', nd, 'ntrp', ntrp, 'npart',npart,xa(ntrp), ta(ntrp)
                                     end do
                                     !
                                     ! Start the cell counter for nx_s
@@ -305,19 +304,36 @@ SUBROUTINE SYSTMM(temp_file,param_file)
                             !
                             ! Set initial river storage (Initial storage for first grid cell is 0)
                             !
-                            !!if(nyear.eq.start_year .and. nd.eq.1 .and. ndd.eq.1 .and. ns.ge.3) then
-                                !sto(nr,ns,n1) = width(ncell) * depth(ncell) * dx(ncell)/2
-                            !!    temp_sto(nr,ns,n1) = T_head(nr)
-                            !!end if
-                            !
                             do nm=no_dt(ns),1,-1
+                                if (ncell.eq.1827.and.nd.eq.197) write(88,*) &
+                                    nyear,nd,ns,nm
                                 dt_calc=dt_part(nm)
                                 z=depth(nncell)
-                                call energy(T_0,q_surf,nncell)
+                                call energy(T_0,q_surf,nncell,z,nd)
+                                !
+                                ! apply a different numerical method to solve
+                                ! energy balance for river temperature
                                 !
                                 q_dot=(q_surf/(z*rfac))
+                                !
+                                ! Initialize dH/dt (temperature increase because
+                                ! of energy balance)
+                                !
+                                if (nyear.eq.start_year .and. nd.eq.1) q_dot_pre = q_dot
+                                !
+                                ! caluclate stream temperature based on Heun
+                                ! mehtod
+                                !
                                 T_0=T_0+q_dot*dt_calc
+                                !
+                                ! estimate the error by numerical method 
+                                !
+                                error_EE=deriv_2nd*dt_calc**2/2
+                                !
+                                !if (ncell.eq.4089 .and. nd.gt.220.and.nd.lt.230) write(*,*) &
+                                !     nyear,nd,ns,nm,wind(nncell),q_ns(nncell)+q_na(nncell),T_0,error_EE
                                 if(T_0.lt.0.0) T_0=0.0
+                                q_dot_pre = q_dot
                                 !
                                 !    Add distributed flows
                                 !
@@ -326,14 +342,6 @@ SUBROUTINE SYSTMM(temp_file,param_file)
                                 Q_dstrb = Q_local(nncell)
                                 !
                                 T_dstrb_load  = T_dstrb * Q_dstrb
-                                !
-                                !    Add flow from transient river storage
-                                !
-                                !T_sto_load = 0.0
-                                !
-                                !Q_sto = delta_sto_flux(nncell)
-                                !
-                                !if(nm.eq.1) Q_sto_out = delta_sto_flux(nncell)
                                 !
                                 !     Look for a tributary.
                                 !
@@ -354,8 +362,8 @@ SUBROUTINE SYSTMM(temp_file,param_file)
                                         end if
                                     end do
                                 end if
-                                Q_trb_sum = Q_trb_sum/2
-                                T_trb_load = T_trb_load/2
+                                Q_trb_sum = Q_trb_sum/ndelta(nncell)
+                                T_trb_load = T_trb_load/ndelta(nncell)
                                 !
                                 ! Do the mass/energy balance
                                 !
@@ -366,11 +374,6 @@ SUBROUTINE SYSTMM(temp_file,param_file)
                                 else
                                     T_0 = T_0
                                 end if
-                                !if(nr.eq.8 .and.ns.eq.3 .and. nd.lt.300 .and. nm.eq.1) write(*,*) &
-                                !    'nd', nd, 'T_0 post', T_0, 'energy', q_dot*dt_calc, &
-                                !    'Inflow', Q_ratio, 'local', T_dstrb_load/Q_tot, &
-                                !    'tributary', T_trb_load/Q_tot, 'storage flow', T_sto_load/Q_tot, &
-                                !    'storage', sto_post/sec_day*T_sto/Q_tot
                                 !
                                 if (T_0.lt.0.5) T_0 =0.5
                                 !
@@ -399,8 +402,18 @@ SUBROUTINE SYSTMM(temp_file,param_file)
                         !
                         !   if the segment is located in reservoir
                         !
-                        call WRITE(time,nd,nr,ncell,ns,T_0,T_head(nr),dbt(ncell), &
-                            Q_inflow_out, Q_outflow_out)
+                        !   
+                        !   test output for a specific grid cell 
+                        !
+                        !
+                        if (ncell.eq.1827.and.nd.eq.197) write(*,*) nyear,nd,nr,ncell,ns,T_0
+                        do nseg_temp=1,nseg_out_num
+                            if (nseg_out(nr,ncell,nseg_temp).eq.ns) then
+                                call WRITE(time,nd,nr,ncell,ns,T_0,T_head(nr),dbt(ncell), &
+                                    Q_inflow_out, Q_outflow_out)
+                            if (ncell.eq.1827) write(89,*)nyear,nd,nr,ncell,ns,T_0,temp_equil,time_equil,deriv_2nd*dt_comp**2/2
+                            end if
+                        end do
                         end if
 
                         if (res_pres(ncell)) then
@@ -413,7 +426,6 @@ SUBROUTINE SYSTMM(temp_file,param_file)
                             !
                             if(ncell .eq. res_start_node(res_no) .and. &
                                 .NOT. res_start(res_no)) then
-                                if(res_no.eq.3 .and. nd.lt.5) write(*,*) res_start_node(res_no)
                                 ns_res_start(res_no) = ns
                                 Q_res_in(res_no) = Q_in(ncell)                  ! Inflow for reservoir
                                 T_res_in(res_no) = temp(nr,ns-1,n1)               ! Inflow temperature
@@ -424,7 +436,6 @@ SUBROUTINE SYSTMM(temp_file,param_file)
                                     + rminsmooth*T_smth(nr)
                                 if (T_res_dstrb .lt. 0) T_res_dstrb=0
                                 T_res_dstrb_load_tot = Q_res_dstrb_tot*T_res_dstrb
-                                Q_res_outflow(res_no) = Q_out(ncell)    !!!!!!!!!TESTINFLOW
                                 res_start(res_no) = .TRUE.
                                 !
                                 !     Calculate tributary flow for reservoir grid cells
@@ -478,17 +489,17 @@ SUBROUTINE SYSTMM(temp_file,param_file)
                                 !     If it is the last segment in the reservoir
                                 !
                                 if(ncell .eq. res_end_node(res_no) .and. &
-                                    .NOT. res_pres(segment_cell(nr,ns+1))) then
-                                    !write(*,*) 'test: start of loop 2'
+                                    (.NOT. res_pres(segment_cell(nr,ns+1)) &
+                                    .or. res_num(segment_cell(nr,ns+1)) .ne. res_no)) then
+                                    exceed_error_bound=.FALSE.
+                                    adjust_timestep=.FALSE.
+                                    recalculate_volume=.FALSE.
                                     ns_res_end(res_no) = ns
-                                    !Q_res_outflow(res_no) = Q_out(ncell)     !!!!TESTINFLOW(need to uncomment)
+                                    Q_res_outflow(res_no) = Q_out(ncell)     !!!!TESTINFLOW(need to uncomment)
                                     !
                                     !      Sum up all streamflow into inflow
                                     !
                                     Q_res_inflow(res_no) = Q_res_in(res_no) + Q_res_dstrb_tot + Q_res_trib_tot
-                                    if (res_no.eq.3) write(55,*) &
-                                        time, T_res_in(res_no), Q_res_in(res_no), &
-                                        Q_res_trib_tot, Q_res_dstrb_tot            !!!!!!! test code
                                     if (Q_res_inflow(res_no) .gt. 0) then
                                         T_res_inflow(res_no) = (Q_res_in(res_no)*T_res_in(res_no) +  &
                                             T_res_trib_load_tot + T_res_dstrb_load_tot)/  &
@@ -496,46 +507,80 @@ SUBROUTINE SYSTMM(temp_file,param_file)
                                     else
                                         T_res_inflow(res_no) = T_res_in(res_no)
                                     end if
-                                    !if (res_no.eq.28) write(*,*) &
-                                    !    'inflow',Q_res_in(res_no), &
-                                    !    'trb', Q_res_trib_tot, &
-                                    !    'local', Q_res_dstrb_tot
                                     !
                                     !     Calculate the density of inflow, compared with epilimnion/hypolimnion
                                     !
-                                    T_res_inflow(res_no) = SIN(nd/365.0*2.0*pi - 0.5*pi)*14 + 16    ! TESTINFLOW
-                                    Q_res_inflow(res_no) =  Q_res_outflow(res_no) + Q_res_trib_tot ! TESTINFLOW
-                                    !
-                                    !
                                     call stream_density(T_res_inflow(res_no), density_in(res_no))
-                                    call stream_density(T_epil(res_no), density_epil(res_no))
-                                    call stream_density(T_hypo(res_no), density_hypo(res_no))
+                                    !call stream_density(T_epil(res_no),density_epil(res_no))
+                                    !call stream_density(T_hypo(res_no),density_hypo(res_no))
                                     !
-                                    !     Calculate flow subroutine
+                                    !     Start the subdaily calculation
                                     !
-                                    call flow_subroutine(res_no)
+500                                 continue
+                                    numsub=1
                                     !
-                                    !     Energy balance
+                                    !     calculate the number of timestep based
+                                    !     on error bound
                                     !
-                                    call energy(T_epil(res_no), q_surf, ncell)
-                                    !
-                                    !     Calculate reservoir temperature
-                                    !
-                                    !call reservoir_subroutine(res_no,q_surf)
-                                    call reservoir_subroutine_implicit(res_no,q_surf,nd,dbt(ncell))
+                                    if (exceed_error_bound) then
+                                        numsub=MAX(ceiling(sqrt(abs(error_e)/error_threshold)), &
+                                                   ceiling(sqrt(abs(error_h)/error_threshold)))
+                                        numsub=MIN(20,numsub)
+                                    end if
+                                    dt_res = dt_comp/numsub
+                                    DO nsub=1,numsub
+                                        !
+                                        !     Calculate stream density 
+                                        !
+                                        call stream_density(T_epil(res_no), density_epil(res_no))
+                                        call stream_density(T_hypo(res_no), density_hypo(res_no))
+                                        !
+                                        !     Calculate flow subroutine
+                                        !
+                                        call flow_subroutine(res_no, nyear, nd)
+                                        !
+                                        !     Energy balance
+                                        !
+                                        call energy(T_epil(res_no), q_surf, ncell)
+                                        !
+                                        !     Error estimation
+                                        !
+                                        if (.not.exceed_error_bound) then
+                                            call Error_estimate(nd,res_no)
+                                        end if
+                                        !
+                                        !     Adjust the timestep based on error
+                                        !
+                                        if (exceed_error_bound .and..not.adjust_timestep) then
+                                             adjust_timestep=.TRUE.
+                                             recalculate_volume=.TRUE.
+                                             if (nyear.eq.start_year.and.nd.eq.1) then
+                                                initial_storage(res_no)=.TRUE. 
+                                             end if
+                                             go to 500
+                                        end if
+                                        !
+                                        !     Calculate reservoir temperature
+                                        !
+                                        call reservoir_subroutine_implicit(res_no,q_surf,nd,dbt(ncell))
+                                    end do
                                     !
                                     T_0 = T_hypo(res_no) ! In reservoir, water is released from hypolimnion
                                     if (T_0.lt.0.5) T_0=0.5
-                                    temp(nr,ns,n2)=T_0
+                                    temp(nr,ns_res_start(res_no):ns_res_end(res_no),n2)=T_0
                                     T_trib(nr)=T_0
                                     !
                                     !     Write output
                                     !
                                     do nsegment=ns_res_start(res_no),ns_res_end(res_no)
-                                        call WRITE(time,nd,nr,ncell,nsegment,T_0, &
-                                            T_head(nr),dbt(segment_cell(nr,nsegment)), &
-                                            Q_res_inflow(res_no), Q_res_outflow(res_no), &
-                                            res_storage_post, T_res(res_no))
+                                        do nseg_temp=1,nseg_out_num
+                                            if (nseg_out(nr,ncell,nseg_temp).eq.nsegment) then
+                                                call WRITE(time,nd,nr,ncell,nsegment,T_0, &
+                                                    T_head(nr),dbt(segment_cell(nr,nsegment)), &
+                                                    Q_res_inflow(res_no), Q_res_outflow(res_no), &
+                                                    res_storage_post, T_res(res_no))
+                                            end if
+                                        end do 
                                     end do
                                 end if
                             end if
@@ -567,9 +612,11 @@ SUBROUTINE SYSTMM(temp_file,param_file)
 4700            format(f10.4,f6.0,15(f6.1,f8.3))
 4750            format(f10.4,10(i4,f8.0))
                 if (reservoir) then
-                    write(75,*) nyear, nd, T_epil(:), T_hypo(:), T_res_inflow(:), K_z(:), depth_e(:), depth_h(:),&
+                    open(75,file=TRIM(res_file),status='unknown') 
+                    write(75, '(i8, i6, 1680f20.10)') nyear, nd, T_epil(:), T_hypo(:), T_res_inflow(:),& 
+                        depth_e(:), depth_h(:),&
                         Q_res_inflow(:), Q_res_outflow(:)
-                    write(76,'(2i6, 37f15.10, 37f15.10)') nyear, nd, depth_e(:), depth_h(:), volume_e_x,volume_h_x
+                    write(76,'(i8, i6, 240f15.10, 240f15.10)') nyear, nd, depth_e(:), depth_h(:), volume_e_x,volume_h_x
                     write(77,*) nyear, nd, diffusion_tot, advec_hyp_tot,advec_epi_tot,qsurf_tot
                 end if
             end do
