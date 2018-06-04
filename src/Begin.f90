@@ -152,6 +152,7 @@ end if
 !--------------------------read in reservoir info-----------------------------
 read(37,*)
 do nreservoir = 1,nres
+   write(*,*) nres,nreservoir
    read(37,*) dam_number(nreservoir)  &
               , res_grid_lat(nreservoir), res_grid_lon(nreservoir) &
               , res_top_vol(nreservoir) &
@@ -159,19 +160,10 @@ do nreservoir = 1,nres
               , res_width_feet(nreservoir), res_length_feet(nreservoir) &
               ,res_start_node(nreservoir), res_end_node(nreservoir) &
               , res_min_flow(nreservoir)
-
+   print *, dam_number
    print *, dam_number(nreservoir), res_depth_feet(nreservoir) &
               , res_width_feet(nreservoir), res_length_feet(nreservoir) &
               ,res_start_node(nreservoir), res_end_node(nreservoir)
- !  read(37,*) dam_number(nreservoir), dam_name ,dam_lat(nreservoir)
- !  ,dam_lon(nreservoir) &
- !             , res_grid_lat(nreservoir), res_grid_lon(nreservoir) &
- !             ,start_operating_year(nreservoir) , res_top_vol(nreservoir) &
- !             , res_bot_vol(nreservoir),res_max_flow(nreservoir) &
- !             ,res_min_flow(nreservoir), res_depth_feet(nreservoir) &
- !             , res_width_feet(nreservoir), res_length_feet(nreservoir) &
- !             ,res_start_node(nreservoir), res_end_node(nreservoir)
-
 
 end do
 
