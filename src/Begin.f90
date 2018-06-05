@@ -158,8 +158,8 @@ do nreservoir = 1,nres
               , res_top_vol(nreservoir) &
               , res_bot_vol(nreservoir),res_depth_feet(nreservoir) &
               , res_width_feet(nreservoir), res_length_feet(nreservoir) &
-              ,res_start_node(nreservoir), res_end_node(nreservoir) &
-              , res_min_flow(nreservoir)
+              ,res_start_node(nreservoir), res_end_node(nreservoir) 
+!              , res_min_flow(nreservoir)
    print *, dam_number
    print *, dam_number(nreservoir), res_depth_feet(nreservoir) &
               , res_width_feet(nreservoir), res_length_feet(nreservoir) &
