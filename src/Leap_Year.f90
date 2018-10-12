@@ -15,15 +15,15 @@
 !     Function return value = .true. if year is a leap year, and .false. otherwise.
 !*************************************************************************************
 !
-      LOGICAL FUNCTION Leap_Year(nyear)
-!
-      IMPLICIT NONE
-!
-      INTEGER :: nyear
-!
-      leap_year = .FALSE.
-      IF (MOD(nyear,4) .EQ. 0)   leap_year = .TRUE.
-      IF (MOD(nyear,100) .EQ. 0) leap_year = .FALSE.
-      IF (MOD(nyear,400) .EQ. 0) leap_year = .TRUE.
-      RETURN
-      END FUNCTION Leap_Year
+LOGICAL FUNCTION Leap_Year(nyear)
+    !
+    IMPLICIT NONE
+    !
+    INTEGER :: nyear
+    !
+    leap_year = .FALSE.
+    IF (MOD(nyear,4) .EQ. 0)   leap_year = .TRUE.
+    IF (MOD(nyear,100) .EQ. 0) leap_year = .FALSE.
+    IF (MOD(nyear,400) .EQ. 0) leap_year = .TRUE.
+    RETURN
+END FUNCTION Leap_Year
