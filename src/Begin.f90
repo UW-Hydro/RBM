@@ -4,7 +4,7 @@ implicit none
 !
 ! Integer variables 
 !
-    integer:: nwpd
+integer:: nwpd
 !
 ! Character variables
 !
