@@ -5,7 +5,7 @@ module Block_Hydro
     integer, dimension(2000):: no_dt,nstrt_elm
     integer :: nsource,  sourcex, sourcex2  ! number of thermal point-source inputs
     real, dimension(2000)   :: dt_part,x_part
-!
+    !
     real, dimension(:),   allocatable  :: depth
     real, dimension(:),   allocatable  :: width
     real, dimension(:),   allocatable  :: u
@@ -24,9 +24,9 @@ module Block_Hydro
     real, dimension(:), allocatable :: T_trib, T_head
     real, dimension(:), allocatable :: flow_source, source_num_cell
 
-! Leopold coefficients (constant throughout basin)
-! <a_d> and <b_d>: a and b coefficients in flow depth estimation: z=aQ^b, where Q is flow discharge [cfs], z is flow depth [ft]
-! <a_w> and <b_w>: a and b coefficients in channel width estimation: w=aQ^b, where Q is flow discharge [cfs], w is channel width [ft]
+    ! Leopold coefficients (constant throughout basin)
+    ! <a_d> and <b_d>: a and b coefficients in flow depth estimation: z=aQ^b, where Q is flow discharge [cfs], z is flow depth [ft]
+    ! <a_w> and <b_w>: a and b coefficients in channel width estimation: w=aQ^b, where Q is flow discharge [cfs], w is channel width [ft]
     real, parameter :: a_d  =  0.408, b_d= 0.392, a_w = 4.346, b_w = 0.520
 
     integer, dimension(:), allocatable :: source_cell
